@@ -1,6 +1,4 @@
-// 首页专用脚本
 window.addEventListener('DOMContentLoaded', function() {
-    // 更新统计数据
     updateStats();
 });
 
