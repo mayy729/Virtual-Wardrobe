@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>My Wardrobe - Virtual Wardrobe</title>
+        <link rel="icon" type="image/x-icon" href="./favicon.ico">
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+        <header>
+            <h1>👔 My Wardrobe</h1>
+            <p>Manage all your clothes and accessories</p>
+        </header>
+
+        <nav>
+            <ul>
+                <li><a href="index.html">🏠 Home</a></li>
+                <li><a href="upload.html">📤 Upload Clothes</a></li>
+                <li><a href="outfit.html">✨ Create Outfit</a></li>
+                <li><a href="saved.html">💖 Saved Outfits</a></li>
+            </ul>
+        </nav>
+
+        <section id="wardrobe">
+            <div class="wardrobe-controls">
+                <div class="search-bar">
+                    <input type="text" id="search-input" placeholder="🔍 Search clothes by name, brand...">
+                </div>
+
+                <div class="filters-section">
+                    <h3>Filter Conditions</h3>
+                    <div class="filters-grid">
+                        <div class="filter-group">
+                            <label for="filter-season">Season:</label>
+                            <select id="filter-season">
+                                <option value="">All Seasons</option>
+                                <option value="spring">🌸 Spring</option>
+                                <option value="summer">☀️ Summer</option>
+                                <option value="autumn">🍂 Autumn</option>
+                                <option value="winter">❄️ Winter</option>
+                                <option value="all">🌟 All Seasons</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label for="filter-occasion">Occasion:</label>
+                            <select id="filter-occasion">
+                                <option value="">All Occasions</option>
+                                <option value="casual">👕 Casual</option>
+                                <option value="date">💕 Date</option>
+                                <option value="work">💼 Work</option>
+                                <option value="party">🎉 Party</option>
+                                <option value="formal">👔 Formal Occasion</option>
+                                <option value="sport">🏃 Sport</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label for="filter-brand">Brand:</label>
+                            <input type="text" id="filter-brand" placeholder="Enter brand name">
+                        </div>
+
+                        <div class="filter-group">
+                            <label for="filter-size">Size:</label>
+                            <input type="text" id="filter-size" placeholder="Enter size">
+                        </div>
+
+                        <div class="filter-group">
+                            <label for="filter-material">Material:</label>
+                            <input type="text" id="filter-material" placeholder="Enter material">
+                        </div>
+
+                        <div class="filter-group">
+                            <button id="clear-filters" class="btn-secondary">Clear Filters</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wardrobe-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Total Clothes:</span>
+                    <span class="stat-value" id="total-items">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Displaying:</span>
+                    <span class="stat-value" id="filtered-items">0</span>
+                </div>
+            </div>
+
+            <div id="wardrobe-items" class="wardrobe-items">
+                <p class="empty-message">Your wardrobe is empty, upload some beautiful clothes!</p>
+            </div>
+        </section>
+
+        <div id="item-modal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <div id="modal-body"></div>
+            </div>
+        </div>
+
+        <footer>
+            <p>💝 Created for Ms.C</p>
+        </footer>
+
+        <script src="script.js"></script>
+        <script src="wardrobe-script.js"></script>
+    </body>
+</html>

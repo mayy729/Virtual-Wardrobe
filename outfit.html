@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Create Outfit - Virtual Wardrobe</title>
+        <link rel="icon" type="image/x-icon" href="./favicon.ico">
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+        <header>
+            <h1>✨ Create Outfit</h1>
+            <p>Select clothes from your wardrobe, and create perfect outfit combinations.</p>
+        </header>
+
+        <nav>
+            <ul>
+                <li><a href="index.html">🏠 Home</a></li>
+                <li><a href="wardrobe.html">👔 My Wardrobe</a></li>
+                <li><a href="upload.html">📤 Upload Clothes</a></li>
+                <li><a href="saved.html">💖 Saved Outfits</a></li>
+            </ul>
+        </nav>
+
+        <section id="outfit">
+            <div class="outfit-container">
+                <div class="wardrobe-selection">
+                    <h2>Select Clothes</h2>
+                    <div class="selection-filters">
+                        <select id="outfit-filter-season">
+                            <option value="">All Seasons</option>
+                            <option value="spring">🌸 Spring</option>
+                            <option value="summer">☀️ Summer</option>
+                            <option value="autumn">🍂 Autumn</option>
+                            <option value="winter">❄️ Winter</option>
+                            <option value="all">🌟 All Seasons</option>
+                        </select>
+                        <select id="outfit-filter-occasion">
+                            <option value="">All Occasions</option>
+                            <option value="casual">👕 Casual</option>
+                            <option value="date">💕 Date</option>
+                            <option value="work">💼 Work</option>
+                            <option value="party">🎉 Party</option>
+                            <option value="formal">👔 Formal Occasion</option>
+                            <option value="sport">🏃 Sport</option>
+                        </select>
+                    </div>
+                    <div id="selectable-wardrobe" class="selectable-wardrobe">
+                        <!-- 衣物卡片将在这里动态加载 -->
+                    </div>
+                </div>
+
+                <div class="outfit-creation-area-wrapper">
+                    <h2>Outfit Area</h2>
+                    <div class="outfit-creation-area" id="outfit-area">
+                        <p class="drop-hint">Drag clothes here to create an outfit, or click on the clothes cards below</p>
+                    </div>
+                    <div class="outfit-actions">
+                        <button id="clear-outfit" class="btn-secondary">Clear</button>
+                        <button id="save-outfit-btn" class="btn-primary">💾 Save Outfit</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 保存搭配的模态框 -->
+        <div id="save-outfit-modal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h2>Save Outfit</h2>
+                <form id="save-outfit-form">
+                    <div class="form-group">
+                        <label for="outfit-name">Outfit Name:</label>
+                        <input type="text" id="outfit-name" placeholder="For example: Spring Date Outfit" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="outfit-season">Season:</label>
+                        <select id="outfit-season" required>
+                            <option value="">All Seasons</option>
+                            <option value="spring">🌸 Spring</option>
+                            <option value="summer">☀️ Summer</option>
+                            <option value="autumn">🍂 Autumn</option>
+                            <option value="winter">❄️ Winter</option>
+                            <option value="all">🌟 All Seasons</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="outfit-occasion">Occasion:</label>
+                        <select id="outfit-occasion" required>
+                            <option value="">All Occasions</option>
+                            <option value="casual">👕 Casual</option>
+                            <option value="date">💕 Date</option>
+                            <option value="work">💼 Work</option>
+                            <option value="party">🎉 Party</option>
+                            <option value="formal">👔 Formal Occasion</option>
+                            <option value="sport">🏃 Sport</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="outfit-notes">Notes:</label>
+                        <textarea id="outfit-notes" placeholder="For example: This outfit is perfect for take pictures" rows="3"></textarea>
+                    </div>
+                    <div class="button-group">
+                        <button type="submit" class="btn-primary">Save</button>
+                        <button type="button" class="btn-secondary" id="cancel-save-outfit">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <footer>
+            <p>💝 Created for Ms.C</p>
+        </footer>
+
+        <script src="script.js"></script>
+        <script src="outfit-script.js"></script>
+    </body>
+</html>

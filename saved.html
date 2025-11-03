@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Saved Outfits - Virtual Wardrobe</title>
+        <link rel="icon" type="image/x-icon" href="./favicon.ico">
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+        <header>
+            <h1>💖 Saved Outfits</h1>
+            <p>View all your perfect outfits</p>
+        </header>
+
+        <nav>
+            <ul>
+                <li><a href="index.html">🏠 Home</a></li>
+                <li><a href="wardrobe.html">👔 My Wardrobe</a></li>
+                <li><a href="upload.html">📤 Upload Clothes</a></li>
+                <li><a href="outfit.html">✨ Create Outfit</a></li>
+            </ul>
+        </nav>
+
+        <section id="saved">
+            <div class="saved-outfits-controls">
+                <div class="search-bar">
+                    <input type="text" id="outfit-search" placeholder="Search outfit name...">
+                </div>
+                <div class="filters-section">
+                    <select id="saved-filter-season">
+                        <option value="">All Seasons</option>
+                        <option value="spring">🌸 Spring</option>
+                        <option value="summer">☀️ Summer</option>
+                        <option value="autumn">🍂 Autumn</option>
+                        <option value="winter">❄️ Winter</option>
+                        <option value="all">🌟 All Seasons</option>
+                    </select>
+                    <select id="saved-filter-occasion">
+                        <option value="">All Occasions</option>
+                        <option value="casual">👕 Casual</option>
+                        <option value="date">💕 Date</option>
+                        <option value="work">💼 Work</option>
+                        <option value="party">🎉 Party</option>
+                        <option value="formal">👔 Formal Occasion</option>
+                        <option value="sport">🏃 Sport</option>
+                    </select>
+                    <button id="clear-saved-filters" class="btn-secondary">Clear Filters</button>
+                </div>
+            </div>
+
+            <div class="saved-outfits-grid" id="saved-outfits-grid">
+                <p class="empty-message">You haven't saved any outfits yet, go create your first outfit!</p>
+            </div>
+        </section>
+
+        <!-- 搭配详情模态框 -->
+        <div id="outfit-modal" class="modal" style="display:none;">
+            <div class="modal-content large-modal">
+                <span class="close-modal">&times;</span>
+                <div id="outfit-modal-body"></div>
+            </div>
+        </div>
+
+        <footer>
+            <p>💝 Created for Ms.C</p>
+        </footer>
+
+        <script src="script.js"></script>
+        <script src="saved-script.js"></script>
+    </body>
+</html>

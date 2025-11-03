@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Upload Clothes</title>
+        <link rel="icon" type="image/x-icon" href="./favicon.ico">
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+        <header>
+            <h1>👗 Upload Your Clothes</h1>
+            <p>Upload your clothes, and the system will automatically process them</p>
+        </header>
+
+        <nav>
+            <ul>
+                <li><a href="index.html">🏠 Home</a></li>
+                <li><a href="wardrobe.html">👔 My Wardrobe</a></li>
+                <li><a href="outfit.html">✨ Create Outfit</a></li>
+                <li><a href="saved.html">💖 Saved Outfits</a></li>
+            </ul>
+        </nav>
+
+        <section id="upload">
+            <h2>📤 Upload New Clothes</h2>
+            <form id="upload-form">
+                <div class="upload-area">
+                    <label for="clothes-upload" class="upload-label">
+                        <div class="upload-icon">📷</div>
+                        <p>Click or drag and drop images here to upload</p>
+                        <p class="upload-hint">Supports JPG, PNG formats</p>
+                    </label>
+                    <input type="file" id="clothes-upload" name="clothes-upload" accept="image/*" multiple required>
+                </div>
+
+                <div id="preview-section" class="preview-section" style="display:none;">
+                    <h3>Preview and Category Information</h3>
+                    <div id="preview-container"></div>
+                </div>
+
+                <div id="item-details-form" style="display:none;">
+                    <h3>Item Details</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="item-name">Name:</label>
+                            <input type="text" id="item-name" placeholder="For example: Pink Dress">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="item-season">Season:</label>
+                            <select id="item-season">
+                                <option value="">Select Season</option>
+                                <option value="spring">🌸 Spring</option>
+                                <option value="summer">☀️ Summer</option>
+                                <option value="autumn">🍂 Autumn</option>
+                                <option value="winter">❄️ Winter</option>
+                                <option value="all">🌟 All Seasons</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="item-occasion">Occasion:</label>
+                            <select id="item-occasion">
+                                <option value="">Select Occasion</option>
+                                <option value="casual">👕 Casual</option>
+                                <option value="date">💕 Date</option>
+                                <option value="work">💼 Work</option>
+                                <option value="party">🎉 Party</option>
+                                <option value="formal">👔 Formal Occasion</option>
+                                <option value="sport">🏃 Sport</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="item-brand">Brand:</label>
+                            <input type="text" id="item-brand" placeholder="For example: ZARA">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="item-size">Size:</label>
+                            <input type="text" id="item-size" placeholder="For example: M / 38">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="item-material">Material:</label>
+                            <input type="text" id="item-material" placeholder="For example: Cotton, Silk">
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="item-notes">Notes:</label>
+                            <textarea id="item-notes" placeholder="For example: This necklace is temporarily borrowed from a friend" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>
+                                <input type="checkbox" id="item-wearing-photo">
+                                Add wearing photo (optional)
+                            </label>
+                            <input type="file" id="wearing-photo" accept="image/*" style="display:none;">
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" id="remove-background-btn" class="btn-primary">🎨 Auto Cutout</button>
+                        <button type="submit" class="btn-primary">💾 Save Clothes</button>
+                        <button type="button" id="cancel-btn" class="btn-secondary">Cancel</button>
+                    </div>
+                </div>
+            </form>
+        </section>
+
+        <canvas id="imageCanvas" style="display:none;"></canvas>
+
+        <footer>
+            <p>Created for Ms.C </p>
+        </footer>
+
+        <script src="script.js"></script>
+        <script src="upload-script.js"></script>
+    </body>
+</html>
