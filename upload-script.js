@@ -11,7 +11,10 @@ const cancelBtn = document.getElementById('cancel-btn');
 const wearingPhotoInput = document.getElementById('wearing-photo');
 const wearingPhotoCheckbox = document.getElementById('item-wearing-photo');
 
-document.querySelector('.upload-label').addEventListener('click', () => {
+document.querySelector('.upload-label').addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    uploadInput.value = '';
     uploadInput.click();
 });
 
@@ -62,6 +65,9 @@ function handleFileUpload(files) {
         };
         reader.readAsDataURL(file);
     }
+
+    // 处理完成后清空 input 值，允许再次选择同一文件也能触发 change
+    uploadInput.value = '';
 }
 
 function showPreview() {
