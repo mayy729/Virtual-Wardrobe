@@ -1,4 +1,3 @@
-// 搭配创建页面专用脚本
 let availableItems = [];
 let selectedItems = [];
 
@@ -13,14 +12,12 @@ const closeModal = document.querySelector('.close-modal');
 const outfitFilterSeason = document.getElementById('outfit-filter-season');
 const outfitFilterOccasion = document.getElementById('outfit-filter-occasion');
 
-// 加载衣柜数据
 function loadWardrobeForOutfit() {
     const wardrobe = JSON.parse(localStorage.getItem('wardrobe') || '[]');
     availableItems = wardrobe;
     filterAndDisplayItems();
 }
 
-// 筛选并显示物品
 function filterAndDisplayItems() {
     const seasonFilter = outfitFilterSeason.value;
     const occasionFilter = outfitFilterOccasion.value;
@@ -40,7 +37,6 @@ function filterAndDisplayItems() {
     displaySelectableItems(filtered);
 }
 
-// 显示可选择的物品
 function displaySelectableItems(items) {
     selectableWardrobe.innerHTML = '';
     
@@ -62,12 +58,10 @@ function displaySelectableItems(items) {
             </div>
         `;
         
-        // 点击添加到搭配
         itemCard.addEventListener('click', () => {
             addItemToOutfit(item);
         });
         
-        // 拖拽功能
         itemCard.addEventListener('dragstart', (e) => {
             e.dataTransfer.setData('itemId', item.id.toString());
             itemCard.classList.add('dragging');
@@ -81,9 +75,7 @@ function displaySelectableItems(items) {
     });
 }
 
-// 添加到搭配区域
 function addItemToOutfit(item) {
-    // 检查是否已添加
     if (selectedItems.find(i => i.id === item.id)) {
         alert('This item is already in the outfit!');
         return;
@@ -93,7 +85,6 @@ function addItemToOutfit(item) {
     updateOutfitArea();
 }
 
-// 更新搭配区域
 function updateOutfitArea() {
     outfitArea.innerHTML = '';
     
@@ -118,7 +109,6 @@ function updateOutfitArea() {
         outfitArea.appendChild(outfitItem);
     });
     
-    // 移除按钮事件
     outfitArea.querySelectorAll('.btn-remove-from-outfit').forEach(btn => {
         btn.addEventListener('click', () => {
             const index = parseInt(btn.dataset.index);
@@ -128,7 +118,6 @@ function updateOutfitArea() {
     });
 }
 
-// 拖拽放置功能
 outfitArea.addEventListener('dragover', (e) => {
     e.preventDefault();
     outfitArea.classList.add('drag-over');
@@ -150,7 +139,6 @@ outfitArea.addEventListener('drop', (e) => {
     }
 });
 
-// 清空搭配
 clearOutfitBtn.addEventListener('click', () => {
     if (selectedItems.length === 0) return;
     
@@ -160,14 +148,12 @@ clearOutfitBtn.addEventListener('click', () => {
     }
 });
 
-// 保存搭配
 saveOutfitBtn.addEventListener('click', () => {
     if (selectedItems.length === 0) {
         alert('Please select clothes to create an outfit!');
         return;
     }
     
-    // 预设表单值
     if (selectedItems.length > 0) {
         const firstItem = selectedItems[0];
         if (firstItem.season) {
@@ -181,7 +167,6 @@ saveOutfitBtn.addEventListener('click', () => {
     saveOutfitModal.style.display = 'block';
 });
 
-// 保存搭配表单提交
 saveOutfitForm.addEventListener('submit', (e) => {
     e.preventDefault();
     
@@ -199,21 +184,18 @@ saveOutfitForm.addEventListener('submit', (e) => {
         dateCreated: new Date().toISOString()
     };
     
-    // 保存到本地存储
     const savedOutfits = JSON.parse(localStorage.getItem('savedOutfits') || '[]');
     savedOutfits.push(outfitData);
     localStorage.setItem('savedOutfits', JSON.stringify(savedOutfits));
     
     alert('Outfit has been successfully saved!');
     
-    // 重置
     selectedItems = [];
     updateOutfitArea();
     saveOutfitForm.reset();
     saveOutfitModal.style.display = 'none';
 });
 
-// 关闭模态框
 closeModal.addEventListener('click', () => {
     saveOutfitModal.style.display = 'none';
 });
@@ -228,9 +210,7 @@ window.addEventListener('click', (e) => {
     }
 });
 
-// 筛选器事件
 outfitFilterSeason.addEventListener('change', filterAndDisplayItems);
 outfitFilterOccasion.addEventListener('change', filterAndDisplayItems);
 
-// 页面加载时初始化
 window.addEventListener('DOMContentLoaded', loadWardrobeForOutfit);

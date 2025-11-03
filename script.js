@@ -1,7 +1,3 @@
-// 通用脚本文件
-// 用于所有页面的通用功能
-
-// 初始化本地存储（如果不存在）
 if (!localStorage.getItem('wardrobe')) {
     localStorage.setItem('wardrobe', JSON.stringify([]));
 }
@@ -10,9 +6,7 @@ if (!localStorage.getItem('savedOutfits')) {
     localStorage.setItem('savedOutfits', JSON.stringify([]));
 }
 
-// 通用工具函数
 const Utils = {
-    // 格式化日期
     formatDate: function(dateString) {
         const date = new Date(dateString);
         return date.toLocaleDateString('zh-CN', {
@@ -22,9 +16,7 @@ const Utils = {
         });
     },
 
-    // 显示通知消息
     showNotification: function(message, type = 'info') {
-        // 创建通知元素
         const notification = document.createElement('div');
         notification.className = `notification notification-${type}`;
         notification.textContent = message;
@@ -43,20 +35,17 @@ const Utils = {
         
         document.body.appendChild(notification);
         
-        // 3秒后自动移除
         setTimeout(() => {
             notification.style.animation = 'slideOut 0.3s ease';
             setTimeout(() => notification.remove(), 300);
         }, 3000);
     },
 
-    // 确认对话框
     confirm: function(message) {
         return window.confirm(message);
     }
 };
 
-// 添加CSS动画
 const style = document.createElement('style');
 style.textContent = `
     @keyframes slideIn {

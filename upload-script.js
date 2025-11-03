@@ -1,4 +1,3 @@
-// 上传页面专用脚本
 let currentUploadedImages = [];
 let currentWearingPhoto = null;
 
@@ -12,12 +11,10 @@ const cancelBtn = document.getElementById('cancel-btn');
 const wearingPhotoInput = document.getElementById('wearing-photo');
 const wearingPhotoCheckbox = document.getElementById('item-wearing-photo');
 
-// 上传区域点击事件
 document.querySelector('.upload-label').addEventListener('click', () => {
     uploadInput.click();
 });
 
-// 拖拽上传
 const uploadArea = document.querySelector('.upload-area');
 uploadArea.addEventListener('dragover', (e) => {
     e.preventDefault();
@@ -37,7 +34,6 @@ uploadArea.addEventListener('drop', (e) => {
     }
 });
 
-// 处理文件上传
 uploadInput.addEventListener('change', function(event) {
     handleFileUpload(event.target.files);
 });
@@ -90,7 +86,6 @@ function showPreview() {
     });
 }
 
-// 移除背景功能（使用简单的背景移除方法）
 previewContainer.addEventListener('click', async function(e) {
     if (e.target.classList.contains('btn-remove-bg')) {
         const index = parseInt(e.target.dataset.index);
@@ -102,7 +97,6 @@ previewContainer.addEventListener('click', async function(e) {
         overlay.style.display = 'flex';
         
         try {
-            // 使用 remove.bg API 或本地处理
             const processedImage = await removeBackground(imageData.original);
             imageData.processed = processedImage;
             img.src = processedImage;
@@ -115,7 +109,6 @@ previewContainer.addEventListener('click', async function(e) {
     }
 });
 
-// 背景移除函数（使用 remove.bg API 或 Canvas 处理）
 async function removeBackground(imageSrc) {
     // Method 1: Try using remove.bg API (requires API key)
     // Method 2: Use local Canvas processing (simplified version)
@@ -132,7 +125,6 @@ async function removeBackground(imageSrc) {
             canvas.height = img.height;
             ctx.drawImage(img, 0, 0);
             
-            // 简化的背景移除：将白色/浅色背景变为透明
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const data = imageData.data;
             
@@ -142,7 +134,6 @@ async function removeBackground(imageSrc) {
                 const b = data[i + 2];
                 const brightness = (r + g + b) / 3;
                 
-                // 如果像素较亮（可能是背景），设为透明
                 if (brightness > 200) {
                     data[i + 3] = 0; // alpha = 0 (transparent)
                 }
@@ -156,7 +147,6 @@ async function removeBackground(imageSrc) {
     });
 }
 
-// 全局移除背景按钮
 removeBackgroundBtn.addEventListener('click', async function() {
     if (currentUploadedImages.length === 0) return;
     
@@ -181,7 +171,6 @@ removeBackgroundBtn.addEventListener('click', async function() {
     removeBackgroundBtn.textContent = '🎨 Auto Cutout';
 });
 
-// 穿着照片
 wearingPhotoCheckbox.addEventListener('change', function() {
     if (this.checked) {
         wearingPhotoInput.click();
@@ -200,7 +189,6 @@ wearingPhotoInput.addEventListener('change', function(e) {
     }
 });
 
-// 保存衣物
 uploadForm.addEventListener('submit', function(e) {
     e.preventDefault();
     
@@ -209,7 +197,6 @@ uploadForm.addEventListener('submit', function(e) {
         return;
     }
     
-    // 获取表单数据
     const itemData = {
         name: document.getElementById('item-name').value || 'Unnamed Clothes',
         season: document.getElementById('item-season').value || 'all',
@@ -225,14 +212,12 @@ uploadForm.addEventListener('submit', function(e) {
         dateAdded: new Date().toISOString()
     };
     
-    // 保存到本地存储
     const wardrobe = JSON.parse(localStorage.getItem('wardrobe') || '[]');
     wardrobe.push(itemData);
     localStorage.setItem('wardrobe', JSON.stringify(wardrobe));
     
     alert('Clothes have been successfully saved!');
     
-    // 重置表单
     uploadForm.reset();
     currentUploadedImages = [];
     currentWearingPhoto = null;
@@ -241,7 +226,6 @@ uploadForm.addEventListener('submit', function(e) {
     previewContainer.innerHTML = '';
 });
 
-// 取消按钮
 cancelBtn.addEventListener('click', function() {
     if (confirm('Are you sure you want to cancel? The uploaded images will not be saved.')) {
         uploadForm.reset();

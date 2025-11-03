@@ -1,4 +1,3 @@
-// 已保存搭配页面专用脚本
 let allOutfits = [];
 let filteredOutfits = [];
 
@@ -11,7 +10,6 @@ const outfitModal = document.getElementById('outfit-modal');
 const outfitModalBody = document.getElementById('outfit-modal-body');
 const closeModal = document.querySelector('.close-modal');
 
-// 加载保存的搭配
 function loadSavedOutfits() {
     const savedOutfits = JSON.parse(localStorage.getItem('savedOutfits') || '[]');
     allOutfits = savedOutfits.sort((a, b) => new Date(b.dateCreated) - new Date(a.dateCreated));
@@ -19,7 +17,6 @@ function loadSavedOutfits() {
     displayOutfits();
 }
 
-// 显示搭配
 function displayOutfits() {
     if (filteredOutfits.length === 0) {
         savedOutfitsGrid.innerHTML = '<p class="empty-message">No matching criteria found</p>';
@@ -60,7 +57,6 @@ function displayOutfits() {
     });
 }
 
-// 获取季节标签
 function getSeasonLabel(season) {
     const labels = {
         spring: '🌸 Spring',
@@ -72,7 +68,6 @@ function getSeasonLabel(season) {
     return labels[season] || season;
 }
 
-// 获取场合标签
 function getOccasionLabel(occasion) {
     const labels = {
         casual: '👕 Casual',
@@ -85,7 +80,6 @@ function getOccasionLabel(occasion) {
     return labels[occasion] || occasion;
 }
 
-// 筛选功能
 function applyFilters() {
     const searchTerm = outfitSearch.value.toLowerCase();
     const season = savedFilterSeason.value;
@@ -105,7 +99,6 @@ function applyFilters() {
     displayOutfits();
 }
 
-// 事件监听
 outfitSearch.addEventListener('input', applyFilters);
 savedFilterSeason.addEventListener('change', applyFilters);
 savedFilterOccasion.addEventListener('change', applyFilters);
@@ -117,7 +110,6 @@ clearSavedFilters.addEventListener('click', function() {
     applyFilters();
 });
 
-// 查看详情
 savedOutfitsGrid.addEventListener('click', function(e) {
     if (e.target.classList.contains('btn-view-outfit')) {
         const outfitId = parseInt(e.target.dataset.id);
@@ -135,7 +127,6 @@ savedOutfitsGrid.addEventListener('click', function(e) {
     }
 });
 
-// 显示搭配详情模态框
 function showOutfitModal(outfit) {
     outfitModalBody.innerHTML = `
         <div class="modal-outfit-content">
@@ -162,7 +153,6 @@ function showOutfitModal(outfit) {
     outfitModal.style.display = 'block';
 }
 
-// 关闭模态框
 closeModal.addEventListener('click', function() {
     outfitModal.style.display = 'none';
 });
@@ -173,12 +163,10 @@ window.addEventListener('click', function(e) {
     }
 });
 
-// 删除搭配
 function deleteOutfit(outfitId) {
     allOutfits = allOutfits.filter(outfit => outfit.id !== outfitId);
     localStorage.setItem('savedOutfits', JSON.stringify(allOutfits));
     loadSavedOutfits();
 }
 
-// 页面加载时初始化
 window.addEventListener('DOMContentLoaded', loadSavedOutfits);
