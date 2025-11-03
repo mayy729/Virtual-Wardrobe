@@ -12,7 +12,7 @@ const wearingPhotoInput = document.getElementById('wearing-photo');
 const wearingPhotoCheckbox = document.getElementById('item-wearing-photo');
 
 document.querySelector('.upload-label').addEventListener('click', () => {
-    uploadInput.value = '';
+    uploadInput.click();
 });
 
 const uploadArea = document.querySelector('.upload-area');
@@ -63,8 +63,6 @@ function handleFileUpload(files) {
         reader.readAsDataURL(file);
     }
 
-    // 处理完成后清空 input 值，允许再次选择同一文件也能触发 change
-    uploadInput.value = '';
 }
 
 function showPreview() {
