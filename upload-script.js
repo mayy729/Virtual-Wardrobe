@@ -11,11 +11,8 @@ const cancelBtn = document.getElementById('cancel-btn');
 const wearingPhotoInput = document.getElementById('wearing-photo');
 const wearingPhotoCheckbox = document.getElementById('item-wearing-photo');
 
-document.querySelector('.upload-label').addEventListener('click', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+document.querySelector('.upload-label').addEventListener('click', () => {
     uploadInput.value = '';
-    uploadInput.click();
 });
 
 const uploadArea = document.querySelector('.upload-area');
