@@ -30,7 +30,7 @@ body {
 
 /* Hello Kitty photo background */
 body {
-    background-image: url('./hello-kitty-bg.png');
+    background-image: url('./hello-kitty-bg.jpg');
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;
