@@ -11,16 +11,16 @@
     </head>
     <body>
         <header>
-            <h1>💖 Saved Outfits</h1>
+            <h1>🧸 Saved Outfits</h1>
             <p>View all your perfect outfits</p>
         </header>
 
         <nav>
             <ul>
                 <li><a href="index.html">🏠 Home</a></li>
-                <li><a href="wardrobe.html">👔 My Wardrobe</a></li>
-                <li><a href="upload.html">📤 Upload Clothes</a></li>
-                <li><a href="outfit.html">✨ Create Outfit</a></li>
+                <li><a href="wardrobe.html">👘 My Wardrobe</a></li>
+                <li><a href="upload.html">🔮 Upload Clothes</a></li>
+                <li><a href="outfit.html">💫 Create Outfit</a></li>
             </ul>
         </nav>
 
@@ -32,20 +32,21 @@
                 <div class="filters-section">
                     <select id="saved-filter-season">
                         <option value="">All Seasons</option>
-                        <option value="spring">🌸 Spring</option>
-                        <option value="summer">☀️ Summer</option>
+                        <option value="spring">🌼 Spring</option>
+                        <option value="summer">🌴 Summer</option>
                         <option value="autumn">🍂 Autumn</option>
                         <option value="winter">❄️ Winter</option>
-                        <option value="all">🌟 All Seasons</option>
+                        <option value="all">🌏 All Seasons</option>
                     </select>
                     <select id="saved-filter-occasion">
                         <option value="">All Occasions</option>
-                        <option value="casual">👕 Casual</option>
+                        <option value="casual">👚 Casual</option>
                         <option value="date">💕 Date</option>
                         <option value="work">💼 Work</option>
                         <option value="party">🎉 Party</option>
                         <option value="formal">👔 Formal Occasion</option>
                         <option value="sport">🏃 Sport</option>
+                        <option value="all">🌏 All Occasions</option>
                     </select>
                     <button id="clear-saved-filters" class="btn-secondary">Clear Filters</button>
                 </div>
@@ -55,8 +56,7 @@
                 <p class="empty-message">You haven't saved any outfits yet, go create your first outfit!</p>
             </div>
         </section>
-
-        <!-- 搭配详情模态框 -->
+    
         <div id="outfit-modal" class="modal" style="display:none;">
             <div class="modal-content large-modal">
                 <span class="close-modal">&times;</span>
@@ -65,9 +65,11 @@
         </div>
 
         <footer>
-            <p>💝 Created for Ms.C</p>
+            <p>💖 Created for Ms.C</p>
         </footer>
 
+        <script src="config.js"></script>
+        <script src="api.js"></script>
         <script src="script.js"></script>
         <script src="saved-script.js"></script>
     </body>

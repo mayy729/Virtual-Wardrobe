@@ -11,16 +11,16 @@
     </head>
     <body>
         <header>
-            <h1>✨ Create Outfit</h1>
+            <h1>💫 Create Outfit</h1>
             <p>Select clothes from your wardrobe, and create perfect outfit combinations.</p>
         </header>
 
         <nav>
             <ul>
                 <li><a href="index.html">🏠 Home</a></li>
-                <li><a href="wardrobe.html">👔 My Wardrobe</a></li>
-                <li><a href="upload.html">📤 Upload Clothes</a></li>
-                <li><a href="saved.html">💖 Saved Outfits</a></li>
+                <li><a href="wardrobe.html">👘 My Wardrobe</a></li>
+                <li><a href="upload.html">🔮 Upload Clothes</a></li>
+                <li><a href="saved.html">🧸 Saved Outfits</a></li>
             </ul>
         </nav>
 
@@ -31,24 +31,25 @@
                     <div class="selection-filters">
                         <select id="outfit-filter-season">
                             <option value="">All Seasons</option>
-                            <option value="spring">🌸 Spring</option>
-                            <option value="summer">☀️ Summer</option>
+                            <option value="spring">🌼 Spring</option>
+                            <option value="summer">🌴 Summer</option>
                             <option value="autumn">🍂 Autumn</option>
                             <option value="winter">❄️ Winter</option>
-                            <option value="all">🌟 All Seasons</option>
+                            <option value="all">🌏 All Seasons</option>
                         </select>
                         <select id="outfit-filter-occasion">
                             <option value="">All Occasions</option>
-                            <option value="casual">👕 Casual</option>
+                            <option value="casual">👚 Casual</option>
                             <option value="date">💕 Date</option>
                             <option value="work">💼 Work</option>
                             <option value="party">🎉 Party</option>
                             <option value="formal">👔 Formal Occasion</option>
                             <option value="sport">🏃 Sport</option>
+                            <option value="all">🌏 All Occasions</option>
+
                         </select>
                     </div>
                     <div id="selectable-wardrobe" class="selectable-wardrobe">
-                        <!-- 衣物卡片将在这里动态加载 -->
                     </div>
                 </div>
 
@@ -65,7 +66,6 @@
             </div>
         </section>
 
-        <!-- 保存搭配的模态框 -->
         <div id="save-outfit-modal" class="modal" style="display:none;">
             <div class="modal-content">
                 <span class="close-modal">&times;</span>
@@ -79,23 +79,24 @@
                         <label for="outfit-season">Season:</label>
                         <select id="outfit-season" required>
                             <option value="">All Seasons</option>
-                            <option value="spring">🌸 Spring</option>
-                            <option value="summer">☀️ Summer</option>
+                            <option value="spring">🌼 Spring</option>
+                            <option value="summer">🌴 Summer</option>
                             <option value="autumn">🍂 Autumn</option>
                             <option value="winter">❄️ Winter</option>
-                            <option value="all">🌟 All Seasons</option>
+                            <option value="all">🌏 All Seasons</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="outfit-occasion">Occasion:</label>
                         <select id="outfit-occasion" required>
                             <option value="">All Occasions</option>
-                            <option value="casual">👕 Casual</option>
+                            <option value="casual">👚 Casual</option>
                             <option value="date">💕 Date</option>
                             <option value="work">💼 Work</option>
                             <option value="party">🎉 Party</option>
                             <option value="formal">👔 Formal Occasion</option>
                             <option value="sport">🏃 Sport</option>
+                            <option value="all">🌏 All Occasions</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -111,9 +112,11 @@
         </div>
 
         <footer>
-            <p>💝 Created for Ms.C</p>
+            <p>💖 Created for Ms.C</p>
         </footer>
 
+        <script src="config.js"></script>
+        <script src="api.js"></script>
         <script src="script.js"></script>
         <script src="outfit-script.js"></script>
     </body>

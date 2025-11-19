@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Upload and Crop Image</title>
+        <link rel="icon" type="image/png" href="./favicon-32.png" sizes="32x32">
+        <style>
+            canvas {
+                display: block;
+                border: 1px solid red;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Upload and Crop Image</h1>
+        <input type="file" id="clothes-upload" accept="image/*">
+        <canvas id="imageCanvas"></canvas>
+        <div id="wardrobe"></div>
+
+        <script>
+            const uploadInput = document.getElementById('clothes-upload');
+            const imageCanvas = document.getElementById('imageCanvas');
+            const ctx = imageCanvas.getContext('2d');
+            const wardrobeItems = document.getElementById('wardrobe');
+
+            uploadInput.addEventListener('change', function(event){
+                const files = event.target.files;
+
+                for (const file of files) {
+                     const reader = new FileReader();
+                     reader.onload = function(e) {
+                        const img = new Image();
+                        img.src = e.target.result;
+                        
+                        img.onload = function() {
+                            imageCanvas.width = img.width;
+                            imageCanvas.height = img.height;
+                            ctx.drawImage(img, 0, 0);
+                            
+                            const cropX = 50;
+                            const cropY = 50;
+                            const cropWidth = 200;
+                            const cropHeight = 200;
+                            
+                            if (cropX + cropWidth <= img.width && cropY + cropHeight <= img.height) {
+                                const croppedImage = ctx.getImageData(cropX, cropY, cropWidth, cropHeight);
+                                
+                                imageCanvas.clearRect(0, 0, imageCanvas.width, imageCanvas.height);
+                                imageCanvas.width = cropWidth;
+                                imageCanvas.height = cropHeight;
+                                ctx.putImageData(croppedImage, 0, 0);
+                                
+                                const croppedDataURL = imageCanvas.toDataURL();
+                                const croppedImgElement = document.createElement('img');
+                                croppedImgElement.src = croppedDataURL;
+                                croppedImgElement.alt = 'Cropped Clothing Item';
+                                wardrobeItems.appendChild(croppedImgElement);
+                        } else {
+                            console.error("Crop area is out of bounds!");
+                        }
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        </script>
+    </body>
+</html>

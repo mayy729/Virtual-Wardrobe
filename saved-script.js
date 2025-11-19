@@ -10,16 +10,23 @@ const outfitModal = document.getElementById('outfit-modal');
 const outfitModalBody = document.getElementById('outfit-modal-body');
 const closeModal = document.querySelector('.close-modal');
 
-function loadSavedOutfits() {
-    const savedOutfits = JSON.parse(localStorage.getItem('savedOutfits') || '[]');
-    allOutfits = savedOutfits.sort((a, b) => new Date(b.dateCreated) - new Date(a.dateCreated));
-    filteredOutfits = [...allOutfits];
-    displayOutfits();
+async function loadSavedOutfits() {
+    Utils.renderLoading(savedOutfitsGrid, 'Loading saved combinations...');
+    try {
+        const savedOutfits = await WardrobeAPI.listOutfits();
+        allOutfits = savedOutfits.sort((a, b) => new Date(b.dateCreated) - new Date(a.dateCreated));
+        filteredOutfits = [...allOutfits];
+        displayOutfits();
+    } catch (error) {
+        console.error('Failed to load saved outfits:', error);
+        Utils.renderError(savedOutfitsGrid, 'Unable to load saved outfits, please check the backend service.');
+        Utils.showNotification('Unable to load outfit data, please try again later.', 'error');
+    }
 }
 
 function displayOutfits() {
     if (filteredOutfits.length === 0) {
-        savedOutfitsGrid.innerHTML = '<p class="empty-message">No matching criteria found</p>';
+        savedOutfitsGrid.innerHTML = '<p class="empty-message">No outfits found matching the criteria</p>';
         return;
     }
 
@@ -59,23 +66,24 @@ function displayOutfits() {
 
 function getSeasonLabel(season) {
     const labels = {
-        spring: '🌸 Spring',
-        summer: '☀️ Summer',
+        spring: '🌼 Spring',
+        summer: '🌴 Summer',
         autumn: '🍂 Autumn',
         winter: '❄️ Winter',
-        all: '🌟 All Seasons'
+        all: '🌏 All Seasons'
     };
     return labels[season] || season;
 }
 
 function getOccasionLabel(occasion) {
     const labels = {
-        casual: '👕 Casual',
+        casual: '👚 Casual',
         date: '💕 Date',
         work: '💼 Work',
         party: '🎉 Party',
         formal: '👔 Formal Occasion',
-        sport: '🏃 Sport'
+        sport: '🏃 Sport',
+        all: '🌏 All Occasions'
     };
     return labels[occasion] || occasion;
 }
@@ -121,7 +129,8 @@ savedOutfitsGrid.addEventListener('click', function(e) {
     
     if (e.target.classList.contains('btn-delete-outfit')) {
         const outfitId = parseInt(e.target.dataset.id);
-        if (confirm('Are you sure you want to delete this outfit?')) {
+        const confirmed = Utils.confirm ? Utils.confirm('Are you sure you want to delete this outfit?') : confirm('Are you sure you want to delete this outfit?');
+        if (confirmed) {
             deleteOutfit(outfitId);
         }
     }
@@ -163,10 +172,17 @@ window.addEventListener('click', function(e) {
     }
 });
 
-function deleteOutfit(outfitId) {
-    allOutfits = allOutfits.filter(outfit => outfit.id !== outfitId);
-    localStorage.setItem('savedOutfits', JSON.stringify(allOutfits));
-    loadSavedOutfits();
+async function deleteOutfit(outfitId) {
+    try {
+        await WardrobeAPI.deleteOutfit(outfitId);
+        allOutfits = allOutfits.filter(outfit => outfit.id !== outfitId);
+        filteredOutfits = filteredOutfits.filter(outfit => outfit.id !== outfitId);
+        displayOutfits();
+        Utils.showNotification('Outfit deleted successfully.', 'success');
+    } catch (error) {
+        console.error('Failed to delete outfit:', error);
+        Utils.showNotification('Delete failed, please try again later.', 'error');
+    }
 }
 
 window.addEventListener('DOMContentLoaded', loadSavedOutfits);

@@ -11,42 +11,57 @@
     </head>
     <body>
         <header>
-            <h1>👗 Welcome to Your Virtual Wardrobe</h1>
+            <h1>🎀 Welcome to Your Virtual Wardrobe 🎀</h1>
             <p>Make dressing up easy and fun, and say goodbye to decision-making paralysis.</p>
         </header>
 
         <nav>
             <ul>
                 <li><a href="index.html">🏠 Home</a></li>
-                <li><a href="upload.html">📤 Upload Clothes</a></li>
-                <li><a href="wardrobe.html">👔 My Wardrobe</a></li>
-                <li><a href="outfit.html">✨ Create Outfit</a></li>
-                <li><a href="saved.html">💖 Saved Outfits</a></li>
+                <li><a href="upload.html">🔮 Upload Clothes</a></li>
+                <li><a href="wardrobe.html">👘 My Wardrobe</a></li>
+                <li><a href="outfit.html">💫 Create Outfit</a></li>
+                <li><a href="saved.html">🧸 Saved Outfits</a></li>
+                <li><a href="#" id="config-btn">⚙️ Settings</a></li>
             </ul>
         </nav>
 
         <main class="home-main">
             <section class="welcome-section">
                 <div class="welcome-content">
-                    <h2>💝 Created for Ms.C</h2>
+                    <h2>💌 To Ms.C 💌</h2>
                     <p>This is a virtual wardrobe management system built just for you, helping you easily manage your clothes, quickly create perfect outfits, and make every outing full of confidence!</p>
                 </div>
             </section>
 
             <section class="features-section">
-                <h2>🌟 Main Features</h2>
+                <h2>✨ Main Features</h2>
                 <div class="features-grid">
                     <div class="feature-card">
-                        <div class="feature-icon">📤</div>
+                        <div class="feature-icon">🔮</div>
                         <h3>Upload Clothes</h3>
                         <p>Upload your clothes and accessories photos, and the system will automatically process the images for you.</p>
                         <a href="upload.html" class="feature-link">Upload →</a>
                     </div>
                     
                     <div class="feature-card">
-                        <div class="feature-icon">🎨</div>
+                        <div class="feature-icon">🪄</div>
                         <h3>Auto Cutout</h3>
                         <p>Remove background automatically, and make your clothes look more beautiful.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">💫</div>
+                        <h3>Create Outfit</h3>
+                        <p>Select clothes from your wardrobe, and create perfect outfit combinations.</p>
+                        <a href="outfit.html" class="feature-link">Create Outfit →</a>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">🧸</div>
+                        <h3>Save Outfit</h3>
+                        <p>Save your favorite outfits, and view and use them anytime.</p>
+                        <a href="saved.html" class="feature-link">Save Outfit →</a>
                     </div>
                     
                     <div class="feature-card">
@@ -55,21 +70,7 @@
                         <p>Classify your clothes by season, occasion, brand, and more, so you can easily find what you need.</p>
                         <a href="wardrobe.html" class="feature-link">View Wardrobe →</a>
                     </div>
-                    
-                    <div class="feature-card">
-                        <div class="feature-icon">✨</div>
-                        <h3>Create Outfit</h3>
-                        <p>Select clothes from your wardrobe, and create perfect outfit combinations.</p>
-                        <a href="outfit.html" class="feature-link">Create Outfit →</a>
-                    </div>
-                    
-                    <div class="feature-card">
-                        <div class="feature-icon">💾</div>
-                        <h3>Save Outfit</h3>
-                        <p>Save your favorite outfits, and view and use them anytime.</p>
-                        <a href="saved.html" class="feature-link">Save Outfit →</a>
-                    </div>
-                    
+
                     <div class="feature-card">
                         <div class="feature-icon">🔍</div>
                         <h3>Smart Filter</h3>
@@ -79,7 +80,7 @@
             </section>
 
             <section class="quick-stats">
-                <h2>📊 Wardrobe Statistics</h2>
+                <h2>🌸 Wardrobe Statistics</h2>
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-number" id="total-wardrobe-items">0</div>
@@ -94,10 +95,34 @@
         </main>
 
         <footer>
-            <p>💝 Created for Ms.C | Make dressing up easy and fun</p>
+            <p>💖 Created for Ms.C | Make dressing up easy and fun</p>
         </footer>
 
+        <!-- API Configuration Modal -->
+        <div id="config-modal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h2>⚙️ API Configuration</h2>
+                <div class="config-form">
+                    <div class="form-group">
+                        <label for="api-base-input">API Base URL:</label>
+                        <input type="text" id="api-base-input" placeholder="http://localhost:3000" />
+                        <p class="form-hint">Current value: <span id="current-api-base"></span></p>
+                    </div>
+                    <div class="form-group">
+                        <button id="test-connection-btn" class="btn-secondary">Test Connection</button>
+                        <button id="save-config-btn" class="btn-primary">Save Configuration</button>
+                        <button id="reset-config-btn" class="btn-secondary">Reset to Default</button>
+                    </div>
+                    <div id="config-status" class="config-status"></div>
+                </div>
+            </div>
+        </div>
+
+        <script src="config.js"></script>
+        <script src="api.js"></script>
         <script src="script.js"></script>
         <script src="index-script.js"></script>
+        <script src="config-ui.js"></script>
     </body>
 </html>

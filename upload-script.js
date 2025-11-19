@@ -1,6 +1,9 @@
 let currentUploadedImages = [];
 let currentWearingPhoto = null;
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+
 const uploadInput = document.getElementById('clothes-upload');
 const uploadForm = document.getElementById('upload-form');
 const previewSection = document.getElementById('preview-section');
@@ -40,29 +43,60 @@ uploadInput.addEventListener('change', function(event) {
 
 function handleFileUpload(files) {
     currentUploadedImages = [];
+    let validFiles = [];
+    let hasErrors = false;
     
     for (const file of files) {
-        if (!file.type.startsWith('image/')) {
-            alert('Please upload image files!');
+        if (!ALLOWED_IMAGE_TYPES.includes(file.type.toLowerCase())) {
+            Utils.showNotification(`"${file.name}" is not supported, only JPG, PNG, GIF, WebP are supported`, 'error');
+            hasErrors = true;
             continue;
         }
-
+        
+        if (file.size > MAX_FILE_SIZE) {
+            const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+            Utils.showNotification(`"${file.name}" is too large (${fileSizeMB}MB), maximum supported is 5MB`, 'error');
+            hasErrors = true;
+            continue;
+        }
+        
+        validFiles.push(file);
+    }
+    
+    if (validFiles.length === 0) {
+        if (!hasErrors) {
+            Utils.showNotification('Please select a valid image file', 'info');
+        }
+        return;
+    }
+    
+    let processedCount = 0;
+    for (const file of validFiles) {
         const reader = new FileReader();
         reader.onload = function(e) {
             const imageData = {
                 original: e.target.result,
                 processed: e.target.result,
-                id: Date.now() + Math.random()
+                id: Date.now() + Math.random(),
+                fileName: file.name,
+                fileSize: file.size
             };
             currentUploadedImages.push(imageData);
+            processedCount++;
             
-            if (currentUploadedImages.length === files.length) {
+            if (processedCount === validFiles.length) {
+                showPreview();
+            }
+        };
+        reader.onerror = function() {
+            Utils.showNotification(`Failed to read file "${file.name}"`, 'error');
+            processedCount++;
+            if (processedCount === validFiles.length && currentUploadedImages.length > 0) {
                 showPreview();
             }
         };
         reader.readAsDataURL(file);
     }
-
 }
 
 function showPreview() {
@@ -81,7 +115,7 @@ function showPreview() {
                     <p>Processing...</p>
                 </div>
             </div>
-            <button type="button" class="btn-remove-bg" data-index="${index}">🎨 Remove Background</button>
+            <button type="button" class="btn-remove-bg" data-index="${index}">🪄 Remove Background</button>
         `;
         previewContainer.appendChild(previewItem);
     });
@@ -103,7 +137,7 @@ previewContainer.addEventListener('click', async function(e) {
             img.src = processedImage;
         } catch (error) {
             console.error('Background removal failed:', error);
-            alert('Background removal failed, will use original image');
+            Utils.showNotification('Background removal failed, will use original image', 'error');
         } finally {
             overlay.style.display = 'none';
         }
@@ -111,9 +145,6 @@ previewContainer.addEventListener('click', async function(e) {
 });
 
 async function removeBackground(imageSrc) {
-    // Method 1: Try using remove.bg API (requires API key)
-    // Method 2: Use local Canvas processing (simplified version)
-    
     return new Promise((resolve) => {
         const img = new Image();
         img.crossOrigin = 'anonymous';
@@ -136,7 +167,7 @@ async function removeBackground(imageSrc) {
                 const brightness = (r + g + b) / 3;
                 
                 if (brightness > 200) {
-                    data[i + 3] = 0; // alpha = 0 (transparent)
+                    data[i + 3] = 0;
                 }
             }
             
@@ -169,7 +200,7 @@ removeBackgroundBtn.addEventListener('click', async function() {
     }
     
     removeBackgroundBtn.disabled = false;
-    removeBackgroundBtn.textContent = '🎨 Auto Cutout';
+    removeBackgroundBtn.textContent = '🪄 Auto Cutout';
 });
 
 wearingPhotoCheckbox.addEventListener('change', function() {
@@ -182,53 +213,100 @@ wearingPhotoCheckbox.addEventListener('change', function() {
 
 wearingPhotoInput.addEventListener('change', function(e) {
     if (e.target.files.length > 0) {
+        const file = e.target.files[0];
+        
+        if (!ALLOWED_IMAGE_TYPES.includes(file.type.toLowerCase())) {
+            Utils.showNotification('Wearing photo format not supported, only JPG, PNG, GIF, WebP are supported', 'error');
+            e.target.value = '';
+            return;
+        }
+
+        if (file.size > MAX_FILE_SIZE) {
+            const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+            Utils.showNotification(`Wearing photo is too large (${fileSizeMB}MB), maximum supported is 5MB`, 'error');
+            e.target.value = '';
+            return;
+        }
+        
         const reader = new FileReader();
         reader.onload = function(e) {
             currentWearingPhoto = e.target.result;
         };
-        reader.readAsDataURL(e.target.files[0]);
+        reader.onerror = function() {
+            Utils.showNotification('Failed to read wearing photo', 'error');
+            e.target.value = '';
+        };
+        reader.readAsDataURL(file);
     }
 });
 
-uploadForm.addEventListener('submit', function(e) {
+uploadForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     
     if (currentUploadedImages.length === 0) {
-        alert('Please upload images first!');
+        Utils.showNotification('Please upload images first!', 'info');
+        return;
+    }
+
+    const MAX_BASE64_SIZE = 10 * 1024 * 1024;
+    const mainImage = currentUploadedImages[0].processed;
+    
+    if (mainImage.length > MAX_BASE64_SIZE) {
+        Utils.showNotification('Image data is too large, please use a smaller image file', 'error');
         return;
     }
     
+    if (currentWearingPhoto && currentWearingPhoto.length > MAX_BASE64_SIZE) {
+        Utils.showNotification('Wearing photo data is too large, please use a smaller image file', 'error');
+        return;
+    }
+
+    const submitBtn = uploadForm.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving...';
+    
+    const name = (document.getElementById('item-name').value || 'Unnamed Clothes').trim();
+    const brand = (document.getElementById('item-brand').value || '').trim();
+    const size = (document.getElementById('item-size').value || '').trim();
+    const material = (document.getElementById('item-material').value || '').trim();
+    const notes = (document.getElementById('item-notes').value || '').trim();
+    
     const itemData = {
-        name: document.getElementById('item-name').value || 'Unnamed Clothes',
+        name: name.substring(0, 200),
         season: document.getElementById('item-season').value || 'all',
         occasion: document.getElementById('item-occasion').value || 'casual',
-        brand: document.getElementById('item-brand').value || '',
-        size: document.getElementById('item-size').value || '',
-        material: document.getElementById('item-material').value || '',
-        notes: document.getElementById('item-notes').value || '',
-        image: currentUploadedImages[0].processed,
+        brand: brand.substring(0, 100),
+        size: size.substring(0, 50),
+        material: material.substring(0, 100),
+        notes: notes.substring(0, 500),
+        image: mainImage,
         originalImage: currentUploadedImages[0].original,
         wearingPhoto: currentWearingPhoto || null,
-        id: Date.now(),
         dateAdded: new Date().toISOString()
     };
     
-    const wardrobe = JSON.parse(localStorage.getItem('wardrobe') || '[]');
-    wardrobe.push(itemData);
-    localStorage.setItem('wardrobe', JSON.stringify(wardrobe));
-    
-    alert('Clothes have been successfully saved!');
-    
-    uploadForm.reset();
-    currentUploadedImages = [];
-    currentWearingPhoto = null;
-    previewSection.style.display = 'none';
-    itemDetailsForm.style.display = 'none';
-    previewContainer.innerHTML = '';
+    try {
+        await WardrobeAPI.createClothes(itemData);
+        Utils.showNotification('Clothes saved to server!', 'success');
+        uploadForm.reset();
+        currentUploadedImages = [];
+        currentWearingPhoto = null;
+        previewSection.style.display = 'none';
+        itemDetailsForm.style.display = 'none';
+        previewContainer.innerHTML = '';
+    } catch (error) {
+        console.error('Failed to save item:', error);
+        const errorMessage = error.message || 'Save failed, please try again later.';
+        Utils.showNotification(errorMessage, 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '💾 Save Clothes';
+    }
 });
 
 cancelBtn.addEventListener('click', function() {
-    if (confirm('Are you sure you want to cancel? The uploaded images will not be saved.')) {
+    const confirmed = Utils.confirm ? Utils.confirm('Are you sure you want to cancel? The uploaded images will not be saved.') : confirm('Are you sure you want to cancel? The uploaded images will not be saved.');
+    if (confirmed) {
         uploadForm.reset();
         currentUploadedImages = [];
         currentWearingPhoto = null;

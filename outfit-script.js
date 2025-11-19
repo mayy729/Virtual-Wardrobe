@@ -11,11 +11,19 @@ const cancelSaveOutfit = document.getElementById('cancel-save-outfit');
 const closeModal = document.querySelector('.close-modal');
 const outfitFilterSeason = document.getElementById('outfit-filter-season');
 const outfitFilterOccasion = document.getElementById('outfit-filter-occasion');
+const PLACEHOLDER_IMAGE = './hello-kitty-bg.jpg';
 
-function loadWardrobeForOutfit() {
-    const wardrobe = JSON.parse(localStorage.getItem('wardrobe') || '[]');
-    availableItems = wardrobe;
-    filterAndDisplayItems();
+async function loadWardrobeForOutfit() {
+    Utils.renderLoading(selectableWardrobe, 'Loading clothes...');
+    try {
+        const wardrobe = await WardrobeAPI.listClothes();
+        availableItems = wardrobe;
+        filterAndDisplayItems();
+    } catch (error) {
+        console.error('Failed to load wardrobe for outfit:', error);
+        Utils.renderError(selectableWardrobe, 'Unable to get clothes, please check the backend service.');
+        Utils.showNotification('Unable to load wardrobe data, cannot create outfit temporarily.', 'error');
+    }
 }
 
 function filterAndDisplayItems() {
@@ -46,13 +54,14 @@ function displaySelectableItems(items) {
     }
     
     items.forEach(item => {
+        const imageSrc = item.image || item.originalImage || PLACEHOLDER_IMAGE;
         const itemCard = document.createElement('div');
         itemCard.className = 'selectable-item-card';
         itemCard.dataset.id = item.id;
         itemCard.draggable = true;
         
         itemCard.innerHTML = `
-            <img src="${item.image}" alt="${item.name}">
+            <img src="${imageSrc}" alt="${item.name}">
             <div class="item-card-info">
                 <p>${item.name}</p>
             </div>
@@ -77,7 +86,7 @@ function displaySelectableItems(items) {
 
 function addItemToOutfit(item) {
     if (selectedItems.find(i => i.id === item.id)) {
-        alert('This item is already in the outfit!');
+        Utils.showNotification('This clothing is already in the current outfit!', 'info');
         return;
     }
     
@@ -142,7 +151,8 @@ outfitArea.addEventListener('drop', (e) => {
 clearOutfitBtn.addEventListener('click', () => {
     if (selectedItems.length === 0) return;
     
-    if (confirm('Are you sure you want to clear the current outfit?')) {
+    const confirmed = Utils.confirm ? Utils.confirm('Are you sure you want to clear the current outfit?') : confirm('Are you sure you want to clear the current outfit?');
+    if (confirmed) {
         selectedItems = [];
         updateOutfitArea();
     }
@@ -150,7 +160,7 @@ clearOutfitBtn.addEventListener('click', () => {
 
 saveOutfitBtn.addEventListener('click', () => {
     if (selectedItems.length === 0) {
-        alert('Please select clothes to create an outfit!');
+        Utils.showNotification('Please select clothes before saving the outfit!', 'info');
         return;
     }
     
@@ -167,11 +177,15 @@ saveOutfitBtn.addEventListener('click', () => {
     saveOutfitModal.style.display = 'block';
 });
 
-saveOutfitForm.addEventListener('submit', (e) => {
+saveOutfitForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
+    const submitBtn = saveOutfitForm.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving...';
+    
     const outfitData = {
-        id: Date.now(),
         name: document.getElementById('outfit-name').value,
         season: document.getElementById('outfit-season').value,
         occasion: document.getElementById('outfit-occasion').value,
@@ -179,21 +193,25 @@ saveOutfitForm.addEventListener('submit', (e) => {
         items: selectedItems.map(item => ({
             id: item.id,
             name: item.name,
-            image: item.image
-        })),
-        dateCreated: new Date().toISOString()
+            image: item.image || item.originalImage || ''
+        }))
     };
     
-    const savedOutfits = JSON.parse(localStorage.getItem('savedOutfits') || '[]');
-    savedOutfits.push(outfitData);
-    localStorage.setItem('savedOutfits', JSON.stringify(savedOutfits));
-    
-    alert('Outfit has been successfully saved!');
-    
-    selectedItems = [];
-    updateOutfitArea();
-    saveOutfitForm.reset();
-    saveOutfitModal.style.display = 'none';
+    try {
+        await WardrobeAPI.createOutfit(outfitData);
+        Utils.showNotification('Outfit saved to server!', 'success');
+        
+        selectedItems = [];
+        updateOutfitArea();
+        saveOutfitForm.reset();
+        saveOutfitModal.style.display = 'none';
+    } catch (error) {
+        console.error('Failed to save outfit:', error);
+        Utils.showNotification('Save failed, please try again later.', 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+    }
 });
 
 closeModal.addEventListener('click', () => {

@@ -1,6 +1,9 @@
 let allItems = [];
 let filteredItems = [];
 
+const ITEMS_PER_PAGE = 20;
+let currentPage = 1;
+
 const searchInput = document.getElementById('search-input');
 const filterSeason = document.getElementById('filter-season');
 const filterOccasion = document.getElementById('filter-occasion');
@@ -11,31 +14,57 @@ const clearFiltersBtn = document.getElementById('clear-filters');
 const wardrobeItems = document.getElementById('wardrobe-items');
 const itemModal = document.getElementById('item-modal');
 const closeModal = document.querySelector('.close-modal');
+const pagination = document.getElementById('pagination');
+const prevPageBtn = document.getElementById('prev-page');
+const nextPageBtn = document.getElementById('next-page');
+const pageInfo = document.getElementById('page-info');
+const PLACEHOLDER_IMAGE = './hello-kitty-bg.jpg';
 
-function loadWardrobe() {
-    const wardrobe = JSON.parse(localStorage.getItem('wardrobe') || '[]');
-    allItems = wardrobe;
-    filteredItems = [...allItems];
-    displayItems();
-    updateStats();
+async function loadWardrobe() {
+    Utils.renderLoading(wardrobeItems, 'Loading wardrobe from server...');
+    try {
+        const wardrobe = await WardrobeAPI.listClothes();
+        allItems = wardrobe;
+        filteredItems = [...allItems];
+        displayItems();
+        updateStats();
+    } catch (error) {
+        console.error('Failed to load wardrobe:', error);
+        Utils.renderError(wardrobeItems, 'Unable to load wardrobe data, please try again later.');
+        if (window.Utils) {
+            Utils.showNotification('Unable to connect to wardrobe server, please try again later.', 'error');
+        }
+    }
 }
 
 function displayItems() {
     if (filteredItems.length === 0) {
         wardrobeItems.innerHTML = '<p class="empty-message">No items found that match the criteria</p>';
+        pagination.style.display = 'none';
         return;
     }
 
+    const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
+    
+    if (currentPage > totalPages) {
+        currentPage = totalPages || 1;
+    }
+    
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, filteredItems.length);
+    const itemsToShow = filteredItems.slice(startIndex, endIndex);
+
     wardrobeItems.innerHTML = '';
     
-    filteredItems.forEach(item => {
+    itemsToShow.forEach(item => {
+        const imageSrc = item.image || item.originalImage || PLACEHOLDER_IMAGE;
         const itemCard = document.createElement('div');
         itemCard.className = 'wardrobe-item-card';
         itemCard.dataset.id = item.id;
         
         itemCard.innerHTML = `
             <div class="item-image-wrapper">
-                <img src="${item.image}" alt="${item.name}">
+                <img src="${imageSrc}" alt="${item.name}" loading="lazy">
                 ${item.wearingPhoto ? '<span class="wearing-photo-badge">📷</span>' : ''}
             </div>
             <div class="item-info">
@@ -55,27 +84,43 @@ function displayItems() {
         
         wardrobeItems.appendChild(itemCard);
     });
+    
+    updatePagination(totalPages);
+}
+
+function updatePagination(totalPages) {
+    if (totalPages <= 1) {
+        pagination.style.display = 'none';
+        return;
+    }
+    
+    pagination.style.display = 'flex';
+    pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+    
+    prevPageBtn.disabled = currentPage === 1;
+    nextPageBtn.disabled = currentPage === totalPages;
 }
 
 function getSeasonLabel(season) {
     const labels = {
-        spring: '🌸 Spring',
-        summer: '☀️ Summer',
+        spring: '🌼 Spring',
+        summer: '🌴 Summer',
         autumn: '🍂 Autumn',
         winter: '❄️ Winter',
-        all: '🌟 All Seasons'
+        all: '🌏 All Seasons'
     };
     return labels[season] || season;
 }
 
 function getOccasionLabel(occasion) {
     const labels = {
-        casual: '👕 Casual',
+        casual: '👚 Casual',
         date: '💕 Date',
         work: '💼 Work',
         party: '🎉 Party',
         formal: '👔 Formal Occasion',
-        sport: '🏃 Sport'
+        sport: '🏃 Sport',
+        all: '🌏 All Occasions'
     };
     return labels[occasion] || occasion;
 }
@@ -88,21 +133,29 @@ function applyFilters() {
     const size = filterSize.value.toLowerCase();
     const material = filterMaterial.value.toLowerCase();
     
+    currentPage = 1;
+    
     filteredItems = allItems.filter(item => {
+        const brandValue = (item.brand || '').toLowerCase();
+        const sizeValue = (item.size || '').toLowerCase();
+        const materialValue = (item.material || '').toLowerCase();
+        const notesValue = (item.notes || '').toLowerCase();
+        const nameValue = (item.name || '').toLowerCase();
+        
         const matchesSearch = !searchTerm || 
-            item.name.toLowerCase().includes(searchTerm) ||
-            item.brand.toLowerCase().includes(searchTerm) ||
-            item.notes.toLowerCase().includes(searchTerm);
+            nameValue.includes(searchTerm) ||
+            brandValue.includes(searchTerm) ||
+            notesValue.includes(searchTerm);
         
         const matchesSeason = !season || item.season === season || item.season === 'all';
         
         const matchesOccasion = !occasion || item.occasion === occasion;
         
-        const matchesBrand = !brand || item.brand.toLowerCase().includes(brand);
+        const matchesBrand = !brand || brandValue.includes(brand);
         
-        const matchesSize = !size || item.size.toLowerCase().includes(size);
+        const matchesSize = !size || sizeValue.includes(size);
         
-        const matchesMaterial = !material || item.material.toLowerCase().includes(material);
+        const matchesMaterial = !material || materialValue.includes(material);
         
         return matchesSearch && matchesSeason && matchesOccasion && 
                matchesBrand && matchesSize && matchesMaterial;
@@ -117,12 +170,14 @@ function updateStats() {
     document.getElementById('filtered-items').textContent = filteredItems.length;
 }
 
-searchInput.addEventListener('input', applyFilters);
+const debouncedApplyFilters = Utils.debounce(applyFilters, 250);
+
+searchInput.addEventListener('input', debouncedApplyFilters);
 filterSeason.addEventListener('change', applyFilters);
 filterOccasion.addEventListener('change', applyFilters);
-filterBrand.addEventListener('input', applyFilters);
-filterSize.addEventListener('input', applyFilters);
-filterMaterial.addEventListener('input', applyFilters);
+filterBrand.addEventListener('input', debouncedApplyFilters);
+filterSize.addEventListener('input', debouncedApplyFilters);
+filterMaterial.addEventListener('input', debouncedApplyFilters);
 
 clearFiltersBtn.addEventListener('click', function() {
     searchInput.value = '';
@@ -145,7 +200,8 @@ wardrobeItems.addEventListener('click', function(e) {
     
     if (e.target.classList.contains('btn-delete')) {
         const itemId = parseInt(e.target.dataset.id);
-        if (confirm('Are you sure you want to delete this item?')) {
+        const confirmed = Utils.confirm ? Utils.confirm('Are you sure you want to delete this item?') : confirm('Are you sure you want to delete this item?');
+        if (confirmed) {
             deleteItem(itemId);
         }
     }
@@ -220,10 +276,35 @@ window.addEventListener('click', function(e) {
     }
 });
 
-function deleteItem(itemId) {
-    allItems = allItems.filter(item => item.id !== itemId);
-    localStorage.setItem('wardrobe', JSON.stringify(allItems));
-    loadWardrobe();
+async function deleteItem(itemId) {
+    try {
+        await WardrobeAPI.deleteClothes(itemId);
+        allItems = allItems.filter(item => item.id !== itemId);
+        filteredItems = filteredItems.filter(item => item.id !== itemId);
+        displayItems();
+        updateStats();
+        Utils.showNotification('Item deleted successfully.', 'success');
+    } catch (error) {
+        console.error('Failed to delete item:', error);
+        Utils.showNotification('Delete failed, please try again later.', 'error');
+    }
 }
+
+prevPageBtn.addEventListener('click', () => {
+    if (currentPage > 1) {
+        currentPage--;
+        displayItems();
+        wardrobeItems.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+});
+
+nextPageBtn.addEventListener('click', () => {
+    const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
+    if (currentPage < totalPages) {
+        currentPage++;
+        displayItems();
+        wardrobeItems.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+});
 
 window.addEventListener('DOMContentLoaded', loadWardrobe);

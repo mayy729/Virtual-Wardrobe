@@ -1,11 +1,3 @@
-if (!localStorage.getItem('wardrobe')) {
-    localStorage.setItem('wardrobe', JSON.stringify([]));
-}
-
-if (!localStorage.getItem('savedOutfits')) {
-    localStorage.setItem('savedOutfits', JSON.stringify([]));
-}
-
 const Utils = {
     formatDate: function(dateString) {
         const date = new Date(dateString);
@@ -43,6 +35,30 @@ const Utils = {
 
     confirm: function(message) {
         return window.confirm(message);
+    },
+
+    renderLoading: function(container, message = 'Loading...') {
+        if (!container) return;
+        container.innerHTML = `
+            <div class="loading-state">
+                <div class="loading-spinner"></div>
+                <span>${message}</span>
+            </div>
+        `;
+    },
+
+    renderError: function(container, message = 'Loading failed, please try again later.') {
+        if (!container) return;
+        container.innerHTML = `<p class="error-message">${message}</p>`;
+    },
+
+    debounce: function(fn, delay = 250) {
+        let timer;
+        return function(...args) {
+            const context = this;
+            clearTimeout(timer);
+            timer = setTimeout(() => fn.apply(context, args), delay);
+        };
     }
 };
 
