@@ -38,23 +38,37 @@ uploadArea.addEventListener('drop', (e) => {
 });
 
 uploadInput.addEventListener('change', function(event) {
+    console.log('[Upload] File input changed, files:', event.target.files);
+    if (!event.target.files || event.target.files.length === 0) {
+        console.warn('[Upload] No files selected');
+        return;
+    }
     handleFileUpload(event.target.files);
 });
 
 function handleFileUpload(files) {
+    console.log('[Upload] handleFileUpload called with', files.length, 'files');
     currentUploadedImages = [];
     let validFiles = [];
     let hasErrors = false;
     
     for (const file of files) {
-        if (!ALLOWED_IMAGE_TYPES.includes(file.type.toLowerCase())) {
-            Utils.showNotification(`"${file.name}" is not supported, only JPG, PNG, GIF, WebP are supported`, 'error');
+        console.log('[Upload] Processing file:', file.name, 'Type:', file.type, 'Size:', file.size);
+        
+        const fileExtension = file.name.split('.').pop().toLowerCase();
+        const isImageByExtension = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'heif'].includes(fileExtension);
+        const isValidType = file.type && ALLOWED_IMAGE_TYPES.includes(file.type.toLowerCase());
+        
+        if (!isValidType && !isImageByExtension) {
+            console.warn('[Upload] File type not supported:', file.type, fileExtension);
+            Utils.showNotification(`"${file.name}" format not supported, only JPG, PNG, GIF, WebP are supported`, 'error');
             hasErrors = true;
             continue;
         }
         
         if (file.size > MAX_FILE_SIZE) {
             const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+            console.warn('[Upload] File too large:', fileSizeMB, 'MB');
             Utils.showNotification(`"${file.name}" is too large (${fileSizeMB}MB), maximum supported is 5MB`, 'error');
             hasErrors = true;
             continue;
@@ -64,16 +78,21 @@ function handleFileUpload(files) {
     }
     
     if (validFiles.length === 0) {
+        console.warn('[Upload] No valid files after validation');
         if (!hasErrors) {
             Utils.showNotification('Please select a valid image file', 'info');
         }
         return;
     }
     
+    console.log('[Upload] Starting to read', validFiles.length, 'valid files');
     let processedCount = 0;
+    let errorCount = 0;
+    
     for (const file of validFiles) {
         const reader = new FileReader();
         reader.onload = function(e) {
+            console.log('[Upload] File read successfully:', file.name, 'Data length:', e.target.result.length);
             const imageData = {
                 original: e.target.result,
                 processed: e.target.result,
@@ -84,18 +103,43 @@ function handleFileUpload(files) {
             currentUploadedImages.push(imageData);
             processedCount++;
             
+            console.log('[Upload] Processed', processedCount, 'of', validFiles.length);
             if (processedCount === validFiles.length) {
+                console.log('[Upload] All files processed, showing preview');
                 showPreview();
             }
         };
-        reader.onerror = function() {
-            Utils.showNotification(`Failed to read file "${file.name}"`, 'error');
+        reader.onerror = function(error) {
+            console.error('[Upload] FileReader error for', file.name, ':', error);
+            Utils.showNotification(`Failed to read file "${file.name}". Please try a different image.`, 'error');
+            errorCount++;
+            processedCount++;
+            if (processedCount === validFiles.length) {
+                if (currentUploadedImages.length > 0) {
+                    console.log('[Upload] Some files processed, showing preview');
+                    showPreview();
+                } else {
+                    console.error('[Upload] No files were successfully processed');
+                    Utils.showNotification('Failed to process images. Please try again with different images.', 'error');
+                }
+            }
+        };
+        reader.onprogress = function(e) {
+            if (e.lengthComputable) {
+                const percent = Math.round((e.loaded / e.total) * 100);
+                console.log('[Upload] Reading', file.name, ':', percent + '%');
+            }
+        };
+        try {
+            reader.readAsDataURL(file);
+        } catch (error) {
+            console.error('[Upload] Exception reading file', file.name, ':', error);
+            Utils.showNotification(`Error processing "${file.name}": ${error.message}`, 'error');
             processedCount++;
             if (processedCount === validFiles.length && currentUploadedImages.length > 0) {
                 showPreview();
             }
-        };
-        reader.readAsDataURL(file);
+        }
     }
 }
 
@@ -286,7 +330,9 @@ uploadForm.addEventListener('submit', async function(e) {
     };
     
     try {
-        await WardrobeAPI.createClothes(itemData);
+        console.log('[Upload] Submitting item data, image size:', mainImage.length, 'bytes');
+        const result = await WardrobeAPI.createClothes(itemData);
+        console.log('[Upload] Item saved successfully:', result);
         Utils.showNotification('Clothes saved to server!', 'success');
         uploadForm.reset();
         currentUploadedImages = [];
@@ -294,9 +340,22 @@ uploadForm.addEventListener('submit', async function(e) {
         previewSection.style.display = 'none';
         itemDetailsForm.style.display = 'none';
         previewContainer.innerHTML = '';
+        // 清空文件输入
+        uploadInput.value = '';
+        wearingPhotoInput.value = '';
     } catch (error) {
-        console.error('Failed to save item:', error);
-        const errorMessage = error.message || 'Save failed, please try again later.';
+        console.error('[Upload] Failed to save item:', error);
+        console.error('[Upload] Error details:', {
+            name: error.name,
+            message: error.message,
+            stack: error.stack
+        });
+        let errorMessage = 'Save failed, please try again later.';
+        if (error.message) {
+            errorMessage = error.message;
+        } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            errorMessage = 'Cannot connect to server. Please check your API configuration in Settings.';
+        }
         Utils.showNotification(errorMessage, 'error');
     } finally {
         submitBtn.disabled = false;
