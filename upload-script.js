@@ -70,17 +70,17 @@ function setupEventListeners() {
         console.log('[Upload] Files:', event.target.files);
         console.log('[Upload] Files length:', event.target.files ? event.target.files.length : 0);
         
-        if (isProcessingFiles) {
-            console.log('[Upload] Already processing files, ignoring duplicate event');
-            return;
-        }
-        
         if (!event.target.files || event.target.files.length === 0) {
             console.warn('[Upload] No files selected - user may have cancelled');
             return;
         }
         
-        isProcessingFiles = true;
+        // 检查是否正在处理（防止重复处理）
+        if (isProcessingFiles) {
+            console.log('[Upload] Already processing files, ignoring duplicate event');
+            return;
+        }
+        
         console.log('[Upload] Files selected, showing notification...');
         try {
             Utils.showNotification('Processing images...', 'info');
@@ -92,7 +92,6 @@ function setupEventListeners() {
         const files = Array.from(event.target.files);
         console.log('[Upload] Calling handleFileUpload with', files.length, 'files');
         handleFileUpload(files);
-        
     });
     
     console.log('[Upload] File input element:', uploadInput);
@@ -339,13 +338,17 @@ window.handleFileUploadDirect = function(files) {
 
 function handleFileUpload(files) {
     console.log('[Upload] handleFileUpload called with', files.length, 'files');
+    console.log('[Upload] isProcessingFiles before:', isProcessingFiles);
     
     if (isProcessingFiles) {
         console.log('[Upload] Already processing, ignoring duplicate call');
-        return;
+        console.log('[Upload] Resetting flag and retrying...');
+        // 如果标志卡住了，强制重置并继续处理
+        isProcessingFiles = false;
     }
     
     isProcessingFiles = true;
+    console.log('[Upload] isProcessingFiles set to true');
     
     currentUploadedImages = [];
     let validFiles = [];
@@ -555,28 +558,8 @@ function showPreview() {
     }
 }
 
-previewContainer.addEventListener('click', async function(e) {
-    if (e.target.classList.contains('btn-remove-bg')) {
-        const index = parseInt(e.target.dataset.index);
-        const imageData = currentUploadedImages[index];
-        const previewItem = e.target.closest('.preview-item');
-        const overlay = previewItem.querySelector('.processing-overlay');
-        const img = previewItem.querySelector('img');
-        
-        overlay.style.display = 'flex';
-        
-        try {
-            const processedImage = await removeBackground(imageData.original);
-            imageData.processed = processedImage;
-            img.src = processedImage;
-        } catch (error) {
-            console.error('Background removal failed:', error);
-            Utils.showNotification('Background removal failed, will use original image', 'error');
-        } finally {
-            overlay.style.display = 'none';
-        }
-    }
-});
+// 注意：previewContainer 的事件监听器已经在 setupEventListeners() 中设置了
+// 这里不需要重复设置
 
 async function removeBackground(imageSrc) {
     return new Promise((resolve) => {
