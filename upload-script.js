@@ -74,11 +74,17 @@ function setupEventListeners() {
         console.log('[Upload] Files:', event.target.files);
         console.log('[Upload] Files length:', event.target.files ? event.target.files.length : 0);
         
+        if (isProcessingFiles) {
+            console.log('[Upload] Already processing files, ignoring duplicate event');
+            return;
+        }
+        
         if (!event.target.files || event.target.files.length === 0) {
             console.warn('[Upload] No files selected - user may have cancelled');
             return;
         }
         
+        isProcessingFiles = true;
         console.log('[Upload] Files selected, showing notification...');
         try {
             Utils.showNotification('Processing images...', 'info');
@@ -90,6 +96,7 @@ function setupEventListeners() {
         const files = Array.from(event.target.files);
         console.log('[Upload] Calling handleFileUpload with', files.length, 'files');
         handleFileUpload(files);
+        
     });
     
     console.log('[Upload] File input element:', uploadInput);
@@ -316,8 +323,16 @@ if (document.readyState === 'loading') {
     }
 }
 
+let isProcessingFiles = false;
+
 window.handleFileUploadDirect = function(files) {
     console.log('[Upload] handleFileUploadDirect called (HTML onchange fallback)');
+    
+    if (isProcessingFiles) {
+        console.log('[Upload] Already processing files, ignoring duplicate call');
+        return;
+    }
+    
     if (typeof handleFileUpload === 'function') {
         handleFileUpload(files);
     } else {
@@ -328,6 +343,14 @@ window.handleFileUploadDirect = function(files) {
 
 function handleFileUpload(files) {
     console.log('[Upload] handleFileUpload called with', files.length, 'files');
+    
+    if (isProcessingFiles) {
+        console.log('[Upload] Already processing, ignoring duplicate call');
+        return;
+    }
+    
+    isProcessingFiles = true;
+    
     currentUploadedImages = [];
     let validFiles = [];
     let hasErrors = false;
@@ -387,6 +410,7 @@ function handleFileUpload(files) {
             if (processedCount === validFiles.length) {
                 console.log('[Upload] All files processed, showing preview');
                 showPreview();
+                isProcessingFiles = false;
             }
         };
         reader.onerror = function(error) {
@@ -418,6 +442,7 @@ function handleFileUpload(files) {
                     console.error('[Upload] No files were successfully processed');
                     Utils.showNotification('All images failed to load. Please try selecting different images or check if the images are corrupted.', 'error');
                 }
+                isProcessingFiles = false;
             }
         };
         reader.onprogress = function(e) {
@@ -432,8 +457,11 @@ function handleFileUpload(files) {
             console.error('[Upload] Exception reading file', file.name, ':', error);
             Utils.showNotification(`Error processing "${file.name}": ${error.message}`, 'error');
             processedCount++;
-            if (processedCount === validFiles.length && currentUploadedImages.length > 0) {
-                showPreview();
+            if (processedCount === validFiles.length) {
+                if (currentUploadedImages.length > 0) {
+                    showPreview();
+                }
+                isProcessingFiles = false;
             }
         }
     }
