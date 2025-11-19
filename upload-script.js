@@ -31,6 +31,11 @@ function initUploadElements() {
     
     setupEventListeners();
     
+    console.log('[Upload] Initialization complete. Testing...');
+    console.log('[Upload] Upload input exists:', !!uploadInput);
+    console.log('[Upload] Utils exists:', typeof Utils !== 'undefined');
+    console.log('[Upload] WardrobeAPI exists:', typeof WardrobeAPI !== 'undefined');
+    
     return true;
 }
 
@@ -64,16 +69,41 @@ function setupEventListeners() {
     }
     
     uploadInput.addEventListener('change', function(event) {
-        console.log('[Upload] File input changed, files:', event.target.files);
+        console.log('[Upload] ===== FILE INPUT CHANGE EVENT TRIGGERED =====');
+        console.log('[Upload] Event:', event);
+        console.log('[Upload] Files:', event.target.files);
+        console.log('[Upload] Files length:', event.target.files ? event.target.files.length : 0);
+        
         if (!event.target.files || event.target.files.length === 0) {
-            console.warn('[Upload] No files selected');
+            console.warn('[Upload] No files selected - user may have cancelled');
             return;
         }
         
-        Utils.showNotification('Processing images...', 'info');
+        console.log('[Upload] Files selected, showing notification...');
+        try {
+            Utils.showNotification('Processing images...', 'info');
+        } catch (e) {
+            console.error('[Upload] Failed to show notification:', e);
+            alert('Processing images...'); 
+        }
+        
         const files = Array.from(event.target.files);
+        console.log('[Upload] Calling handleFileUpload with', files.length, 'files');
         handleFileUpload(files);
     });
+    
+    console.log('[Upload] File input element:', uploadInput);
+    console.log('[Upload] File input ID:', uploadInput.id);
+    console.log('[Upload] File input type:', uploadInput.type);
+    
+    if (window.location.search.includes('debug=upload')) {
+        console.log('[Upload] Debug mode enabled');
+        window.testUpload = function() {
+            console.log('[Upload] Manual test triggered');
+            const testEvent = new Event('change', { bubbles: true });
+            uploadInput.dispatchEvent(testEvent);
+        };
+    }
     
     if (removeBackgroundBtn) {
         removeBackgroundBtn.addEventListener('click', async function() {
@@ -262,55 +292,39 @@ function setupEventListeners() {
     }
 }
 
-// 初始化
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
+        console.log('[Upload] DOM loaded, initializing...');
         if (!initUploadElements()) {
             console.error('[Upload] Failed to initialize upload elements');
+            if (window.Utils) {
+                Utils.showNotification('Failed to initialize upload form. Please refresh the page.', 'error');
+            }
+        } else {
+            console.log('[Upload] Upload elements initialized successfully');
         }
     });
 } else {
+    console.log('[Upload] DOM already loaded, initializing...');
     if (!initUploadElements()) {
         console.error('[Upload] Failed to initialize upload elements');
+        if (window.Utils) {
+            Utils.showNotification('Failed to initialize upload form. Please refresh the page.', 'error');
+        }
+    } else {
+        console.log('[Upload] Upload elements initialized successfully');
     }
 }
 
-document.querySelector('.upload-label').addEventListener('click', () => {
-    uploadInput.click();
-});
-
-const uploadArea = document.querySelector('.upload-area');
-uploadArea.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    uploadArea.classList.add('drag-over');
-});
-
-uploadArea.addEventListener('dragleave', () => {
-    uploadArea.classList.remove('drag-over');
-});
-
-uploadArea.addEventListener('drop', (e) => {
-    e.preventDefault();
-    uploadArea.classList.remove('drag-over');
-    if (e.dataTransfer.files.length > 0) {
-        uploadInput.files = e.dataTransfer.files;
-        handleFileUpload(e.dataTransfer.files);
+window.handleFileUploadDirect = function(files) {
+    console.log('[Upload] handleFileUploadDirect called (HTML onchange fallback)');
+    if (typeof handleFileUpload === 'function') {
+        handleFileUpload(files);
+    } else {
+        console.error('[Upload] handleFileUpload function not available yet');
+        alert('Please wait for page to load completely, then try again.');
     }
-});
-
-uploadInput.addEventListener('change', function(event) {
-    console.log('[Upload] File input changed, files:', event.target.files);
-    if (!event.target.files || event.target.files.length === 0) {
-        console.warn('[Upload] No files selected');
-        return;
-    }
-    
-    Utils.showNotification('Processing images...', 'info');
-    
-    const files = Array.from(event.target.files);
-    handleFileUpload(files);
-    
-});
+};
 
 function handleFileUpload(files) {
     console.log('[Upload] handleFileUpload called with', files.length, 'files');
