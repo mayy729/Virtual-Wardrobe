@@ -40,8 +40,12 @@ function initUploadElements() {
 }
 
 function setupEventListeners() {
-    // 注意：不需要给 label 添加点击事件，因为 HTML 的 label for 属性已经会自动触发 input
-    // 如果添加了，会导致文件选择对话框弹出两次
+    const uploadLabel = document.querySelector('.upload-label');
+    if (uploadLabel) {
+        uploadLabel.addEventListener('click', () => {
+            uploadInput.click();
+        });
+    }
     
     const uploadArea = document.querySelector('.upload-area');
     if (uploadArea) {
@@ -65,33 +69,12 @@ function setupEventListeners() {
     }
     
     uploadInput.addEventListener('change', function(event) {
-        console.log('[Upload] ===== FILE INPUT CHANGE EVENT TRIGGERED =====');
-        console.log('[Upload] Event:', event);
-        console.log('[Upload] Files:', event.target.files);
-        console.log('[Upload] Files length:', event.target.files ? event.target.files.length : 0);
-        
         if (!event.target.files || event.target.files.length === 0) {
-            console.warn('[Upload] No files selected - user may have cancelled');
             return;
         }
         
-        // 检查是否正在处理（防止重复处理）
-        if (isProcessingFiles) {
-            console.log('[Upload] Already processing files, ignoring duplicate event');
-            return;
-        }
-        
-        console.log('[Upload] Files selected, showing notification...');
-        try {
-            Utils.showNotification('Processing images...', 'info');
-        } catch (e) {
-            console.error('[Upload] Failed to show notification:', e);
-            alert('Processing images...'); 
-        }
-        
-        const files = Array.from(event.target.files);
-        console.log('[Upload] Calling handleFileUpload with', files.length, 'files');
-        handleFileUpload(files);
+        Utils.showNotification('Processing images...', 'info');
+        handleFileUpload(event.target.files);
     });
     
     console.log('[Upload] File input element:', uploadInput);
@@ -318,59 +301,20 @@ if (document.readyState === 'loading') {
     }
 }
 
-let isProcessingFiles = false;
-
-window.handleFileUploadDirect = function(files) {
-    console.log('[Upload] handleFileUploadDirect called (HTML onchange fallback)');
-    
-    if (isProcessingFiles) {
-        console.log('[Upload] Already processing files, ignoring duplicate call');
-        return;
-    }
-    
-    if (typeof handleFileUpload === 'function') {
-        handleFileUpload(files);
-    } else {
-        console.error('[Upload] handleFileUpload function not available yet');
-        alert('Please wait for page to load completely, then try again.');
-    }
-};
-
 function handleFileUpload(files) {
-    console.log('[Upload] handleFileUpload called with', files.length, 'files');
-    console.log('[Upload] isProcessingFiles before:', isProcessingFiles);
-    
-    if (isProcessingFiles) {
-        console.log('[Upload] Already processing, ignoring duplicate call');
-        console.log('[Upload] Resetting flag and retrying...');
-        // 如果标志卡住了，强制重置并继续处理
-        isProcessingFiles = false;
-    }
-    
-    isProcessingFiles = true;
-    console.log('[Upload] isProcessingFiles set to true');
-    
     currentUploadedImages = [];
     let validFiles = [];
     let hasErrors = false;
     
     for (const file of files) {
-        console.log('[Upload] Processing file:', file.name, 'Type:', file.type, 'Size:', file.size);
-        
-        const fileExtension = file.name.split('.').pop().toLowerCase();
-        const isImageByExtension = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'heif'].includes(fileExtension);
-        const isValidType = file.type && ALLOWED_IMAGE_TYPES.includes(file.type.toLowerCase());
-        
-        if (!isValidType && !isImageByExtension) {
-            console.warn('[Upload] File type not supported:', file.type, fileExtension);
-            Utils.showNotification(`"${file.name}" format not supported, only JPG, PNG, GIF, WebP are supported`, 'error');
+        if (!ALLOWED_IMAGE_TYPES.includes(file.type.toLowerCase())) {
+            Utils.showNotification(`"${file.name}" is not supported, only JPG, PNG, GIF, WebP are supported`, 'error');
             hasErrors = true;
             continue;
         }
         
         if (file.size > MAX_FILE_SIZE) {
             const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
-            console.warn('[Upload] File too large:', fileSizeMB, 'MB');
             Utils.showNotification(`"${file.name}" is too large (${fileSizeMB}MB), maximum supported is 5MB`, 'error');
             hasErrors = true;
             continue;
@@ -380,182 +324,61 @@ function handleFileUpload(files) {
     }
     
     if (validFiles.length === 0) {
-        console.warn('[Upload] No valid files after validation');
         if (!hasErrors) {
             Utils.showNotification('Please select a valid image file', 'info');
         }
         return;
     }
     
-    console.log('[Upload] Starting to read', validFiles.length, 'valid files');
     let processedCount = 0;
-    let errorCount = 0;
-    
-    // 如果没有任何有效文件，直接返回
-    if (validFiles.length === 0) {
-        console.error('[Upload] No valid files to process!');
-        isProcessingFiles = false;
-        Utils.showNotification('No valid files to process', 'error');
-        return;
-    }
-    
     for (const file of validFiles) {
-        console.log('[Upload] Creating FileReader for:', file.name);
         const reader = new FileReader();
-        
         reader.onload = function(e) {
-            console.log('[Upload] FileReader onload triggered for:', file.name);
-            console.log('[Upload] File read successfully:', file.name, 'Data length:', e.target.result ? e.target.result.length : 0);
-            
-            if (!e.target.result) {
-                console.error('[Upload] FileReader result is empty for:', file.name);
-                errorCount++;
-                processedCount++;
-                if (processedCount === validFiles.length) {
-                    handleProcessingComplete();
-                }
-                return;
-            }
-            
-            try {
-                const imageData = {
-                    original: e.target.result,
-                    processed: e.target.result,
-                    id: Date.now() + Math.random(),
-                    fileName: file.name,
-                    fileSize: file.size
-                };
-                currentUploadedImages.push(imageData);
-                console.log('[Upload] Image data added, total images:', currentUploadedImages.length);
-            } catch (err) {
-                console.error('[Upload] Error creating image data:', err);
-                errorCount++;
-            }
-            
+            const imageData = {
+                original: e.target.result,
+                processed: e.target.result,
+                id: Date.now() + Math.random(),
+                fileName: file.name,
+                fileSize: file.size
+            };
+            currentUploadedImages.push(imageData);
             processedCount++;
-            console.log('[Upload] Processed', processedCount, 'of', validFiles.length, 'files');
             
             if (processedCount === validFiles.length) {
-                console.log('[Upload] All files processed, calling handleProcessingComplete');
-                handleProcessingComplete();
+                showPreview();
             }
         };
-        reader.onerror = function(error) {
-            console.error('[Upload] FileReader error for', file.name, ':', error);
-            console.error('[Upload] FileReader error details:', {
-                error: error,
-                file: {
-                    name: file.name,
-                    type: file.type,
-                    size: file.size
-                }
-            });
-            
-            let errorMsg = `Failed to read "${file.name}". `;
-            if (file.type && file.type.includes('heic')) {
-                errorMsg += 'HEIC format may not be supported. Please convert to JPG or PNG first.';
-            } else {
-                errorMsg += 'Please try a different image or convert the image format.';
-            }
-            Utils.showNotification(errorMsg, 'error');
-            
-            errorCount++;
+        reader.onerror = function() {
+            Utils.showNotification(`Failed to read file "${file.name}"`, 'error');
             processedCount++;
-            console.log('[Upload] Error processed, count:', processedCount, 'of', validFiles.length);
-            
-            if (processedCount === validFiles.length) {
-                handleProcessingComplete();
+            if (processedCount === validFiles.length && currentUploadedImages.length > 0) {
+                showPreview();
             }
         };
-        reader.onprogress = function(e) {
-            if (e.lengthComputable) {
-                const percent = Math.round((e.loaded / e.total) * 100);
-                console.log('[Upload] Reading', file.name, ':', percent + '%');
-            }
-        };
-        try {
-            reader.readAsDataURL(file);
-        } catch (error) {
-            console.error('[Upload] Exception reading file', file.name, ':', error);
-            Utils.showNotification(`Error processing "${file.name}": ${error.message}`, 'error');
-            errorCount++;
-            processedCount++;
-            console.log('[Upload] Exception handled, count:', processedCount, 'of', validFiles.length);
-            
-            if (processedCount === validFiles.length) {
-                handleProcessingComplete();
-            }
-        }
-    }
-    
-    // 统一处理完成逻辑
-    function handleProcessingComplete() {
-        console.log('[Upload] handleProcessingComplete called');
-        console.log('[Upload] Total images loaded:', currentUploadedImages.length);
-        console.log('[Upload] Errors:', errorCount);
-        
-        isProcessingFiles = false;
-        
-        if (currentUploadedImages.length > 0) {
-            console.log('[Upload] Showing preview for', currentUploadedImages.length, 'images');
-            showPreview();
-        } else {
-            console.error('[Upload] No images were successfully loaded');
-            Utils.showNotification('Failed to load images. Please try again with different images.', 'error');
-        }
+        reader.readAsDataURL(file);
     }
 }
 
 function showPreview() {
-    console.log('[Upload] showPreview called, images count:', currentUploadedImages.length);
+    previewSection.style.display = 'block';
+    previewContainer.innerHTML = '';
+    itemDetailsForm.style.display = 'block';
     
-    if (currentUploadedImages.length === 0) {
-        console.error('[Upload] No images to preview!');
-        Utils.showNotification('No images were loaded. Please try selecting images again.', 'error');
-        return;
-    }
-    
-    try {
-        previewSection.style.display = 'block';
-        previewContainer.innerHTML = '';
-        itemDetailsForm.style.display = 'block';
-        
-        console.log('[Upload] Preview section and form should now be visible');
-        
-        currentUploadedImages.forEach((imageData, index) => {
-            console.log('[Upload] Creating preview for image', index, 'Data length:', imageData.processed.length);
-            const previewItem = document.createElement('div');
-            previewItem.className = 'preview-item';
-            
-            if (!imageData.processed || imageData.processed.length === 0) {
-                console.error('[Upload] Image data is empty for index', index);
-                Utils.showNotification(`Image ${index + 1} data is invalid`, 'error');
-                return;
-            }
-            
-            previewItem.innerHTML = `
-                <div class="preview-image-wrapper">
-                    <img src="${imageData.processed}" alt="Preview ${index + 1}" onerror="console.error('[Upload] Image load error for index ${index}'); Utils.showNotification('Failed to display image ${index + 1}', 'error');">
-                    <div class="processing-overlay" style="display:none;">
-                        <div class="loading-spinner"></div>
-                        <p>Processing...</p>
-                    </div>
+    currentUploadedImages.forEach((imageData, index) => {
+        const previewItem = document.createElement('div');
+        previewItem.className = 'preview-item';
+        previewItem.innerHTML = `
+            <div class="preview-image-wrapper">
+                <img src="${imageData.processed}" alt="Preview ${index + 1}">
+                <div class="processing-overlay" style="display:none;">
+                    <div class="spinner"></div>
+                    <p>Processing...</p>
                 </div>
-                <button type="button" class="btn-remove-bg" data-index="${index}">🪄 Remove Background</button>
-            `;
-            previewContainer.appendChild(previewItem);
-        });
-        
-        setTimeout(() => {
-            previewSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }, 100);
-        
-        console.log('[Upload] Preview displayed successfully');
-        Utils.showNotification(`Loaded ${currentUploadedImages.length} image(s). Please fill in the details below.`, 'success');
-    } catch (error) {
-        console.error('[Upload] Error in showPreview:', error);
-        Utils.showNotification('Failed to display preview: ' + error.message, 'error');
-    }
+            </div>
+            <button type="button" class="btn-remove-bg" data-index="${index}">🪄 Remove Background</button>
+        `;
+        previewContainer.appendChild(previewItem);
+    });
 }
 
 // 注意：previewContainer 的事件监听器已经在 setupEventListeners() 中设置了
