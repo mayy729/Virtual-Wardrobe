@@ -1,8 +1,29 @@
 # 虚拟衣柜系统 - 为C小姐定制
 
-## 项目的简介
+## 项目简介
 
 这是一个专为C小姐定制的虚拟衣柜管理系统，帮助她轻松管理衣物，快速创建完美搭配，告别选择困难症。系统采用Hello Kitty主题设计，界面美观友好，操作简单直观。
+
+## 快速开始
+
+```bash
+# 1. 安装依赖
+cd server
+npm install
+
+# 2. 启动后端服务器
+npm run dev
+
+# 3. 在浏览器中打开
+# 方式1：使用本地服务器（推荐）
+python -m http.server 8080
+# 访问 http://localhost:8080/docs/index.html
+
+# 方式2：直接打开文件
+# 打开 docs/index.html
+```
+
+后端服务器将在 `http://localhost:3000` 运行，前端会自动连接。
 
 ## 功能特性
 
@@ -53,27 +74,89 @@
 ## 文件结构
 
 ```
-index.html/
-├── index.html          # 首页
-├── upload.html         # 上传页面
-├── wardrobe.html       # 衣柜页面
-├── outfit.html         # 创建搭配页面
-├── saved.html          # 已保存搭配页面
-├── styles.css          # 样式文件
-├── script.js           # 通用脚本
-├── index-script.js     # 首页脚本
-├── upload-script.js    # 上传页面脚本
-├── wardrobe-script.js  # 衣柜页面脚本
-├── outfit-script.js    # 搭配页面脚本
-├── saved-script.js     # 保存搭配页面脚本
-└── README.md           # 说明文档
+CSIA/
+├── docs/                          # 前端文件
+│   ├── index.html                 # 首页
+│   ├── upload.html                # 上传页面
+│   ├── wardrobe.html              # 衣柜页面
+│   ├── outfit.html                # 创建搭配页面
+│   ├── saved.html                 # 已保存搭配页面
+│   ├── styles.css                 # 样式文件
+│   ├── script.js                  # 通用脚本
+│   ├── config.js                  # API配置管理
+│   ├── config-ui.js               # 配置界面脚本
+│   ├── api.js                     # API客户端
+│   ├── index-script.js            # 首页脚本
+│   ├── upload-script.js           # 上传页面脚本
+│   ├── wardrobe-script.js         # 衣柜页面脚本
+│   ├── outfit-script.js           # 搭配页面脚本
+│   ├── saved-script.js            # 保存搭配页面脚本
+│   ├── README.md                  # 说明文档
+│   ├── TESTING.md                 # 测试文档
+│   ├── API_CONFIG.md              # API配置文档
+│   └── [图片资源文件]
+├── server/                         # 后端服务器
+│   ├── server.js                  # Express服务器
+│   ├── storage.js                  # 数据存储模块
+│   ├── package.json               # 依赖配置
+│   ├── package-lock.json          # 依赖锁定文件
+│   └── .gitignore                 # Git忽略配置
+└── .gitignore                     # 根目录Git配置
 ```
 
+## 安装和运行
+
+### 前置要求
+
+- Node.js (v14 或更高版本)
+- npm (Node.js 自带)
+
+### 安装步骤
+
+1. **克隆或下载项目**
+   ```bash
+   git clone https://github.com/mayy729/Virtual-Wardrobe.git
+   cd Virtual-Wardrobe
+   ```
+
+2. **安装后端依赖**
+   ```bash
+   cd server
+   npm install
+   ```
+
+3. **启动后端服务器**
+   ```bash
+   # 开发模式（自动重启）
+   npm run dev
+   
+   # 或生产模式
+   npm start
+   ```
+   服务器将在 `http://localhost:3000` 启动
+
+4. **打开前端页面**
+   - 方式1：使用本地服务器（推荐）
+     ```bash
+     # 在项目根目录运行
+     python -m http.server 8080
+     # 然后访问 http://localhost:8080/docs/index.html
+     ```
+   - 方式2：直接打开文件
+     - 打开 `docs/index.html` 文件
+     - 系统会自动连接到 `http://localhost:3000`
+
+### API 配置
+
+系统支持灵活的 API Base URL 配置：
+
+- **URL 参数方式**：`index.html?apiBase=http://localhost:3000`
+- **配置界面**：点击首页的 "⚙️ Settings" 按钮
+- **控制台方式**：`await setWardrobeApiBase('http://your-api-url')`
+
+详细配置说明请查看 [API_CONFIG.md](./API_CONFIG.md)
+
 ## 使用方法
-
-### 1. 打开网站
-
-直接在浏览器中打开 `index.html` 文件即可开始使用。
 
 ### 2. 上传衣物
 
@@ -125,10 +208,17 @@ index.html/
 
 ### 技术栈
 
+**前端：**
 - HTML5
-- CSS3（包含响应式设计）
+- CSS3（包含响应式设计和媒体查询）
 - JavaScript (原生JS，无框架依赖)
-- LocalStorage（本地存储）
+- Fetch API（RESTful API 调用）
+
+**后端：**
+- Node.js
+- Express.js（Web 框架）
+- CORS（跨域支持）
+- JSON 文件存储（轻量级数据持久化）
 
 ### 浏览器兼容性
 
@@ -139,9 +229,30 @@ index.html/
 
 ### 数据存储
 
-所有数据（衣物信息、保存的搭配）都存储在浏览器的 LocalStorage 中，无需服务器支持。
+**后端存储：**
+- 衣物数据：`server/wardrobe-data.json`
+- 搭配数据：`server/outfits-data.json`
+- 数据持久化，重启服务器后数据仍然保留
+- 支持多设备共享数据
 
-**注意**：清空浏览器缓存可能会丢失数据，建议定期备份重要数据。
+**前端缓存：**
+- API Base URL 配置存储在 localStorage
+- 配置信息持久化保存
+
+### 性能优化
+
+- **分页功能**：衣柜列表支持分页（每页20项），确保100+衣物无卡顿
+- **图片懒加载**：使用 `loading="lazy"` 属性，减少初始加载时间
+- **搜索节流**：搜索输入250ms延迟，避免频繁触发
+- **响应式设计**：支持桌面、平板、手机多设备
+
+### 安全特性
+
+- **文件类型验证**：仅支持 JPG、PNG、GIF、WebP 格式
+- **文件大小限制**：单个文件最大 5MB
+- **Base64 大小限制**：图片数据最大 10MB
+- **输入验证**：所有文本输入自动清理和长度限制
+- **URL 验证**：API Base URL 格式验证
 
 ## 特色功能详解
 
@@ -167,10 +278,10 @@ index.html/
 ## 常见问题
 
 **Q: 数据会丢失吗？**  
-A: 数据存储在浏览器LocalStorage中，清空浏览器缓存会丢失数据。建议定期备份。
+A: 数据存储在后端服务器的 JSON 文件中，重启服务器后数据仍然保留。建议定期备份 `server/wardrobe-data.json` 和 `server/outfits-data.json` 文件。
 
 **Q: 支持哪些图片格式？**  
-A: 支持常见的图片格式（JPG、PNG等）
+A: 支持 JPG、PNG、GIF、WebP 格式，单个文件最大 5MB。
 
 **Q: 可以批量上传吗？**  
 A: 可以，支持一次选择多张图片上传。
@@ -178,17 +289,69 @@ A: 可以，支持一次选择多张图片上传。
 **Q: 抠图效果不理想怎么办？**  
 A: 可以跳过自动抠图，直接使用原图。对于更好的抠图效果，可以手动使用图片编辑软件处理后再上传。
 
+**Q: 如何更改后端服务器地址？**  
+A: 有三种方式：
+1. 在首页点击 "⚙️ Settings" 按钮进行配置
+2. 在 URL 中添加参数：`?apiBase=http://your-server:3000`
+3. 在浏览器控制台执行：`await setWardrobeApiBase('http://your-server:3000')`
+
+**Q: 后端服务器无法启动怎么办？**  
+A: 检查以下几点：
+1. 确保已安装 Node.js 和 npm
+2. 在 `server` 目录运行 `npm install` 安装依赖
+3. 检查端口 3000 是否被占用
+4. 查看控制台错误信息
+
+**Q: 如何支持 100+ 衣物不卡顿？**  
+A: 系统已实现分页功能（每页20项），自动处理大量数据。如果仍有性能问题，可以调整 `wardrobe-script.js` 中的 `ITEMS_PER_PAGE` 值。
+
+**Q: 可以在不同设备上使用吗？**  
+A: 可以！只要所有设备连接到同一个后端服务器，数据会自动同步。需要在每个设备上配置相同的 API Base URL。
+
 ## 开发者信息
 
 本项目专为C小姐定制，采用Hello Kitty主题设计，旨在帮助解决衣物搭配的选择困难问题。
 
+## API 文档
+
+### 衣物 API
+
+- `GET /api/clothes` - 获取所有衣物
+- `POST /api/clothes` - 创建新衣物
+- `PUT /api/clothes/:id` - 更新衣物信息
+- `DELETE /api/clothes/:id` - 删除衣物
+
+### 搭配 API
+
+- `GET /api/outfits` - 获取所有搭配
+- `POST /api/outfits` - 创建新搭配
+- `PUT /api/outfits/:id` - 更新搭配信息
+- `DELETE /api/outfits/:id` - 删除搭配
+
+详细 API 配置说明请查看 [API_CONFIG.md](./API_CONFIG.md)
+
+## 测试文档
+
+系统包含完整的测试文档，包括：
+- 性能测试方法
+- 兼容性测试清单
+- 响应式设计测试
+- 页面加载时间测试
+
+详细测试说明请查看 [TESTING.md](./TESTING.md)
+
 ## 未来改进方向
 
-1. 集成专业的背景移除API
-2. 添加衣物颜色识别功能
-3. 智能搭配推荐功能
-4. 云端数据同步
+1. ✅ ~~云端数据同步~~（已实现：后端存储）
+2. 集成专业的背景移除API（如 remove.bg）
+3. 添加衣物颜色识别功能
+4. 智能搭配推荐功能（基于颜色、风格等）
 5. 导出搭配为图片功能
+6. 用户认证和多用户支持
+7. 数据库迁移（从 JSON 到 SQLite/PostgreSQL）
+8. 图片压缩和优化
+9. 离线模式支持（Service Worker）
+10. 移动端 App（React Native / Flutter）
 
 ---
 
