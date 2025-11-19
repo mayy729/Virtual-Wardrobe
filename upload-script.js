@@ -388,25 +388,53 @@ function handleFileUpload(files) {
     let processedCount = 0;
     let errorCount = 0;
     
+    // 如果没有任何有效文件，直接返回
+    if (validFiles.length === 0) {
+        console.error('[Upload] No valid files to process!');
+        isProcessingFiles = false;
+        Utils.showNotification('No valid files to process', 'error');
+        return;
+    }
+    
     for (const file of validFiles) {
+        console.log('[Upload] Creating FileReader for:', file.name);
         const reader = new FileReader();
+        
         reader.onload = function(e) {
-            console.log('[Upload] File read successfully:', file.name, 'Data length:', e.target.result.length);
-            const imageData = {
-                original: e.target.result,
-                processed: e.target.result,
-                id: Date.now() + Math.random(),
-                fileName: file.name,
-                fileSize: file.size
-            };
-            currentUploadedImages.push(imageData);
-            processedCount++;
+            console.log('[Upload] FileReader onload triggered for:', file.name);
+            console.log('[Upload] File read successfully:', file.name, 'Data length:', e.target.result ? e.target.result.length : 0);
             
-            console.log('[Upload] Processed', processedCount, 'of', validFiles.length);
+            if (!e.target.result) {
+                console.error('[Upload] FileReader result is empty for:', file.name);
+                errorCount++;
+                processedCount++;
+                if (processedCount === validFiles.length) {
+                    handleProcessingComplete();
+                }
+                return;
+            }
+            
+            try {
+                const imageData = {
+                    original: e.target.result,
+                    processed: e.target.result,
+                    id: Date.now() + Math.random(),
+                    fileName: file.name,
+                    fileSize: file.size
+                };
+                currentUploadedImages.push(imageData);
+                console.log('[Upload] Image data added, total images:', currentUploadedImages.length);
+            } catch (err) {
+                console.error('[Upload] Error creating image data:', err);
+                errorCount++;
+            }
+            
+            processedCount++;
+            console.log('[Upload] Processed', processedCount, 'of', validFiles.length, 'files');
+            
             if (processedCount === validFiles.length) {
-                console.log('[Upload] All files processed, showing preview');
-                showPreview();
-                isProcessingFiles = false;
+                console.log('[Upload] All files processed, calling handleProcessingComplete');
+                handleProcessingComplete();
             }
         };
         reader.onerror = function(error) {
@@ -430,15 +458,10 @@ function handleFileUpload(files) {
             
             errorCount++;
             processedCount++;
+            console.log('[Upload] Error processed, count:', processedCount, 'of', validFiles.length);
+            
             if (processedCount === validFiles.length) {
-                if (currentUploadedImages.length > 0) {
-                    console.log('[Upload] Some files processed, showing preview');
-                    showPreview();
-                } else {
-                    console.error('[Upload] No files were successfully processed');
-                    Utils.showNotification('All images failed to load. Please try selecting different images or check if the images are corrupted.', 'error');
-                }
-                isProcessingFiles = false;
+                handleProcessingComplete();
             }
         };
         reader.onprogress = function(e) {
@@ -452,13 +475,30 @@ function handleFileUpload(files) {
         } catch (error) {
             console.error('[Upload] Exception reading file', file.name, ':', error);
             Utils.showNotification(`Error processing "${file.name}": ${error.message}`, 'error');
+            errorCount++;
             processedCount++;
+            console.log('[Upload] Exception handled, count:', processedCount, 'of', validFiles.length);
+            
             if (processedCount === validFiles.length) {
-                if (currentUploadedImages.length > 0) {
-                    showPreview();
-                }
-                isProcessingFiles = false;
+                handleProcessingComplete();
             }
+        }
+    }
+    
+    // 统一处理完成逻辑
+    function handleProcessingComplete() {
+        console.log('[Upload] handleProcessingComplete called');
+        console.log('[Upload] Total images loaded:', currentUploadedImages.length);
+        console.log('[Upload] Errors:', errorCount);
+        
+        isProcessingFiles = false;
+        
+        if (currentUploadedImages.length > 0) {
+            console.log('[Upload] Showing preview for', currentUploadedImages.length, 'images');
+            showPreview();
+        } else {
+            console.error('[Upload] No images were successfully loaded');
+            Utils.showNotification('Failed to load images. Please try again with different images.', 'error');
         }
     }
 }
