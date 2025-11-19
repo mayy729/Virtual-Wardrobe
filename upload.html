@@ -33,7 +33,7 @@
                         <p>Click or drag and drop images here to upload</p>
                         <p class="upload-hint">Only JPG, PNG, GIF, WebP formats are supported, maximum file size is 5MB</p>
                     </label>
-                    <input type="file" id="clothes-upload" name="clothes-upload" accept="image/*" multiple required onchange="console.log('HTML onchange triggered', this.files); if (window.handleFileUploadDirect) { window.handleFileUploadDirect(this.files); }">
+                    <input type="file" id="clothes-upload" name="clothes-upload" accept="image/*" multiple required>
                 </div>
 
                 <div id="preview-section" class="preview-section" style="display:none;">

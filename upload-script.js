@@ -40,12 +40,8 @@ function initUploadElements() {
 }
 
 function setupEventListeners() {
-    const uploadLabel = document.querySelector('.upload-label');
-    if (uploadLabel) {
-        uploadLabel.addEventListener('click', () => {
-            uploadInput.click();
-        });
-    }
+    // 注意：不需要给 label 添加点击事件，因为 HTML 的 label for 属性已经会自动触发 input
+    // 如果添加了，会导致文件选择对话框弹出两次
     
     const uploadArea = document.querySelector('.upload-area');
     if (uploadArea) {
