@@ -156,6 +156,94 @@ CSIA/
 
 详细配置说明请查看 [API_CONFIG.md](./API_CONFIG.md)
 
+## ⚠️ GitHub Pages 部署说明
+
+### 重要限制
+
+**GitHub Pages 只提供静态文件托管，无法运行 Node.js 后端服务器。**
+
+这意味着：
+- ✅ 前端页面可以正常显示
+- ❌ 无法直接使用后端 API 功能（上传、保存、查看等）
+- ❌ 无法在 GitHub Pages 上运行后端服务器
+
+### 解决方案
+
+#### 方案 1：本地运行后端（推荐用于个人使用）
+
+1. **在本地启动后端服务器**：
+   ```bash
+   cd server
+   npm install
+   npm run dev
+   ```
+
+2. **配置前端连接本地后端**：
+   - 访问 GitHub Pages：`https://mayy729.github.io/Virtual-Wardrobe/`
+   - 点击 "⚙️ Settings" 按钮
+   - 输入后端地址：`http://localhost:3000`
+   - 点击 "测试连接" 验证
+   - 点击 "保存配置"
+
+3. **或使用 URL 参数**：
+   ```
+   https://mayy729.github.io/Virtual-Wardrobe/?apiBase=http://localhost:3000
+   ```
+
+**注意**：此方案需要本地运行后端服务器，适合个人使用。
+
+#### 方案 2：部署后端到云服务器（推荐用于生产环境）
+
+将后端部署到支持 Node.js 的云服务：
+
+**选项 A：Render（免费）**
+1. 在 [Render](https://render.com) 创建账户
+2. 连接 GitHub 仓库
+3. 创建新的 Web Service
+4. 选择 `server` 目录
+5. 设置构建命令：`npm install`
+6. 设置启动命令：`npm start`
+7. 获取部署后的 URL（如：`https://your-app.onrender.com`）
+8. 在前端配置中设置该 URL
+
+**选项 B：Heroku**
+1. 在 [Heroku](https://heroku.com) 创建账户
+2. 安装 Heroku CLI
+3. 在 `server` 目录运行：
+   ```bash
+   heroku create your-app-name
+   git push heroku main
+   ```
+4. 获取 Heroku URL 并配置到前端
+
+**选项 C：Railway、Fly.io 等其他平台**
+- 类似步骤，将后端部署到云服务
+- 确保配置 CORS 允许来自 GitHub Pages 的请求
+
+#### 方案 3：使用 Serverless Functions（高级）
+
+使用 Vercel、Netlify Functions 等将后端 API 转换为 Serverless Functions。
+
+### 配置 CORS
+
+如果后端部署在云服务器上，需要确保后端允许来自 GitHub Pages 的跨域请求。检查 `server/server.js` 中的 CORS 配置：
+
+```javascript
+app.use(cors({
+    origin: ['https://mayy729.github.io', 'http://localhost:8080'],
+    // ...
+}));
+```
+
+### 故障排除
+
+如果访问 GitHub Pages 时看到 "Unable to load wardrobe data" 错误：
+
+1. **检查后端是否运行**：确保后端服务器正在运行
+2. **检查 API 配置**：点击 "⚙️ Settings" 确认 API Base URL 正确
+3. **检查 CORS 设置**：确保后端允许来自 GitHub Pages 的请求
+4. **查看浏览器控制台**：按 F12 查看具体错误信息
+
 ## 使用方法
 
 ### 2. 上传衣物

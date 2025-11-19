@@ -1,6 +1,9 @@
 (() => {
     function getApiBase() {
-        return window.API_BASE_URL || 'http://localhost:3000';
+        if (!window.API_BASE_URL) {
+            throw new Error('The API Base URL is not configured. Please configure the backend server address in the settings, or specify it via the URL parameter ?apiBase=.');
+        }
+        return window.API_BASE_URL;
     }
 
     function buildUrl(path) {

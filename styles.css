@@ -1176,6 +1176,75 @@ footer {
     }
 }
 
+/* API Configuration Alert */
+.api-config-alert {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+.alert-content {
+    background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+    border: 2px solid #ffc107;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+}
+
+.alert-content h3 {
+    color: #856404;
+    margin-bottom: 15px;
+    font-size: 1.5em;
+}
+
+.alert-content p {
+    color: #856404;
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+.alert-content ol {
+    color: #856404;
+    margin: 15px 0;
+    padding-left: 25px;
+}
+
+.alert-content ol li {
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+.alert-content pre {
+    background: rgba(255, 255, 255, 0.7);
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin: 10px 0;
+    overflow-x: auto;
+    border: 1px solid #ffc107;
+}
+
+.alert-content code {
+    background: rgba(255, 255, 255, 0.7);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+}
+
+.alert-content #alert-config-link {
+    color: var(--accent-pink);
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.alert-content #alert-config-link:hover {
+    color: var(--deep-pink);
+}
+
+.alert-content #dismiss-alert {
+    margin-top: 15px;
+}
+
 /* Configuration Modal Styles */
 .config-form {
     padding: 20px 0;

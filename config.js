@@ -3,12 +3,20 @@
     const searchParams = new URLSearchParams(window.location.search);
     const paramBase = searchParams.get('apiBase');
 
+    function isGitHubPages() {
+        return window.location.hostname.includes('github.io') || 
+               window.location.hostname.includes('github.com');
+    }
+
     function getDefaultBase() {
         if (window.location.origin.includes('file://') || window.location.protocol === 'file:') {
             return 'http://localhost:3000';
         }
         if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
             return window.location.origin;
+        }
+        if (isGitHubPages()) {
+            return null;
         }
         return window.location.origin;
     }
@@ -39,11 +47,17 @@
     const defaultBase = getDefaultBase();
     const finalBase = cleanApiBase(storedBase || paramBase || defaultBase);
 
-    if (!validateApiBase(finalBase)) {
-        console.warn('[Config] Invalid API base URL, using default:', defaultBase);
-        window.API_BASE_URL = defaultBase;
+    if (!finalBase || !validateApiBase(finalBase)) {
+        if (isGitHubPages() && !storedBase && !paramBase) {
+            window.API_BASE_URL = null;
+            window.API_BASE_REQUIRED = true;
+            console.warn('[Config] GitHub Pages detected. Please configure API Base URL in Settings.');
+        } else {
+            window.API_BASE_URL = defaultBase || storedBase || 'http://localhost:3000';
+        }
     } else {
         window.API_BASE_URL = finalBase;
+        window.API_BASE_REQUIRED = false;
     }
 
     async function testApiConnection(baseUrl) {
@@ -62,8 +76,10 @@
     window.setWardrobeApiBase = async function setWardrobeApiBase(newBase, skipTest = false) {
         if (!newBase) {
             localStorage.removeItem(STORAGE_KEY);
-            window.API_BASE_URL = defaultBase;
-            return { success: true, url: defaultBase };
+            const resetBase = getDefaultBase() || 'http://localhost:3000';
+            window.API_BASE_URL = resetBase;
+            window.API_BASE_REQUIRED = isGitHubPages() && !localStorage.getItem(STORAGE_KEY);
+            return { success: true, url: resetBase };
         }
 
         const cleaned = cleanApiBase(newBase);
@@ -84,6 +100,7 @@
 
         localStorage.setItem(STORAGE_KEY, cleaned);
         window.API_BASE_URL = cleaned;
+        window.API_BASE_REQUIRED = false;
         
         window.dispatchEvent(new CustomEvent('apiBaseChanged', { detail: { url: cleaned } }));
         
@@ -96,9 +113,11 @@
 
     window.resetWardrobeApiBase = function resetWardrobeApiBase() {
         localStorage.removeItem(STORAGE_KEY);
-        window.API_BASE_URL = defaultBase;
-        window.dispatchEvent(new CustomEvent('apiBaseChanged', { detail: { url: defaultBase } }));
-        return defaultBase;
+        const resetBase = getDefaultBase() || 'http://localhost:3000';
+        window.API_BASE_URL = resetBase;
+        window.API_BASE_REQUIRED = isGitHubPages() && !localStorage.getItem(STORAGE_KEY);
+        window.dispatchEvent(new CustomEvent('apiBaseChanged', { detail: { url: resetBase } }));
+        return resetBase;
     };
 
     window.testWardrobeApiConnection = async function testWardrobeApiConnection() {
