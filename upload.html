@@ -155,10 +155,99 @@
             <p>💖 Created for Ms.C</p>
         </footer>
 
+        <!-- Settings Modal -->
+        <div id="config-modal" class="modal" style="display:none;">
+            <div class="modal-content settings-modal">
+                <span class="close-modal">&times;</span>
+                <h2>⚙️ Settings</h2>
+                
+                <!-- Settings Tabs -->
+                <div class="settings-tabs">
+                    <button class="settings-tab active" data-tab="personal">📎 Personal</button>
+                    <button class="settings-tab" data-tab="password">🔒 Password</button>
+                    <button class="settings-tab" data-tab="api">🌐 API</button>
+                </div>
+                
+                <!-- Personal Information Tab -->
+                <div id="personal-tab" class="settings-tab-content active">
+                    <h3>Personal Information</h3>
+                    <div class="settings-form">
+                        <div class="form-group">
+                            <label>Avatar</label>
+                            <div class="avatar-section">
+                                <div class="avatar-preview">
+                                    <img id="avatar-preview" src="" alt="Avatar" style="display:none;">
+                                    <div id="avatar-placeholder" class="avatar-placeholder">📎</div>
+                                </div>
+                                <input type="file" id="avatar-upload" accept="image/*" style="display:none;">
+                                <button type="button" id="upload-avatar-btn" class="btn-secondary">Change Avatar</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="username-input">Username:</label>
+                            <input type="text" id="username-input" placeholder="Enter username" />
+                            <p class="form-hint">Username must be between 3 and 20 characters</p>
+                        </div>
+                        <div class="form-group">
+                            <button id="save-personal-btn" class="btn-primary">Save Changes</button>
+                        </div>
+                        <div id="personal-status" class="config-status"></div>
+                    </div>
+                </div>
+                
+                <!-- Password Change Tab -->
+                <div id="password-tab" class="settings-tab-content">
+                    <h3>Change Password</h3>
+                    <div class="settings-form">
+                        <div class="form-group">
+                            <label for="old-password-input">Current Password:</label>
+                            <input type="password" id="old-password-input" placeholder="Enter current password" />
+                        </div>
+                        <div class="form-group">
+                            <label for="new-password-input">New Password:</label>
+                            <input type="password" id="new-password-input" placeholder="Enter new password (at least 6 characters)" />
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm-password-input">Confirm New Password:</label>
+                            <input type="password" id="confirm-password-input" placeholder="Confirm new password" />
+                        </div>
+                        <div class="form-group">
+                            <button id="change-password-btn" class="btn-primary">Change Password</button>
+                        </div>
+                        <div id="password-status" class="config-status"></div>
+                    </div>
+                </div>
+                
+                <!-- API Configuration Tab -->
+                <div id="api-tab" class="settings-tab-content">
+                    <h3>API Configuration</h3>
+                    <div class="settings-form">
+                        <div class="form-group">
+                            <label for="api-base-input">API Base URL:</label>
+                            <input type="text" id="api-base-input" placeholder="https://virtual-wardrobe-api.onrender.com" />
+                            <p class="form-hint">Current value: <span id="current-api-base"></span></p>
+                        </div>
+                        <div class="form-group">
+                            <button id="test-connection-btn" class="btn-secondary">Test Connection</button>
+                            <button id="save-config-btn" class="btn-primary">Save Configuration</button>
+                            <button id="reset-config-btn" class="btn-secondary">Reset to Default</button>
+                        </div>
+                        <div id="config-status" class="config-status"></div>
+                    </div>
+                </div>
+                
+                <!-- Logout Section -->
+                <div class="settings-footer">
+                    <button id="logout-btn" class="btn-logout">Logout</button>
+                </div>
+            </div>
+        </div>
+
         <script src="config.js"></script>
         <script src="api.js"></script>
         <script src="auth.js"></script>
         <script src="script.js"></script>
         <script src="upload-script.js"></script>
+        <script src="settings-ui.js"></script>
     </body>
 </html>
