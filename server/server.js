@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const storage = require('./storage');
+const users = require('./users');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -10,16 +11,82 @@ app.use(express.json({ limit: '15mb' }));
 
 app.get('/', (req, res) => res.send('API is running'));
 
-app.get('/api/clothes', (req, res) => {
+function authenticate(req, res, next) {
+    const token = req.headers.authorization?.replace('Bearer ', '') || 
+                  req.headers['x-auth-token'] ||
+                  req.query.token;
+    
+    if (!token) {
+        return res.status(401).json({ message: 'Unauthorized, please log in first.' });
+    }
+    
+    const session = users.verifyToken(token);
+    if (!session) {
+        return res.status(401).json({ message: 'Your login has expired. Please log in again.' });
+    }
+    
+    req.userId = session.userId;
+    req.username = session.username;
+    next();
+}
+
+app.post('/api/auth/register', (req, res) => {
     try {
-        res.json(storage.getClothes());
+        const { username, password } = req.body;
+        
+        if (!username || !password) {
+            return res.status(400).json({ message: 'Username and password cannot be empty.' });
+        }
+        
+        const user = users.registerUser(username, password);
+        const loginResult = users.loginUser(username, password);
+        
+        res.status(201).json(loginResult);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+});
+
+app.post('/api/auth/login', (req, res) => {
+    try {
+        const { username, password } = req.body;
+        
+        if (!username || !password) {
+            return res.status(400).json({ message: 'Username and password cannot be empty.' });
+        }
+        
+        const result = users.loginUser(username, password);
+        res.json(result);
+    } catch (error) {
+        res.status(401).json({ message: error.message });
+    }
+});
+
+app.post('/api/auth/logout', authenticate, (req, res) => {
+    const token = req.headers.authorization?.replace('Bearer ', '') || 
+                  req.headers['x-auth-token'] ||
+                  req.query.token;
+    users.logoutUser(token);
+    res.json({ message: 'Logout' });
+});
+
+app.get('/api/auth/me', authenticate, (req, res) => {
+    res.json({
+        id: req.userId,
+        username: req.username
+    });
+});
+
+app.get('/api/clothes', authenticate, (req, res) => {
+    try {
+        res.json(storage.getClothes(req.userId));
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Failed to fetch clothes' });
     }
 });
 
-app.post('/api/clothes', (req, res) => {
+app.post('/api/clothes', authenticate, (req, res) => {
     const validationError = validateClothes(req.body);
     if (validationError) {
         return res.status(400).json({ message: validationError });
@@ -27,7 +94,7 @@ app.post('/api/clothes', (req, res) => {
 
     try {
         const payload = formatPayload(req.body);
-        storage.addClothes(payload);
+        storage.addClothes(req.userId, payload);
         res.status(201).json(payload);
     } catch (error) {
         console.error(error);
@@ -35,10 +102,10 @@ app.post('/api/clothes', (req, res) => {
     }
 });
 
-app.put('/api/clothes/:id', (req, res) => {
+app.put('/api/clothes/:id', authenticate, (req, res) => {
     const id = Number(req.params.id);
     try {
-        const existingList = storage.getClothes();
+        const existingList = storage.getClothes(req.userId);
         const existing = existingList.find(item => item.id === id);
         if (!existing) {
             return res.status(404).json({ message: 'Not found' });
@@ -51,7 +118,7 @@ app.put('/api/clothes/:id', (req, res) => {
             dateAdded: existing.dateAdded || new Date().toISOString()
         };
 
-        const result = storage.updateClothes(id, updatedPayload);
+        const result = storage.updateClothes(req.userId, id, updatedPayload);
         res.json(result);
     } catch (error) {
         console.error(error);
@@ -59,10 +126,10 @@ app.put('/api/clothes/:id', (req, res) => {
     }
 });
 
-app.delete('/api/clothes/:id', (req, res) => {
+app.delete('/api/clothes/:id', authenticate, (req, res) => {
     const id = Number(req.params.id);
     try {
-        const success = storage.deleteClothes(id);
+        const success = storage.deleteClothes(req.userId, id);
         if (!success) {
             return res.status(404).json({ message: 'Not found' });
         }
@@ -73,9 +140,9 @@ app.delete('/api/clothes/:id', (req, res) => {
     }
 });
 
-app.get('/api/outfits', (req, res) => {
+app.get('/api/outfits', authenticate, (req, res) => {
     try {
-        const outfits = storage.getOutfits();
+        const outfits = storage.getOutfits(req.userId);
         res.json(outfits);
     } catch (error) {
         console.error(error);
@@ -83,7 +150,7 @@ app.get('/api/outfits', (req, res) => {
     }
 });
 
-app.post('/api/outfits', (req, res) => {
+app.post('/api/outfits', authenticate, (req, res) => {
     const validationError = validateOutfit(req.body);
     if (validationError) {
         return res.status(400).json({ message: validationError });
@@ -91,7 +158,7 @@ app.post('/api/outfits', (req, res) => {
 
     try {
         const payload = formatOutfitPayload(req.body);
-        storage.addOutfit(payload);
+        storage.addOutfit(req.userId, payload);
         res.status(201).json(payload);
     } catch (error) {
         console.error(error);
@@ -99,10 +166,10 @@ app.post('/api/outfits', (req, res) => {
     }
 });
 
-app.put('/api/outfits/:id', (req, res) => {
+app.put('/api/outfits/:id', authenticate, (req, res) => {
     const id = Number(req.params.id);
     try {
-        const existingList = storage.getOutfits();
+        const existingList = storage.getOutfits(req.userId);
         const existing = existingList.find(item => item.id === id);
         if (!existing) {
             return res.status(404).json({ message: 'Not found' });
@@ -115,7 +182,7 @@ app.put('/api/outfits/:id', (req, res) => {
             dateCreated: existing.dateCreated || new Date().toISOString()
         };
 
-        const result = storage.updateOutfit(id, updatedPayload);
+        const result = storage.updateOutfit(req.userId, id, updatedPayload);
         res.json(result);
     } catch (error) {
         console.error(error);
@@ -123,10 +190,10 @@ app.put('/api/outfits/:id', (req, res) => {
     }
 });
 
-app.delete('/api/outfits/:id', (req, res) => {
+app.delete('/api/outfits/:id', authenticate, (req, res) => {
     const id = Number(req.params.id);
     try {
-        const success = storage.deleteOutfit(id);
+        const success = storage.deleteOutfit(req.userId, id);
         if (!success) {
             return res.status(404).json({ message: 'Not found' });
         }

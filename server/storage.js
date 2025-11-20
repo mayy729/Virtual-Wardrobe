@@ -1,138 +1,102 @@
 const fs = require('fs');
 const path = require('path');
 
-const DATA_FILE = path.join(__dirname, 'wardrobe-data.json');
-const OUTFITS_FILE = path.join(__dirname, 'outfits-data.json');
-
-function ensureDataFile() {
-    if (fs.existsSync(DATA_FILE)) {
-        return;
+// 多用户数据存储：每个用户有独立的数据文件
+function getUserDataFile(userId, type) {
+    const dataDir = path.join(__dirname, 'user-data');
+    if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true });
     }
-
-    const seed = [
-        {
-            id: Date.now(),
-            name: 'White T-shirt',
-            season: 'summer',
-            occasion: 'casual',
-            brand: 'Uniqlo',
-            size: 'M',
-            material: 'Cotton',
-            notes: 'Basic essential',
-            image: 'https://placehold.co/320x400?text=White+Tee',
-            originalImage: '',
-            wearingPhoto: '',
-            dateAdded: new Date().toISOString()
-        },
-        {
-            id: Date.now() + 1,
-            name: 'Blue Jeans',
-            season: 'all',
-            occasion: 'casual',
-            brand: "Levi's",
-            size: '27',
-            material: 'Denim',
-            notes: 'High-waist straight fit',
-            image: 'https://placehold.co/320x400?text=Jeans',
-            originalImage: '',
-            wearingPhoto: '',
-            dateAdded: new Date().toISOString()
-        }
-    ];
-
-    fs.writeFileSync(DATA_FILE, JSON.stringify(seed, null, 2), 'utf-8');
+    return path.join(dataDir, `user-${userId}-${type}.json`);
 }
 
-function readData() {
-    ensureDataFile();
-    const raw = fs.readFileSync(DATA_FILE, 'utf-8');
+function getDataFile(userId, type) {
+    return getUserDataFile(userId, type);
+}
+
+function ensureDataFile(userId, type) {
+    const file = getDataFile(userId, type);
+    if (fs.existsSync(file)) {
+        return;
+    }
+    fs.writeFileSync(file, JSON.stringify([], null, 2), 'utf-8');
+}
+
+function readData(userId, type) {
+    ensureDataFile(userId, type);
+    const file = getDataFile(userId, type);
+    const raw = fs.readFileSync(file, 'utf-8');
     return JSON.parse(raw);
 }
 
-function writeData(data) {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
+function writeData(userId, type, data) {
+    const file = getDataFile(userId, type);
+    fs.writeFileSync(file, JSON.stringify(data, null, 2), 'utf-8');
 }
 
-function getClothes() {
-    return readData();
+function getClothes(userId) {
+    return readData(userId, 'wardrobe');
 }
 
-function addClothes(item) {
-    const data = readData();
+function addClothes(userId, item) {
+    const data = readData(userId, 'wardrobe');
     data.unshift(item);
-    writeData(data);
+    writeData(userId, 'wardrobe', data);
     return item;
 }
 
-function updateClothes(id, updates) {
-    const data = readData();
+function updateClothes(userId, id, updates) {
+    const data = readData(userId, 'wardrobe');
     const index = data.findIndex(item => item.id === id);
     if (index === -1) {
         return null;
     }
 
     data[index] = { ...data[index], ...updates, id };
-    writeData(data);
+    writeData(userId, 'wardrobe', data);
     return data[index];
 }
 
-function deleteClothes(id) {
-    const data = readData();
+function deleteClothes(userId, id) {
+    const data = readData(userId, 'wardrobe');
     const filtered = data.filter(item => item.id !== id);
     if (filtered.length === data.length) {
         return false;
     }
-    writeData(filtered);
+    writeData(userId, 'wardrobe', filtered);
     return true;
 }
 
 // Outfits storage functions
-function ensureOutfitsFile() {
-    if (fs.existsSync(OUTFITS_FILE)) {
-        return;
-    }
-    fs.writeFileSync(OUTFITS_FILE, JSON.stringify([], null, 2), 'utf-8');
+function getOutfits(userId) {
+    return readData(userId, 'outfits');
 }
 
-function readOutfits() {
-    ensureOutfitsFile();
-    const raw = fs.readFileSync(OUTFITS_FILE, 'utf-8');
-    return JSON.parse(raw);
-}
-
-function writeOutfits(data) {
-    fs.writeFileSync(OUTFITS_FILE, JSON.stringify(data, null, 2), 'utf-8');
-}
-
-function getOutfits() {
-    return readOutfits();
-}
-
-function addOutfit(outfit) {
-    const data = readOutfits();
+function addOutfit(userId, outfit) {
+    const data = readData(userId, 'outfits');
     data.unshift(outfit);
-    writeOutfits(data);
+    writeData(userId, 'outfits', data);
     return outfit;
 }
 
-function updateOutfit(id, updates) {
-    const data = readOutfits();
+function updateOutfit(userId, id, updates) {
+    const data = readData(userId, 'outfits');
     const index = data.findIndex(item => item.id === id);
     if (index === -1) {
         return null;
     }
     data[index] = { ...data[index], ...updates, id };
-    writeOutfits(data);
+    writeData(userId, 'outfits', data);
     return data[index];
 }
 
-function deleteOutfit(id) {
-    const data = readOutfits();
+function deleteOutfit(userId, id) {
+    const data = readData(userId, 'outfits');
     const filtered = data.filter(item => item.id !== id);
     if (filtered.length === data.length) {
         return false;
     }
-    writeOutfits(filtered);
+    writeData(userId, 'outfits', filtered);
     return true;
 }
 
