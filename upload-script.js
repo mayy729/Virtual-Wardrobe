@@ -17,7 +17,7 @@ function initUploadElements() {
     cancelBtn = document.getElementById('cancel-btn');
     wearingPhotoInput = document.getElementById('wearing-photo');
     wearingPhotoCheckbox = document.getElementById('item-wearing-photo');
-    
+
     if (!uploadInput || !uploadForm || !previewSection || !previewContainer || !itemDetailsForm) {
         console.error('[Upload] Required elements not found!', {
             uploadInput: !!uploadInput,
@@ -43,39 +43,39 @@ function setupEventListeners() {
     const uploadLabel = document.querySelector('.upload-label');
     if (uploadLabel) {
         uploadLabel.addEventListener('click', () => {
-            uploadInput.click();
-        });
+    uploadInput.click();
+});
     }
-    
-    const uploadArea = document.querySelector('.upload-area');
+
+const uploadArea = document.querySelector('.upload-area');
     if (uploadArea) {
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('drag-over');
-        });
-        
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('drag-over');
-        });
-        
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('drag-over');
-            if (e.dataTransfer.files.length > 0) {
-                uploadInput.files = e.dataTransfer.files;
-                handleFileUpload(e.dataTransfer.files);
-            }
-        });
+uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.classList.add('drag-over');
+});
+
+uploadArea.addEventListener('dragleave', () => {
+    uploadArea.classList.remove('drag-over');
+});
+
+uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.classList.remove('drag-over');
+    if (e.dataTransfer.files.length > 0) {
+        uploadInput.files = e.dataTransfer.files;
+        handleFileUpload(e.dataTransfer.files);
     }
-    
-    uploadInput.addEventListener('change', function(event) {
+});
+    }
+
+uploadInput.addEventListener('change', function(event) {
         if (!event.target.files || event.target.files.length === 0) {
             return;
         }
         
         Utils.showNotification('Processing images...', 'info');
-        handleFileUpload(event.target.files);
-    });
+    handleFileUpload(event.target.files);
+});
     
     console.log('[Upload] File input element:', uploadInput);
     console.log('[Upload] File input ID:', uploadInput.id);
@@ -319,7 +319,7 @@ function handleFileUpload(files) {
             hasErrors = true;
             continue;
         }
-        
+
         validFiles.push(file);
     }
     
