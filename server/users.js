@@ -255,6 +255,19 @@ function changePassword(userId, oldPassword, newPassword) {
     return true;
 }
 
+// 检查用户名是否可用
+function isUsernameAvailable(username) {
+    if (!username || username.trim().length === 0) {
+        return false;
+    }
+    
+    const users = readUsers();
+    const normalizedUsername = username.trim().toLowerCase();
+    const exists = users.find(u => u.username.toLowerCase() === normalizedUsername);
+    
+    return !exists;
+}
+
 // 获取用户信息
 function getUserById(userId) {
     const users = readUsers();
@@ -320,6 +333,7 @@ module.exports = {
     updateUser,
     changePassword,
     getUserById,
-    resetPassword
+    resetPassword,
+    isUsernameAvailable
 };
 

@@ -82,6 +82,24 @@ app.get('/api/auth/me', authenticate, (req, res) => {
     }
 });
 
+app.get('/api/auth/check-username', (req, res) => {
+    try {
+        const { username } = req.query;
+        
+        if (!username) {
+            return res.status(400).json({ message: 'Username is required' });
+        }
+        
+        const isAvailable = users.isUsernameAvailable(username);
+        res.json({ 
+            available: isAvailable,
+            message: isAvailable ? 'Username is available' : 'Username already exists'
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 app.put('/api/auth/me', authenticate, (req, res) => {
     try {
         const { username, avatar } = req.body;
