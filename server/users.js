@@ -272,6 +272,43 @@ function getUserById(userId) {
     };
 }
 
+// 重置密码（忘记密码功能）
+function resetPassword(username, newPassword) {
+    const users = readUsers();
+    const user = users.find(u => u.username.toLowerCase() === username.toLowerCase());
+    
+    if (!user) {
+        throw new Error('Username not found.');
+    }
+    
+    // 验证新密码
+    if (newPassword.length < 6) {
+        throw new Error('New password must be at least 6 characters.');
+    }
+    
+    // 更新密码
+    user.passwordHash = hashPassword(newPassword);
+    writeUsers(users);
+    
+    // 清除该用户的所有会话（强制重新登录）
+    const sessions = readSessions();
+    let cleared = false;
+    for (const token in sessions) {
+        if (sessions[token].userId === user.id) {
+            delete sessions[token];
+            cleared = true;
+        }
+    }
+    if (cleared) {
+        writeSessions(sessions);
+    }
+    
+    return {
+        id: user.id,
+        username: user.username
+    };
+}
+
 // 定期清理过期会话（每小时）
 setInterval(cleanExpiredSessions, 60 * 60 * 1000);
 
@@ -282,6 +319,7 @@ module.exports = {
     logoutUser,
     updateUser,
     changePassword,
-    getUserById
+    getUserById,
+    resetPassword
 };
 

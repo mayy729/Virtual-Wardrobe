@@ -120,6 +120,27 @@ app.post('/api/auth/change-password', authenticate, (req, res) => {
     }
 });
 
+app.post('/api/auth/reset-password', (req, res) => {
+    try {
+        const { username, newPassword } = req.body;
+        
+        if (!username || !newPassword) {
+            return res.status(400).json({ message: 'Username and new password are required.' });
+        }
+        
+        const user = users.resetPassword(username, newPassword);
+        res.json({ 
+            message: 'Password reset successfully. Please login with your new password.',
+            user: {
+                id: user.id,
+                username: user.username
+            }
+        });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+});
+
 app.get('/api/clothes', authenticate, (req, res) => {
     try {
         res.json(storage.getClothes(req.userId));
