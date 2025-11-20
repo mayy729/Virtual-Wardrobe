@@ -21,6 +21,8 @@
                 <li><a href="wardrobe.html">👘 My Wardrobe</a></li>
                 <li><a href="outfit.html">💫 Create Outfit</a></li>
                 <li><a href="saved.html">🧸 Saved Outfits</a></li>
+                <li><a href="help.html">🔍 Help</a></li>
+                <li><a href="#" id="config-btn">⚙️ Settings</a></li>
             </ul>
         </nav>
 
@@ -50,29 +52,63 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="item-season">Season:</label>
-                            <select id="item-season">
-                                <option value="">Select Season</option>
-                                <option value="spring">🌼 Spring</option>
-                                <option value="summer">🌴 Summer</option>
-                                <option value="autumn">🍂 Autumn</option>
-                                <option value="winter">❄️ Winter</option>
-                                <option value="all">🌏 All Seasons</option>
-                            </select>
+                            <label>Season: <span class="form-hint">(Select multiple)</span></label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="item-season" value="spring">
+                                    🌼 Spring
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="item-season" value="summer">
+                                    🌴 Summer
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="item-season" value="autumn">
+                                    🍂 Autumn
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="item-season" value="winter">
+                                    ❄️ Winter
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="item-season" value="all">
+                                    🌏 All Seasons
+                                </label>
+                            </div>
                         </div>
 
                         <div class="form-group">
-                            <label for="item-occasion">Occasion:</label>
-                            <select id="item-occasion">
-                                <option value="">Select Occasion</option>
-                                <option value="casual">👚 Casual</option>
-                                <option value="date">💕 Date</option>
-                                <option value="work">💼 Work</option>
-                                <option value="party">🎉 Party</option>
-                                <option value="formal">👔 Formal Occasion</option>
-                                <option value="sport">🏃 Sport</option>
-                                <option value="all">🌏 All Occasions</option>
-                            </select>
+                            <label>Occasion: <span class="form-hint">(Select multiple)</span></label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="item-occasion" value="casual">
+                                    👚 Casual
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="item-occasion" value="date">
+                                    💕 Date
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="item-occasion" value="work">
+                                    💼 Work
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="item-occasion" value="party">
+                                    🎉 Party
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="item-occasion" value="formal">
+                                    👔 Formal Occasion
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="item-occasion" value="sport">
+                                    🏃 Sport
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="item-occasion" value="all">
+                                    🌏 All Occasions
+                                </label>
+                            </div>
                         </div>
 
                         <div class="form-group">

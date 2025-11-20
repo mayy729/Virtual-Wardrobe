@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Help & Support - Virtual Wardrobe</title>
+        <link rel="icon" type="image/x-icon" href="./favicon.ico?v=1">
+        <link rel="shortcut icon" type="image/x-icon" href="./favicon.ico?v=1">
+        <link rel="icon" type="image/png" href="./favicon-32.png" sizes="32x32">
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+        <header>
+            <h1>🔍 Help & Support</h1>
+            <p>Get help and learn how to use your Virtual Wardrobe</p>
+        </header>
+
+        <nav>
+            <ul>
+                <li><a href="index.html">🏠 Home</a></li>
+                <li><a href="upload.html">🔮 Upload Clothes</a></li>
+                <li><a href="wardrobe.html">👘 My Wardrobe</a></li>
+                <li><a href="outfit.html">💫 Create Outfit</a></li>
+                <li><a href="saved.html">🧸 Saved Outfits</a></li>
+                <li><a href="#" id="config-btn">⚙️ Settings</a></li>
+            </ul>
+        </nav>
+
+        <main class="help-main">
+            <!-- Tutorial Section -->
+            <section id="tutorial" class="help-section">
+                <h2>📖 Tutorial</h2>
+                
+                <div class="tutorial-content">
+                    <div class="tutorial-section">
+                        <h3>1. Getting Started</h3>
+                        <div class="tutorial-step">
+                            <h4>🔐 Create Your Account</h4>
+                            <p>When you first visit the Virtual Wardrobe, you'll need to create an account:</p>
+                            <ol>
+                                <li>Click on the login page</li>
+                                <li>Click "Register now" to create a new account</li>
+                                <li>Enter a username (3-20 characters) and password (at least 6 characters)</li>
+                                <li>Confirm your password and click "Register"</li>
+                                <li>You'll be automatically logged in after registration</li>
+                            </ol>
+                        </div>
+
+                        <div class="tutorial-step">
+                            <h4>⚙️ Configure API Settings</h4>
+                            <p>Before using the wardrobe, you need to configure the API connection:</p>
+                            <ol>
+                                <li>Click the "⚙️ Settings" button in the navigation bar</li>
+                                <li>Go to the "🌐 API" tab</li>
+                                <li>Enter your API Base URL (e.g., <code>https://virtual-wardrobe-api.onrender.com</code>)</li>
+                                <li>Click "Save Configuration" to save your settings</li>
+                                <li>Click "Test Connection" to verify it works</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="tutorial-section">
+                        <h3>2. Uploading Clothes</h3>
+                        <div class="tutorial-step">
+                            <h4>📷 Upload Your First Item</h4>
+                            <ol>
+                                <li>Go to "🔮 Upload Clothes" from the navigation menu</li>
+                                <li>Click or drag and drop images into the upload area</li>
+                                <li>Supported formats: JPG, PNG, GIF, WebP (max 5MB per file)</li>
+                                <li>After uploading, you'll see a preview of your images</li>
+                            </ol>
+                        </div>
+
+                        <div class="tutorial-step">
+                            <h4>📝 Fill in Item Details</h4>
+                            <ol>
+                                <li><strong>Name:</strong> Give your item a descriptive name (e.g., "Pink Summer Dress")</li>
+                                <li><strong>Season:</strong> Select one or more seasons (Spring, Summer, Autumn, Winter, or All Seasons)</li>
+                                <li><strong>Occasion:</strong> Select one or more occasions (Casual, Date, Work, Party, Formal, Sport, or All Occasions)</li>
+                                <li><strong>Brand:</strong> Enter the brand name (optional)</li>
+                                <li><strong>Size:</strong> Enter the size (optional, e.g., "M" or "38")</li>
+                                <li><strong>Material:</strong> Enter the material (optional, e.g., "Cotton, Silk")</li>
+                                <li><strong>Notes:</strong> Add any additional notes (optional)</li>
+                            </ol>
+                        </div>
+
+                        <div class="tutorial-step">
+                            <h4>🪄 Auto Cutout Feature</h4>
+                            <p>The Auto Cutout feature automatically removes the background from your clothing images:</p>
+                            <ol>
+                                <li>After uploading, click "🎨 Auto Cutout" to process all images</li>
+                                <li>Or click "🪄 Remove Background" on individual preview items</li>
+                                <li>The system will process the image and remove light backgrounds</li>
+                                <li>You can still save items without using cutout if you prefer</li>
+                            </ol>
+                        </div>
+
+                        <div class="tutorial-step">
+                            <h4>📸 Adding Wearing Photos</h4>
+                            <ol>
+                                <li>Check the "Add wearing photo" checkbox</li>
+                                <li>Select a photo of you wearing the item</li>
+                                <li>This photo will be displayed alongside the item in your wardrobe</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="tutorial-section">
+                        <h3>3. Managing Your Wardrobe</h3>
+                        <div class="tutorial-step">
+                            <h4>👘 Viewing Your Wardrobe</h4>
+                            <ol>
+                                <li>Go to "👘 My Wardrobe" from the navigation menu</li>
+                                <li>All your uploaded items will be displayed in a grid</li>
+                                <li>Use pagination to navigate through multiple pages</li>
+                            </ol>
+                        </div>
+
+                        <div class="tutorial-step">
+                            <h4>🔍 Searching and Filtering</h4>
+                            <p>You can filter your wardrobe in several ways:</p>
+                            <ol>
+                                <li><strong>Search Bar:</strong> Type keywords to search by name, brand, or notes</li>
+                                <li><strong>Season Filter:</strong> Filter by season (Spring, Summer, Autumn, Winter, All Seasons)</li>
+                                <li><strong>Occasion Filter:</strong> Filter by occasion (Casual, Date, Work, Party, Formal, Sport, All Occasions)</li>
+                                <li><strong>Brand Filter:</strong> Filter by brand name</li>
+                                <li><strong>Size Filter:</strong> Filter by size</li>
+                                <li><strong>Material Filter:</strong> Filter by material</li>
+                                <li>Click "Clear Filters" to reset all filters</li>
+                            </ol>
+                        </div>
+
+                        <div class="tutorial-step">
+                            <h4>👁️ Viewing Item Details</h4>
+                            <ol>
+                                <li>Click "View Details" on any item card</li>
+                                <li>A modal will show all item information</li>
+                                <li>If you added a wearing photo, it will be displayed here</li>
+                            </ol>
+                        </div>
+
+                        <div class="tutorial-step">
+                            <h4>🗑️ Deleting Items</h4>
+                            <ol>
+                                <li>Click "Delete" on any item card</li>
+                                <li>Confirm the deletion</li>
+                                <li>The item will be permanently removed from your wardrobe</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="tutorial-section">
+                        <h3>4. Creating Outfits</h3>
+                        <div class="tutorial-step">
+                            <h4>💫 Create a New Outfit</h4>
+                            <ol>
+                                <li>Go to "💫 Create Outfit" from the navigation menu</li>
+                                <li>Use filters to find items you want to include</li>
+                                <li>Click on items from your wardrobe to add them to the outfit</li>
+                                <li>Items will appear in the "Outfit Area" on the right</li>
+                                <li>You can click items again to remove them from the outfit</li>
+                            </ol>
+                        </div>
+
+                        <div class="tutorial-step">
+                            <h4>💾 Saving Outfits</h4>
+                            <ol>
+                                <li>After selecting items, click "💾 Save Outfit"</li>
+                                <li>Enter an outfit name (e.g., "Spring Date Outfit")</li>
+                                <li>Select the season and occasion for this outfit</li>
+                                <li>Add optional notes</li>
+                                <li>Click "Save Outfit" to save</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="tutorial-section">
+                        <h3>5. Saved Outfits</h3>
+                        <div class="tutorial-step">
+                            <h4>🧸 Viewing Saved Outfits</h4>
+                            <ol>
+                                <li>Go to "🧸 Saved Outfits" from the navigation menu</li>
+                                <li>All your saved outfits will be displayed</li>
+                                <li>Click on an outfit to view its details</li>
+                            </ol>
+                        </div>
+
+                        <div class="tutorial-step">
+                            <h4>🔍 Filtering Saved Outfits</h4>
+                            <p>You can filter saved outfits by:</p>
+                            <ol>
+                                <li>Season (Spring, Summer, Autumn, Winter, All Seasons)</li>
+                                <li>Occasion (Casual, Date, Work, Party, Formal, Sport, All Occasions)</li>
+                                <li>Search by outfit name</li>
+                            </ol>
+                        </div>
+
+                        <div class="tutorial-step">
+                            <h4>🗑️ Deleting Outfits</h4>
+                            <ol>
+                                <li>Click "Delete" on any outfit card</li>
+                                <li>Confirm the deletion</li>
+                                <li>The outfit will be permanently removed</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="tutorial-section">
+                        <h3>6. Account Settings</h3>
+                        <div class="tutorial-step">
+                            <h4>👤 Personal Information</h4>
+                            <ol>
+                                <li>Click "⚙️ Settings" in the navigation bar</li>
+                                <li>Go to the "📎 Personal" tab</li>
+                                <li><strong>Change Avatar:</strong> Click "Change Avatar" to upload a profile picture</li>
+                                <li><strong>Change Username:</strong> Update your username (must be unique and 3-20 characters)</li>
+                                <li>Click "Save Changes" to update your profile</li>
+                            </ol>
+                        </div>
+
+                        <div class="tutorial-step">
+                            <h4>🔒 Change Password</h4>
+                            <ol>
+                                <li>Go to the "🔒 Password" tab in Settings</li>
+                                <li>Enter your current password</li>
+                                <li>Enter your new password (at least 6 characters)</li>
+                                <li>Confirm your new password</li>
+                                <li>Click "Change Password" to update</li>
+                            </ol>
+                        </div>
+
+                        <div class="tutorial-step">
+                            <h4>🌐 API Configuration</h4>
+                            <ol>
+                                <li>Go to the "🌐 API" tab in Settings</li>
+                                <li>View or update your API Base URL</li>
+                                <li>Test the connection to ensure it's working</li>
+                                <li>Click "Save Configuration" to save changes</li>
+                                <li>Click "Reset to Default" to restore default settings</li>
+                            </ol>
+                        </div>
+
+                        <div class="tutorial-step">
+                            <h4>🚪 Logout</h4>
+                            <ol>
+                                <li>Scroll to the bottom of the Settings modal</li>
+                                <li>Click "Logout" button</li>
+                                <li>You'll be logged out and redirected to the login page</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="tutorial-section">
+                        <h3>7. Troubleshooting</h3>
+                        <div class="tutorial-step">
+                            <h4>❓ Common Issues</h4>
+                            
+                            <h5>Can't connect to server</h5>
+                            <ul>
+                                <li>Check your API Base URL in Settings</li>
+                                <li>Make sure the URL is correct and includes <code>https://</code></li>
+                                <li>Test the connection using the "Test Connection" button</li>
+                                <li>Ensure your internet connection is working</li>
+                            </ul>
+
+                            <h5>Images not uploading</h5>
+                            <ul>
+                                <li>Check file size (must be under 5MB)</li>
+                                <li>Ensure file format is supported (JPG, PNG, GIF, WebP)</li>
+                                <li>Try refreshing the page and uploading again</li>
+                                <li>Check your internet connection</li>
+                            </ul>
+
+                            <h5>Can't log in</h5>
+                            <ul>
+                                <li>Make sure you're using the correct username and password</li>
+                                <li>Try using "Forgot Password" to reset your password</li>
+                                <li>Check if your account still exists (data may have been lost if using file-based storage without MongoDB)</li>
+                            </ul>
+
+                            <h5>Items not showing up</h5>
+                            <ul>
+                                <li>Refresh the page</li>
+                                <li>Check if filters are applied (try clearing them)</li>
+                                <li>Verify your API connection is working</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Contact Support Section -->
+            <section id="contact" class="help-section">
+                <h2>💬 Contact Support</h2>
+                
+                <div class="contact-content">
+                    <div class="contact-info">
+                        <h3>Need Help?</h3>
+                        <p>If you're experiencing any issues or have questions about using the Virtual Wardrobe, please contact us using the form below.</p>
+                        
+                        <div class="contact-methods">
+                            <div class="contact-method">
+                                <h4>Email:huangshiyu0729@gmail.com</h4>
+                                <p>For technical issues or questions, please send an email with details about your problem.</p>
+                            </div>
+                            
+                            <div class="contact-method">
+                                <h4>Response Time</h4>
+                                <p>We typically respond within 24-48 hours during business days.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="contact-form" class="contact-form">
+                        <div class="form-group">
+                            <label for="contact-name">Your Name:</label>
+                            <input type="text" id="contact-name" name="name" placeholder="Enter your name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="contact-email">Your Email:</label>
+                            <input type="email" id="contact-email" name="email" placeholder="your.email@example.com" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="contact-subject">Subject:</label>
+                            <select id="contact-subject" name="subject" required>
+                                <option value="">Select a subject</option>
+                                <option value="technical">Technical Issue</option>
+                                <option value="feature">Feature Request</option>
+                                <option value="bug">Bug Report</option>
+                                <option value="question">General Question</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="contact-message">Message:</label>
+                            <textarea id="contact-message" name="message" rows="6" placeholder="Please describe your issue or question in detail..." required></textarea>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <button type="submit" class="btn-primary">📤 Send Message</button>
+                        </div>
+
+                        <div id="contact-status" class="contact-status" style="display:none;"></div>
+                    </form>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>💖 Created for Ms.C</p>
+        </footer>
+
+        <script src="config.js"></script>
+        <script src="api.js"></script>
+        <script src="auth.js"></script>
+        <script src="script.js"></script>
+        <script src="settings-ui.js"></script>
+        <script src="help-script.js"></script>
+    </body>
+</html>
+

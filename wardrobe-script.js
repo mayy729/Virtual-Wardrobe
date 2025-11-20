@@ -62,6 +62,22 @@ function displayItems() {
         itemCard.className = 'wardrobe-item-card';
         itemCard.dataset.id = item.id;
         
+        // 处理季节标签（支持数组或单个值）
+        let seasonTags = '';
+        if (Array.isArray(item.season)) {
+            seasonTags = item.season.map(s => `<span class="tag tag-season">${getSeasonLabel(s)}</span>`).join('');
+        } else if (item.season) {
+            seasonTags = `<span class="tag tag-season">${getSeasonLabel(item.season)}</span>`;
+        }
+        
+        // 处理场合标签（支持数组或单个值）
+        let occasionTags = '';
+        if (Array.isArray(item.occasion)) {
+            occasionTags = item.occasion.map(o => `<span class="tag tag-occasion">${getOccasionLabel(o)}</span>`).join('');
+        } else if (item.occasion) {
+            occasionTags = `<span class="tag tag-occasion">${getOccasionLabel(item.occasion)}</span>`;
+        }
+        
         itemCard.innerHTML = `
             <div class="item-image-wrapper">
                 <img src="${imageSrc}" alt="${item.name}" loading="lazy">
@@ -70,8 +86,8 @@ function displayItems() {
             <div class="item-info">
                 <h4>${item.name}</h4>
                 <div class="item-tags">
-                    ${item.season ? `<span class="tag tag-season">${getSeasonLabel(item.season)}</span>` : ''}
-                    ${item.occasion ? `<span class="tag tag-occasion">${getOccasionLabel(item.occasion)}</span>` : ''}
+                    ${seasonTags}
+                    ${occasionTags}
                     ${item.brand ? `<span class="tag tag-brand">${item.brand}</span>` : ''}
                 </div>
                 ${item.notes ? `<p class="item-notes">💬 ${item.notes}</p>` : ''}
@@ -147,9 +163,25 @@ function applyFilters() {
             brandValue.includes(searchTerm) ||
             notesValue.includes(searchTerm);
         
-        const matchesSeason = !season || item.season === season || item.season === 'all';
+        // 匹配季节（支持数组或单个值）
+        let matchesSeason = true;
+        if (season) {
+            if (Array.isArray(item.season)) {
+                matchesSeason = item.season.includes(season) || item.season.includes('all');
+            } else {
+                matchesSeason = item.season === season || item.season === 'all';
+            }
+        }
         
-        const matchesOccasion = !occasion || item.occasion === occasion;
+        // 匹配场合（支持数组或单个值）
+        let matchesOccasion = true;
+        if (occasion) {
+            if (Array.isArray(item.occasion)) {
+                matchesOccasion = item.occasion.includes(occasion);
+            } else {
+                matchesOccasion = item.occasion === occasion;
+            }
+        }
         
         const matchesBrand = !brand || brandValue.includes(brand);
         
@@ -225,11 +257,19 @@ function showItemModal(item) {
                 <div class="detail-grid">
                     <div class="detail-item">
                         <span class="detail-label">Season:</span>
-                        <span class="detail-value">${getSeasonLabel(item.season)}</span>
+                        <span class="detail-value">
+                            ${Array.isArray(item.season) 
+                                ? item.season.map(s => getSeasonLabel(s)).join(', ') 
+                                : getSeasonLabel(item.season)}
+                        </span>
                     </div>
                     <div class="detail-item">
                         <span class="detail-label">Occasion:</span>
-                        <span class="detail-value">${getOccasionLabel(item.occasion)}</span>
+                        <span class="detail-value">
+                            ${Array.isArray(item.occasion) 
+                                ? item.occasion.map(o => getOccasionLabel(o)).join(', ') 
+                                : getOccasionLabel(item.occasion)}
+                        </span>
                     </div>
                     ${item.brand ? `
                         <div class="detail-item">

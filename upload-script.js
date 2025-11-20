@@ -214,10 +214,22 @@ uploadInput.addEventListener('change', function(event) {
             const material = (document.getElementById('item-material').value || '').trim();
             const notes = (document.getElementById('item-notes').value || '').trim();
             
+            // 收集选中的季节（多选）
+            const seasonCheckboxes = document.querySelectorAll('input[name="item-season"]:checked');
+            const seasons = Array.from(seasonCheckboxes).map(cb => cb.value);
+            // 如果没有选择任何季节，默认使用 'all'
+            const season = seasons.length > 0 ? seasons : ['all'];
+            
+            // 收集选中的场合（多选）
+            const occasionCheckboxes = document.querySelectorAll('input[name="item-occasion"]:checked');
+            const occasions = Array.from(occasionCheckboxes).map(cb => cb.value);
+            // 如果没有选择任何场合，默认使用 'casual'
+            const occasion = occasions.length > 0 ? occasions : ['casual'];
+            
             const itemData = {
                 name: name.substring(0, 200),
-                season: document.getElementById('item-season').value || 'all',
-                occasion: document.getElementById('item-occasion').value || 'casual',
+                season: season,
+                occasion: occasion,
                 brand: brand.substring(0, 100),
                 size: size.substring(0, 50),
                 material: material.substring(0, 100),
