@@ -155,6 +155,20 @@
             return request('/api/auth/me');
         },
 
+        async updateUser(updates) {
+            return request('/api/auth/me', {
+                method: 'PUT',
+                body: JSON.stringify(updates)
+            });
+        },
+
+        async changePassword(oldPassword, newPassword) {
+            return request('/api/auth/change-password', {
+                method: 'POST',
+                body: JSON.stringify({ oldPassword, newPassword })
+            });
+        },
+
         isAuthenticated() {
             return !!getAuthToken();
         }

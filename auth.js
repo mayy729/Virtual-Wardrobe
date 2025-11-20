@@ -20,7 +20,7 @@
         return !!token;
     }
 
-    // 显示用户信息和登出按钮
+    // 显示用户信息（登出按钮已移至 Settings）
     function setupUserInfo() {
         const userStr = localStorage.getItem('wardrobe_user');
         if (!userStr) return;
@@ -36,12 +36,11 @@
                     existingUserInfo.remove();
                 }
                 
-                // 创建用户信息项
+                // 创建用户信息项（只显示用户名，不显示登出按钮）
                 const userInfo = document.createElement('li');
                 userInfo.id = 'user-info';
                 userInfo.innerHTML = `
                     <span class="user-name">👤 ${user.username}</span>
-                    <a href="#" id="logout-btn" class="logout-link">Logout</a>
                 `;
                 
                 // 插入到导航栏末尾（在 Settings 之前）
@@ -50,22 +49,6 @@
                     nav.insertBefore(userInfo, settingsItem);
                 } else {
                     nav.appendChild(userInfo);
-                }
-                
-                // 添加登出事件
-                const logoutBtn = document.getElementById('logout-btn');
-                if (logoutBtn) {
-                    logoutBtn.addEventListener('click', async (e) => {
-                        e.preventDefault();
-                        if (confirm('Are you sure you want to log out?')) {
-                            try {
-                                await WardrobeAPI.logout();
-                            } catch (error) {
-                                console.error('Logout error:', error);
-                            }
-                            window.location.href = 'login.html';
-                        }
-                    });
                 }
             }
         } catch (error) {
