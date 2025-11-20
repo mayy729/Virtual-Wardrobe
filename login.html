@@ -27,6 +27,9 @@
                     <div class="form-group">
                         <label for="password">Password</label>
                         <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="请输入密码">
+                        <div class="forgot-password-link">
+                            <a href="#" id="forgot-password-link">Forgot Password?</a>
+                        </div>
                     </div>
 
                     <div id="login-error" class="error-message" style="display: none;"></div>
@@ -63,6 +66,36 @@
 
                 <div class="auth-switch">
                     <p>Already have an account? <a href="#" id="switch-to-login">Login now</a></p>
+                </div>
+            </div>
+
+            <div id="forgot-password-container" style="display: none;">
+                <form id="forgot-password-form" class="auth-form">
+                    <h3>Reset Password</h3>
+                    <p class="forgot-password-hint">Enter your username to reset your password. You will be able to set a new password.</p>
+                    
+                    <div class="form-group">
+                        <label for="reset-username">Username</label>
+                        <input type="text" id="reset-username" name="username" required autocomplete="username" placeholder="Enter your username">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reset-new-password">New Password</label>
+                        <input type="password" id="reset-new-password" name="newPassword" required autocomplete="new-password" placeholder="Enter new password (at least 6 characters)" minlength="6">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reset-confirm-password">Confirm New Password</label>
+                        <input type="password" id="reset-confirm-password" name="confirmPassword" required autocomplete="new-password" placeholder="Confirm new password">
+                    </div>
+
+                    <div id="forgot-password-error" class="error-message" style="display: none;"></div>
+
+                    <button type="submit" class="btn-primary btn-reset-password">Reset Password</button>
+                </form>
+
+                <div class="auth-switch">
+                    <p>Remember your password? <a href="#" id="switch-back-to-login">Back to Login</a></p>
                 </div>
             </div>
         </div>

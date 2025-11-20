@@ -1472,12 +1472,43 @@ footer {
 }
 
 .btn-login,
-.btn-register {
+.btn-register,
+.btn-reset-password {
     width: 100%;
     padding: 14px;
     font-size: 1.1em;
     font-weight: 600;
     margin-top: 10px;
+}
+
+.forgot-password-link {
+    text-align: right;
+    margin-top: 8px;
+    font-size: 0.9em;
+}
+
+.forgot-password-link a {
+    color: var(--accent-pink);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.forgot-password-link a:hover {
+    color: var(--deep-pink);
+    text-decoration: underline;
+}
+
+.forgot-password-hint {
+    color: var(--gray);
+    font-size: 0.9em;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+#forgot-password-container h3 {
+    color: var(--accent-pink);
+    margin-bottom: 10px;
+    font-size: 1.5em;
 }
 
 .auth-switch {

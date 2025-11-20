@@ -1,23 +1,46 @@
 (() => {
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
+    const forgotPasswordForm = document.getElementById('forgot-password-form');
     const loginFormContainer = document.getElementById('login-form-container');
     const registerFormContainer = document.getElementById('register-form-container');
+    const forgotPasswordContainer = document.getElementById('forgot-password-container');
     const switchToRegister = document.getElementById('switch-to-register');
     const switchToLogin = document.getElementById('switch-to-login');
+    const forgotPasswordLink = document.getElementById('forgot-password-link');
+    const switchBackToLogin = document.getElementById('switch-back-to-login');
     const loginError = document.getElementById('login-error');
     const registerError = document.getElementById('register-error');
+    const forgotPasswordError = document.getElementById('forgot-password-error');
 
-    // 切换登录/注册表单
+    // 切换登录/注册/忘记密码表单
     switchToRegister?.addEventListener('click', (e) => {
         e.preventDefault();
         loginFormContainer.style.display = 'none';
         registerFormContainer.style.display = 'block';
+        forgotPasswordContainer.style.display = 'none';
         clearErrors();
     });
 
     switchToLogin?.addEventListener('click', (e) => {
         e.preventDefault();
+        registerFormContainer.style.display = 'none';
+        loginFormContainer.style.display = 'block';
+        forgotPasswordContainer.style.display = 'none';
+        clearErrors();
+    });
+
+    forgotPasswordLink?.addEventListener('click', (e) => {
+        e.preventDefault();
+        loginFormContainer.style.display = 'none';
+        registerFormContainer.style.display = 'none';
+        forgotPasswordContainer.style.display = 'block';
+        clearErrors();
+    });
+
+    switchBackToLogin?.addEventListener('click', (e) => {
+        e.preventDefault();
+        forgotPasswordContainer.style.display = 'none';
         registerFormContainer.style.display = 'none';
         loginFormContainer.style.display = 'block';
         clearErrors();
@@ -26,6 +49,7 @@
     function clearErrors() {
         if (loginError) loginError.style.display = 'none';
         if (registerError) registerError.style.display = 'none';
+        if (forgotPasswordError) forgotPasswordError.style.display = 'none';
     }
 
     function showError(element, message) {
@@ -140,6 +164,76 @@
             showError(registerError, error.message || 'Registration failed, please try again later');
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
+        }
+    });
+
+    // 忘记密码表单提交
+    forgotPasswordForm?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        clearErrors();
+
+        const username = document.getElementById('reset-username').value.trim();
+        const newPassword = document.getElementById('reset-new-password').value;
+        const confirmPassword = document.getElementById('reset-confirm-password').value;
+
+        if (!username) {
+            showError(forgotPasswordError, 'Please enter your username');
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            showError(forgotPasswordError, 'New password must be at least 6 characters');
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            showError(forgotPasswordError, 'The passwords you entered do not match');
+            return;
+        }
+
+        const submitBtn = forgotPasswordForm.querySelector('.btn-reset-password');
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Resetting...';
+
+        try {
+            const apiBase = window.API_BASE_URL || 'http://localhost:3000';
+            const response = await fetch(`${apiBase}/api/auth/reset-password`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, newPassword })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Password reset failed');
+            }
+
+            // 显示成功消息
+            showError(forgotPasswordError, 'Password reset successfully! Redirecting to login...');
+            forgotPasswordError.style.color = 'green';
+            
+            // 清空表单
+            document.getElementById('reset-username').value = '';
+            document.getElementById('reset-new-password').value = '';
+            document.getElementById('reset-confirm-password').value = '';
+
+            // 延迟后跳转到登录页面
+            setTimeout(() => {
+                forgotPasswordContainer.style.display = 'none';
+                loginFormContainer.style.display = 'block';
+                clearErrors();
+            }, 2000);
+        } catch (error) {
+            console.error('Reset password error:', error);
+            showError(forgotPasswordError, error.message || 'Password reset failed, please try again');
+            forgotPasswordError.style.color = '';
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Reset Password';
         }
     });
 

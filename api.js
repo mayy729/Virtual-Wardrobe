@@ -169,6 +169,13 @@
             });
         },
 
+        async resetPassword(username, newPassword) {
+            return request('/api/auth/reset-password', {
+                method: 'POST',
+                body: JSON.stringify({ username, newPassword })
+            });
+        },
+
         isAuthenticated() {
             return !!getAuthToken();
         }
