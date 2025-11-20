@@ -53,22 +53,24 @@
     --border-color: #FFB6C6;
 }
 
+html {
+    min-height: 100%;
+}
+
 body {
     font-family: 'Segoe UI', 'Microsoft YaHei', Arial, sans-serif;
+    /* Hello Kitty photo background */
+    background-image: url('./hello-kitty-bg.jpg') !important;
+    background-size: cover !important;
+    background-repeat: no-repeat !important;
+    background-attachment: fixed !important;
+    background-position: center center !important;
     /* Fallback color if image is unavailable */
-    background-color: #FFF0F5;
+    background-color: #FFF0F5 !important;
     color: var(--black);
     padding: 20px;
     min-height: 100vh;
-}
-
-/* Hello Kitty photo background */
-body {
-    background-image: url('./hello-kitty-bg.jpg');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    background-position: center;
+    position: relative;
 }
 
 /* Header Section */

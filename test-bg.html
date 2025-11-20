@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Background Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            background-image: url('./hello-kitty-bg.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: center;
+            background-color: #FFF0F5;
+        }
+        .test-box {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px auto;
+            max-width: 600px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-box">
+        <h1>Background Image Test</h1>
+        <p>If you can see the Hello Kitty background image, it means the image path is correct.</p>
+        <p>If you don't see it, please check:</p>
+        <ul>
+            <li>Whether the image file exists: hello-kitty-bg.jpg</li>
+            <li>Whether there are any error messages in the browser console</li>
+            <li>Whether the image path is correct</li>
+        </ul>
+        <p><a href="index.html">Back to Home</a></p>
+    </div>
+</body>
+</html>
+
