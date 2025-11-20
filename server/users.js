@@ -179,6 +179,99 @@ function cleanExpiredSessions() {
     }
 }
 
+// 更新用户信息
+function updateUser(userId, updates) {
+    const users = readUsers();
+    const userIndex = users.findIndex(u => u.id === userId);
+    
+    if (userIndex === -1) {
+        throw new Error('User not found');
+    }
+    
+    const user = users[userIndex];
+    
+    // 更新用户名
+    if (updates.username !== undefined) {
+        const newUsername = updates.username.trim();
+        if (newUsername.length < 3 || newUsername.length > 20) {
+            throw new Error('Username must be between 3 and 20 characters.');
+        }
+        
+        // 检查新用户名是否已被其他用户使用
+        if (users.find(u => u.id !== userId && u.username.toLowerCase() === newUsername.toLowerCase())) {
+            throw new Error('Username already exists.');
+        }
+        
+        user.username = newUsername;
+        
+        // 更新所有会话中的用户名
+        const sessions = readSessions();
+        for (const token in sessions) {
+            if (sessions[token].userId === userId) {
+                sessions[token].username = newUsername;
+            }
+        }
+        writeSessions(sessions);
+    }
+    
+    // 更新头像
+    if (updates.avatar !== undefined) {
+        user.avatar = updates.avatar;
+    }
+    
+    writeUsers(users);
+    
+    return {
+        id: user.id,
+        username: user.username,
+        avatar: user.avatar || null,
+        createdAt: user.createdAt
+    };
+}
+
+// 修改密码
+function changePassword(userId, oldPassword, newPassword) {
+    const users = readUsers();
+    const user = users.find(u => u.id === userId);
+    
+    if (!user) {
+        throw new Error('User not found');
+    }
+    
+    // 验证旧密码
+    if (!verifyPassword(oldPassword, user.passwordHash)) {
+        throw new Error('Current password is incorrect.');
+    }
+    
+    // 验证新密码
+    if (newPassword.length < 6) {
+        throw new Error('New password must be at least 6 characters.');
+    }
+    
+    // 更新密码
+    user.passwordHash = hashPassword(newPassword);
+    writeUsers(users);
+    
+    return true;
+}
+
+// 获取用户信息
+function getUserById(userId) {
+    const users = readUsers();
+    const user = users.find(u => u.id === userId);
+    
+    if (!user) {
+        return null;
+    }
+    
+    return {
+        id: user.id,
+        username: user.username,
+        avatar: user.avatar || null,
+        createdAt: user.createdAt
+    };
+}
+
 // 定期清理过期会话（每小时）
 setInterval(cleanExpiredSessions, 60 * 60 * 1000);
 
@@ -186,6 +279,9 @@ module.exports = {
     registerUser,
     loginUser,
     verifyToken,
-    logoutUser
+    logoutUser,
+    updateUser,
+    changePassword,
+    getUserById
 };
 

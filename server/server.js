@@ -71,10 +71,53 @@ app.post('/api/auth/logout', authenticate, (req, res) => {
 });
 
 app.get('/api/auth/me', authenticate, (req, res) => {
-    res.json({
-        id: req.userId,
-        username: req.username
-    });
+    try {
+        const user = users.getUserById(req.userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+app.put('/api/auth/me', authenticate, (req, res) => {
+    try {
+        const { username, avatar } = req.body;
+        const updates = {};
+        
+        if (username !== undefined) {
+            updates.username = username;
+        }
+        if (avatar !== undefined) {
+            updates.avatar = avatar;
+        }
+        
+        if (Object.keys(updates).length === 0) {
+            return res.status(400).json({ message: 'No fields to update' });
+        }
+        
+        const updatedUser = users.updateUser(req.userId, updates);
+        res.json(updatedUser);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+});
+
+app.post('/api/auth/change-password', authenticate, (req, res) => {
+    try {
+        const { oldPassword, newPassword } = req.body;
+        
+        if (!oldPassword || !newPassword) {
+            return res.status(400).json({ message: 'Old password and new password are required.' });
+        }
+        
+        users.changePassword(req.userId, oldPassword, newPassword);
+        res.json({ message: 'Password changed successfully' });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
 });
 
 app.get('/api/clothes', authenticate, (req, res) => {
