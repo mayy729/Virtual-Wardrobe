@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const storage = require('./storage');
 const users = require('./users');
 
@@ -14,7 +16,39 @@ try {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+// 安全 HTTP 头
+app.use(helmet({
+    contentSecurityPolicy: false, // 允许内联脚本（如果需要）
+    crossOriginEmbedderPolicy: false
+}));
+
+// CORS 配置（可以根据需要限制特定域名）
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+    ? process.env.ALLOWED_ORIGINS.split(',')
+    : ['*']; // 开发环境允许所有来源，生产环境应该限制
+
+app.use(cors({
+    origin: allowedOrigins.includes('*') ? true : allowedOrigins,
+    credentials: true
+}));
+
+// 速率限制：防止暴力破解
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 分钟
+    max: 5, // 最多 5 次请求
+    message: 'Too many login attempts, please try again later.',
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 分钟
+    max: 100, // 最多 100 次请求
+    message: 'Too many requests, please try again later.',
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
 app.use(express.json({ limit: '15mb' }));
 
 app.get('/', (req, res) => res.send('API is running'));
@@ -38,7 +72,7 @@ async function authenticate(req, res, next) {
     next();
 }
 
-app.post('/api/auth/register', async (req, res) => {
+app.post('/api/auth/register', authLimiter, async (req, res) => {
     try {
         const { username, password } = req.body;
         
@@ -55,7 +89,7 @@ app.post('/api/auth/register', async (req, res) => {
     }
 });
 
-app.post('/api/auth/login', async (req, res) => {
+app.post('/api/auth/login', authLimiter, async (req, res) => {
     try {
         const { username, password } = req.body;
         
@@ -146,7 +180,7 @@ app.post('/api/auth/change-password', authenticate, async (req, res) => {
     }
 });
 
-app.post('/api/auth/reset-password', async (req, res) => {
+app.post('/api/auth/reset-password', authLimiter, async (req, res) => {
     try {
         const { username, newPassword } = req.body;
         
@@ -167,7 +201,7 @@ app.post('/api/auth/reset-password', async (req, res) => {
     }
 });
 
-app.get('/api/clothes', authenticate, (req, res) => {
+app.get('/api/clothes', apiLimiter, authenticate, (req, res) => {
     try {
         res.json(storage.getClothes(req.userId));
     } catch (error) {

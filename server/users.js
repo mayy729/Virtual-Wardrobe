@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const bcrypt = require('bcrypt');
 
 // 尝试加载 MongoDB（如果可用）
 let db = null;
@@ -59,14 +60,27 @@ function writeSessions(sessions) {
     fs.writeFileSync(SESSIONS_FILE, JSON.stringify(sessions, null, 2), 'utf-8');
 }
 
-// 生成密码哈希
-function hashPassword(password) {
-    return crypto.createHash('sha256').update(password).digest('hex');
+// 生成密码哈希（使用 bcrypt，更安全）
+async function hashPassword(password) {
+    // bcrypt 自动加盐，rounds=10 是安全性和性能的平衡
+    const saltRounds = 10;
+    return await bcrypt.hash(password, saltRounds);
 }
 
 // 验证密码
-function verifyPassword(password, hash) {
-    return hashPassword(password) === hash;
+async function verifyPassword(password, hash) {
+    // 兼容旧数据：如果是 SHA-256 格式（64 字符的十六进制），先验证然后迁移
+    if (hash && hash.length === 64 && /^[a-f0-9]{64}$/i.test(hash)) {
+        // 旧格式：SHA-256
+        const oldHash = crypto.createHash('sha256').update(password).digest('hex');
+        if (oldHash === hash) {
+            // 验证成功，但需要迁移到 bcrypt（在更新时进行）
+            return true;
+        }
+        return false;
+    }
+    // 新格式：bcrypt
+    return await bcrypt.compare(password, hash);
 }
 
 // 生成 token
@@ -98,9 +112,10 @@ async function registerUser(username, password) {
             }
             
             // 创建新用户
+            const passwordHash = await hashPassword(password);
             const newUser = new db.User({
                 username: username.trim().toLowerCase(),
-                passwordHash: hashPassword(password),
+                passwordHash: passwordHash,
                 avatar: null,
                 createdAt: new Date()
             });
@@ -129,10 +144,11 @@ async function registerUser(username, password) {
     }
     
     // 创建新用户
+    const passwordHash = await hashPassword(password);
     const newUser = {
         id: Date.now(),
         username: username.trim(),
-        passwordHash: hashPassword(password),
+        passwordHash: passwordHash,
         createdAt: new Date().toISOString()
     };
     
@@ -155,7 +171,7 @@ async function loginUser(username, password) {
                 username: username.toLowerCase() 
             });
             
-            if (!user || !verifyPassword(password, user.passwordHash)) {
+            if (!user || !(await verifyPassword(password, user.passwordHash))) {
                 throw new Error('Invalid username or password.');
             }
             
@@ -194,7 +210,7 @@ async function loginUser(username, password) {
     const users = readUsers();
     const user = users.find(u => u.username.toLowerCase() === username.toLowerCase());
     
-    if (!user || !verifyPassword(password, user.passwordHash)) {
+    if (!user || !(await verifyPassword(password, user.passwordHash))) {
         throw new Error('Invalid username or password.');
     }
     
@@ -425,7 +441,7 @@ async function changePassword(userId, oldPassword, newPassword) {
             }
             
             // 验证旧密码
-            if (!verifyPassword(oldPassword, user.passwordHash)) {
+            if (!(await verifyPassword(oldPassword, user.passwordHash))) {
                 throw new Error('Current password is incorrect.');
             }
             
@@ -435,7 +451,7 @@ async function changePassword(userId, oldPassword, newPassword) {
             }
             
             // 更新密码
-            user.passwordHash = hashPassword(newPassword);
+            user.passwordHash = await hashPassword(newPassword);
             await user.save();
             
             return true;
@@ -456,7 +472,7 @@ async function changePassword(userId, oldPassword, newPassword) {
     }
     
     // 验证旧密码
-    if (!verifyPassword(oldPassword, user.passwordHash)) {
+    if (!(await verifyPassword(oldPassword, user.passwordHash))) {
         throw new Error('Current password is incorrect.');
     }
     
@@ -466,7 +482,7 @@ async function changePassword(userId, oldPassword, newPassword) {
     }
     
     // 更新密码
-    user.passwordHash = hashPassword(newPassword);
+    user.passwordHash = await hashPassword(newPassword);
     writeUsers(users);
     
     return true;
@@ -552,7 +568,7 @@ async function resetPassword(username, newPassword) {
             }
             
             // 更新密码
-            user.passwordHash = hashPassword(newPassword);
+            user.passwordHash = await hashPassword(newPassword);
             await user.save();
             
             // 清除该用户的所有会话（强制重新登录）
@@ -579,7 +595,7 @@ async function resetPassword(username, newPassword) {
     }
     
     // 更新密码
-    user.passwordHash = hashPassword(newPassword);
+    user.passwordHash = await hashPassword(newPassword);
     writeUsers(users);
     
     // 清除该用户的所有会话（强制重新登录）
