@@ -36,13 +36,6 @@
                     existingUserInfo.remove();
                 }
                 
-                // 创建用户信息项（只显示用户名，不显示登出按钮）
-                const userInfo = document.createElement('li');
-                userInfo.id = 'user-info';
-                userInfo.innerHTML = `
-                    <span class="user-name">👤 ${user.username}</span>
-                `;
-                
                 // 插入到导航栏末尾（在 Settings 之前）
                 const settingsItem = nav.querySelector('li:last-child');
                 if (settingsItem) {
