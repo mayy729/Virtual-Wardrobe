@@ -64,7 +64,7 @@ body {
 
 /* Hello Kitty photo background */
 body {
-    background-image: url('./hello-kitty-bg.png');
+    background-image: url('./hello-kitty-bg.jpg');
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;
@@ -1390,6 +1390,11 @@ footer {
     justify-content: center;
     min-height: 100vh;
     padding: 20px;
+    background-image: url('./hello-kitty-bg.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
 }
 
 .login-container {
