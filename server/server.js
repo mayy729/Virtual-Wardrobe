@@ -349,11 +349,29 @@ function formatPayload(data) {
     const validSeasons = ['spring', 'summer', 'autumn', 'winter', 'all'];
     const validOccasions = ['casual', 'date', 'work', 'party', 'formal', 'sport'];
     
+    // 处理季节：支持数组或单个值
+    let season = 'all';
+    if (Array.isArray(data.season)) {
+        const validSeasonsArray = data.season.filter(s => validSeasons.includes(s));
+        season = validSeasonsArray.length > 0 ? validSeasonsArray : ['all'];
+    } else if (typeof data.season === 'string' && validSeasons.includes(data.season)) {
+        season = data.season;
+    }
+    
+    // 处理场合：支持数组或单个值
+    let occasion = 'casual';
+    if (Array.isArray(data.occasion)) {
+        const validOccasionsArray = data.occasion.filter(o => validOccasions.includes(o));
+        occasion = validOccasionsArray.length > 0 ? validOccasionsArray : ['casual'];
+    } else if (typeof data.occasion === 'string' && validOccasions.includes(data.occasion)) {
+        occasion = data.occasion;
+    }
+    
     return {
         id: data.id || Date.now(),
         name: cleanString(data.name, 200) || 'Unnamed Clothes',
-        season: validSeasons.includes(data.season) ? data.season : 'all',
-        occasion: validOccasions.includes(data.occasion) ? data.occasion : 'casual',
+        season: season,
+        occasion: occasion,
         brand: cleanString(data.brand, 100),
         size: cleanString(data.size, 50),
         material: cleanString(data.material, 100),
@@ -404,6 +422,24 @@ function formatOutfitPayload(data) {
     const validSeasons = ['spring', 'summer', 'autumn', 'winter', 'all'];
     const validOccasions = ['casual', 'date', 'work', 'party', 'formal', 'sport'];
     
+    // 处理季节：支持数组或单个值
+    let season = 'all';
+    if (Array.isArray(data.season)) {
+        const validSeasonsArray = data.season.filter(s => validSeasons.includes(s));
+        season = validSeasonsArray.length > 0 ? validSeasonsArray : ['all'];
+    } else if (typeof data.season === 'string' && validSeasons.includes(data.season)) {
+        season = data.season;
+    }
+    
+    // 处理场合：支持数组或单个值
+    let occasion = 'casual';
+    if (Array.isArray(data.occasion)) {
+        const validOccasionsArray = data.occasion.filter(o => validOccasions.includes(o));
+        occasion = validOccasionsArray.length > 0 ? validOccasionsArray : ['casual'];
+    } else if (typeof data.occasion === 'string' && validOccasions.includes(data.occasion)) {
+        occasion = data.occasion;
+    }
+    
     const cleanItems = (items) => {
         if (!Array.isArray(items)) return [];
         return items
@@ -418,8 +454,8 @@ function formatOutfitPayload(data) {
     return {
         id: data.id || Date.now(),
         name: cleanString(data.name, 200) || 'Unnamed Outfit',
-        season: validSeasons.includes(data.season) ? data.season : 'all',
-        occasion: validOccasions.includes(data.occasion) ? data.occasion : 'casual',
+        season: season,
+        occasion: occasion,
         notes: cleanString(data.notes, 500),
         items: cleanItems(data.items),
         dateCreated: data.dateCreated || new Date().toISOString()
