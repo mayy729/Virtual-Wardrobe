@@ -3,6 +3,14 @@ const cors = require('cors');
 const storage = require('./storage');
 const users = require('./users');
 
+// 初始化数据库连接（如果可用）
+try {
+    const db = require('./db');
+    db.connectDB().catch(console.error);
+} catch (error) {
+    console.log('[Server] MongoDB not available, using file-based storage');
+}
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -11,7 +19,7 @@ app.use(express.json({ limit: '15mb' }));
 
 app.get('/', (req, res) => res.send('API is running'));
 
-function authenticate(req, res, next) {
+async function authenticate(req, res, next) {
     const token = req.headers.authorization?.replace('Bearer ', '') || 
                   req.headers['x-auth-token'] ||
                   req.query.token;
@@ -20,7 +28,7 @@ function authenticate(req, res, next) {
         return res.status(401).json({ message: 'Unauthorized, please log in first.' });
     }
     
-    const session = users.verifyToken(token);
+    const session = await users.verifyToken(token);
     if (!session) {
         return res.status(401).json({ message: 'Your login has expired. Please log in again.' });
     }
@@ -30,7 +38,7 @@ function authenticate(req, res, next) {
     next();
 }
 
-app.post('/api/auth/register', (req, res) => {
+app.post('/api/auth/register', async (req, res) => {
     try {
         const { username, password } = req.body;
         
@@ -38,8 +46,8 @@ app.post('/api/auth/register', (req, res) => {
             return res.status(400).json({ message: 'Username and password cannot be empty.' });
         }
         
-        const user = users.registerUser(username, password);
-        const loginResult = users.loginUser(username, password);
+        await users.registerUser(username, password);
+        const loginResult = await users.loginUser(username, password);
         
         res.status(201).json(loginResult);
     } catch (error) {
@@ -47,7 +55,7 @@ app.post('/api/auth/register', (req, res) => {
     }
 });
 
-app.post('/api/auth/login', (req, res) => {
+app.post('/api/auth/login', async (req, res) => {
     try {
         const { username, password } = req.body;
         
@@ -55,24 +63,24 @@ app.post('/api/auth/login', (req, res) => {
             return res.status(400).json({ message: 'Username and password cannot be empty.' });
         }
         
-        const result = users.loginUser(username, password);
+        const result = await users.loginUser(username, password);
         res.json(result);
     } catch (error) {
         res.status(401).json({ message: error.message });
     }
 });
 
-app.post('/api/auth/logout', authenticate, (req, res) => {
+app.post('/api/auth/logout', authenticate, async (req, res) => {
     const token = req.headers.authorization?.replace('Bearer ', '') || 
                   req.headers['x-auth-token'] ||
                   req.query.token;
-    users.logoutUser(token);
+    await users.logoutUser(token);
     res.json({ message: 'Logout' });
 });
 
-app.get('/api/auth/me', authenticate, (req, res) => {
+app.get('/api/auth/me', authenticate, async (req, res) => {
     try {
-        const user = users.getUserById(req.userId);
+        const user = await users.getUserById(req.userId);
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -82,7 +90,7 @@ app.get('/api/auth/me', authenticate, (req, res) => {
     }
 });
 
-app.get('/api/auth/check-username', (req, res) => {
+app.get('/api/auth/check-username', async (req, res) => {
     try {
         const { username } = req.query;
         
@@ -90,7 +98,7 @@ app.get('/api/auth/check-username', (req, res) => {
             return res.status(400).json({ message: 'Username is required' });
         }
         
-        const isAvailable = users.isUsernameAvailable(username);
+        const isAvailable = await users.isUsernameAvailable(username);
         res.json({ 
             available: isAvailable,
             message: isAvailable ? 'Username is available' : 'Username already exists'
@@ -100,7 +108,7 @@ app.get('/api/auth/check-username', (req, res) => {
     }
 });
 
-app.put('/api/auth/me', authenticate, (req, res) => {
+app.put('/api/auth/me', authenticate, async (req, res) => {
     try {
         const { username, avatar } = req.body;
         const updates = {};
@@ -116,14 +124,14 @@ app.put('/api/auth/me', authenticate, (req, res) => {
             return res.status(400).json({ message: 'No fields to update' });
         }
         
-        const updatedUser = users.updateUser(req.userId, updates);
+        const updatedUser = await users.updateUser(req.userId, updates);
         res.json(updatedUser);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
 });
 
-app.post('/api/auth/change-password', authenticate, (req, res) => {
+app.post('/api/auth/change-password', authenticate, async (req, res) => {
     try {
         const { oldPassword, newPassword } = req.body;
         
@@ -131,14 +139,14 @@ app.post('/api/auth/change-password', authenticate, (req, res) => {
             return res.status(400).json({ message: 'Old password and new password are required.' });
         }
         
-        users.changePassword(req.userId, oldPassword, newPassword);
+        await users.changePassword(req.userId, oldPassword, newPassword);
         res.json({ message: 'Password changed successfully' });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
 });
 
-app.post('/api/auth/reset-password', (req, res) => {
+app.post('/api/auth/reset-password', async (req, res) => {
     try {
         const { username, newPassword } = req.body;
         
@@ -146,7 +154,7 @@ app.post('/api/auth/reset-password', (req, res) => {
             return res.status(400).json({ message: 'Username and new password are required.' });
         }
         
-        const user = users.resetPassword(username, newPassword);
+        const user = await users.resetPassword(username, newPassword);
         res.json({ 
             message: 'Password reset successfully. Please login with your new password.',
             user: {
