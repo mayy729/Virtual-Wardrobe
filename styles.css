@@ -1382,3 +1382,152 @@ footer {
         font-size: 0.9em;
     }
 }
+
+/* 登录页面样式 */
+.login-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 450px;
+}
+
+.login-box {
+    background: var(--white);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 8px 30px rgba(255, 105, 180, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.login-header h1 {
+    font-size: 2em;
+    color: var(--accent-pink);
+    margin-bottom: 10px;
+}
+
+.login-header p {
+    color: var(--gray);
+    font-size: 1em;
+}
+
+.auth-form {
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--black);
+    font-weight: 500;
+    font-size: 0.95em;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    background: var(--light-pink);
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--accent-pink);
+    background: var(--white);
+    box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.1);
+}
+
+.error-message {
+    background: #FFE4E1;
+    color: var(--deep-pink);
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 0.9em;
+    border-left: 4px solid var(--deep-pink);
+}
+
+.btn-login,
+.btn-register {
+    width: 100%;
+    padding: 14px;
+    font-size: 1.1em;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.auth-switch {
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.auth-switch p {
+    color: var(--gray);
+    font-size: 0.95em;
+}
+
+.auth-switch a {
+    color: var(--accent-pink);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.auth-switch a:hover {
+    color: var(--deep-pink);
+    text-decoration: underline;
+}
+
+/* 用户信息样式 */
+.user-name {
+    color: var(--accent-pink);
+    font-weight: 500;
+    margin-right: 10px;
+}
+
+.logout-link {
+    color: var(--deep-pink);
+    text-decoration: none;
+    font-size: 0.9em;
+    transition: color 0.3s ease;
+}
+
+.logout-link:hover {
+    color: var(--accent-pink);
+    text-decoration: underline;
+}
+
+/* 响应式登录页面 */
+@media (max-width: 480px) {
+    .login-box {
+        padding: 30px 20px;
+    }
+    
+    .login-header h1 {
+        font-size: 1.6em;
+    }
+    
+    .form-group input {
+        padding: 10px 12px;
+        font-size: 0.95em;
+    }
+}

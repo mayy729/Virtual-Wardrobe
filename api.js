@@ -13,10 +13,17 @@
         return `${getApiBase()}${path}`;
     }
 
+    function getAuthToken() {
+        return localStorage.getItem('wardrobe_token');
+    }
+
     async function request(path, options = {}) {
+        const token = getAuthToken();
         const config = {
             headers: {
                 'Content-Type': 'application/json',
+                ...(token && { 'Authorization': `Bearer ${token}` }),
+                ...(token && { 'X-Auth-Token': token }),
                 ...(options.headers || {})
             },
             ...options
@@ -26,6 +33,17 @@
         
         try {
             const response = await fetch(url, config);
+            
+            // 如果返回 401，说明 token 无效或过期，清除本地存储并跳转到登录页
+            if (response.status === 401) {
+                localStorage.removeItem('wardrobe_token');
+                localStorage.removeItem('wardrobe_user');
+                if (!window.location.pathname.includes('login.html')) {
+                    window.location.href = 'login.html';
+                }
+                throw new Error('Login expired, please login again');
+            }
+            
             if (!response.ok) {
                 let errorMessage = `Request failed with status ${response.status}`;
                 try {
@@ -103,6 +121,42 @@
             return request(`/api/outfits/${id}`, {
                 method: 'DELETE'
             });
+        },
+
+        // 认证相关 API
+        async login(username, password) {
+            return request('/api/auth/login', {
+                method: 'POST',
+                body: JSON.stringify({ username, password })
+            });
+        },
+
+        async register(username, password) {
+            return request('/api/auth/register', {
+                method: 'POST',
+                body: JSON.stringify({ username, password })
+            });
+        },
+
+        async logout() {
+            try {
+                await request('/api/auth/logout', {
+                    method: 'POST'
+                });
+            } catch (error) {
+                console.error('Logout failed:', error);
+            } finally {
+                localStorage.removeItem('wardrobe_token');
+                localStorage.removeItem('wardrobe_user');
+            }
+        },
+
+        async getCurrentUser() {
+            return request('/api/auth/me');
+        },
+
+        isAuthenticated() {
+            return !!getAuthToken();
         }
     };
 })();

@@ -16,7 +16,8 @@
             return window.location.origin;
         }
         if (isGitHubPages()) {
-            return null;
+            // GitHub Pages 默认使用 Render 后端
+            return 'https://virtual-wardrobe-api.onrender.com';
         }
         return window.location.origin;
     }
