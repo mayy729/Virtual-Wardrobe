@@ -12,6 +12,8 @@
     const loginError = document.getElementById('login-error');
     const registerError = document.getElementById('register-error');
     const forgotPasswordError = document.getElementById('forgot-password-error');
+    const regUsernameInput = document.getElementById('reg-username');
+    const usernameStatus = document.getElementById('username-status');
 
     // 切换登录/注册/忘记密码表单
     switchToRegister?.addEventListener('click', (e) => {
@@ -104,6 +106,70 @@
             showError(loginError, error.message || 'Login failed, please check your username and password');
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
+        }
+    });
+
+    // 用户名实时验证（防抖）
+    let usernameCheckTimeout;
+    const debounce = (func, delay) => {
+        return (...args) => {
+            clearTimeout(usernameCheckTimeout);
+            usernameCheckTimeout = setTimeout(() => func.apply(this, args), delay);
+        };
+    };
+
+    async function checkUsernameAvailability(username) {
+        if (!username || username.trim().length < 3) {
+            if (usernameStatus) {
+                usernameStatus.style.display = 'none';
+            }
+            return;
+        }
+
+        if (username.length > 20) {
+            if (usernameStatus) {
+                usernameStatus.textContent = 'Username must be 20 characters or less';
+                usernameStatus.className = 'username-status status-error';
+                usernameStatus.style.display = 'block';
+            }
+            return;
+        }
+
+        try {
+            const apiBase = window.API_BASE_URL || 'http://localhost:3000';
+            const response = await fetch(`${apiBase}/api/auth/check-username?username=${encodeURIComponent(username.trim())}`);
+            const data = await response.json();
+
+            if (usernameStatus) {
+                if (data.available) {
+                    usernameStatus.textContent = '✓ Username is available';
+                    usernameStatus.className = 'username-status status-success';
+                } else {
+                    usernameStatus.textContent = '✗ Username already exists';
+                    usernameStatus.className = 'username-status status-error';
+                }
+                usernameStatus.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Username check error:', error);
+            // 如果检查失败，不显示状态（不影响注册流程）
+            if (usernameStatus) {
+                usernameStatus.style.display = 'none';
+            }
+        }
+    }
+
+    const debouncedCheckUsername = debounce(checkUsernameAvailability, 500);
+
+    regUsernameInput?.addEventListener('input', (e) => {
+        const username = e.target.value.trim();
+        debouncedCheckUsername(username);
+    });
+
+    regUsernameInput?.addEventListener('blur', (e) => {
+        const username = e.target.value.trim();
+        if (username.length >= 3) {
+            checkUsernameAvailability(username);
         }
     });
 

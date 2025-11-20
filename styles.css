@@ -1471,6 +1471,26 @@ footer {
     border-left: 4px solid var(--deep-pink);
 }
 
+.username-status {
+    margin-top: 8px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.85em;
+    font-weight: 500;
+}
+
+.username-status.status-success {
+    background: #d4edda;
+    color: #155724;
+    border-left: 3px solid #28a745;
+}
+
+.username-status.status-error {
+    background: #f8d7da;
+    color: #721c24;
+    border-left: 3px solid #dc3545;
+}
+
 .btn-login,
 .btn-register,
 .btn-reset-password {
