@@ -201,16 +201,17 @@ app.post('/api/auth/reset-password', authLimiter, async (req, res) => {
     }
 });
 
-app.get('/api/clothes', apiLimiter, authenticate, (req, res) => {
+app.get('/api/clothes', apiLimiter, authenticate, async (req, res) => {
     try {
-        res.json(storage.getClothes(req.userId));
+        const clothes = await storage.getClothes(req.userId);
+        res.json(clothes);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Failed to fetch clothes' });
     }
 });
 
-app.post('/api/clothes', authenticate, (req, res) => {
+app.post('/api/clothes', authenticate, async (req, res) => {
     const validationError = validateClothes(req.body);
     if (validationError) {
         return res.status(400).json({ message: validationError });
@@ -218,18 +219,18 @@ app.post('/api/clothes', authenticate, (req, res) => {
 
     try {
         const payload = formatPayload(req.body);
-        storage.addClothes(req.userId, payload);
-        res.status(201).json(payload);
+        const result = await storage.addClothes(req.userId, payload);
+        res.status(201).json(result);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Failed to create clothes' });
     }
 });
 
-app.put('/api/clothes/:id', authenticate, (req, res) => {
+app.put('/api/clothes/:id', authenticate, async (req, res) => {
     const id = Number(req.params.id);
     try {
-        const existingList = storage.getClothes(req.userId);
+        const existingList = await storage.getClothes(req.userId);
         const existing = existingList.find(item => item.id === id);
         if (!existing) {
             return res.status(404).json({ message: 'Not found' });
@@ -242,7 +243,7 @@ app.put('/api/clothes/:id', authenticate, (req, res) => {
             dateAdded: existing.dateAdded || new Date().toISOString()
         };
 
-        const result = storage.updateClothes(req.userId, id, updatedPayload);
+        const result = await storage.updateClothes(req.userId, id, updatedPayload);
         res.json(result);
     } catch (error) {
         console.error(error);
@@ -250,10 +251,10 @@ app.put('/api/clothes/:id', authenticate, (req, res) => {
     }
 });
 
-app.delete('/api/clothes/:id', authenticate, (req, res) => {
+app.delete('/api/clothes/:id', authenticate, async (req, res) => {
     const id = Number(req.params.id);
     try {
-        const success = storage.deleteClothes(req.userId, id);
+        const success = await storage.deleteClothes(req.userId, id);
         if (!success) {
             return res.status(404).json({ message: 'Not found' });
         }
@@ -264,9 +265,9 @@ app.delete('/api/clothes/:id', authenticate, (req, res) => {
     }
 });
 
-app.get('/api/outfits', authenticate, (req, res) => {
+app.get('/api/outfits', authenticate, async (req, res) => {
     try {
-        const outfits = storage.getOutfits(req.userId);
+        const outfits = await storage.getOutfits(req.userId);
         res.json(outfits);
     } catch (error) {
         console.error(error);
@@ -274,7 +275,7 @@ app.get('/api/outfits', authenticate, (req, res) => {
     }
 });
 
-app.post('/api/outfits', authenticate, (req, res) => {
+app.post('/api/outfits', authenticate, async (req, res) => {
     const validationError = validateOutfit(req.body);
     if (validationError) {
         return res.status(400).json({ message: validationError });
@@ -282,18 +283,18 @@ app.post('/api/outfits', authenticate, (req, res) => {
 
     try {
         const payload = formatOutfitPayload(req.body);
-        storage.addOutfit(req.userId, payload);
-        res.status(201).json(payload);
+        const result = await storage.addOutfit(req.userId, payload);
+        res.status(201).json(result);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Failed to create outfit' });
     }
 });
 
-app.put('/api/outfits/:id', authenticate, (req, res) => {
+app.put('/api/outfits/:id', authenticate, async (req, res) => {
     const id = Number(req.params.id);
     try {
-        const existingList = storage.getOutfits(req.userId);
+        const existingList = await storage.getOutfits(req.userId);
         const existing = existingList.find(item => item.id === id);
         if (!existing) {
             return res.status(404).json({ message: 'Not found' });
@@ -306,7 +307,7 @@ app.put('/api/outfits/:id', authenticate, (req, res) => {
             dateCreated: existing.dateCreated || new Date().toISOString()
         };
 
-        const result = storage.updateOutfit(req.userId, id, updatedPayload);
+        const result = await storage.updateOutfit(req.userId, id, updatedPayload);
         res.json(result);
     } catch (error) {
         console.error(error);
@@ -314,10 +315,10 @@ app.put('/api/outfits/:id', authenticate, (req, res) => {
     }
 });
 
-app.delete('/api/outfits/:id', authenticate, (req, res) => {
+app.delete('/api/outfits/:id', authenticate, async (req, res) => {
     const id = Number(req.params.id);
     try {
-        const success = storage.deleteOutfit(req.userId, id);
+        const success = await storage.deleteOutfit(req.userId, id);
         if (!success) {
             return res.status(404).json({ message: 'Not found' });
         }

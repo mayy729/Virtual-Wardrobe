@@ -53,8 +53,84 @@ const sessionSchema = new mongoose.Schema({
 // 自动清理过期会话（通过索引）
 sessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
+// 衣服模型
+const clothesSchema = new mongoose.Schema({
+    userId: {
+        type: String,
+        required: true,
+        index: true
+    },
+    id: {
+        type: Number,
+        required: true
+    },
+    name: {
+        type: String,
+        required: true
+    },
+    image: {
+        type: String,
+        required: true
+    },
+    season: {
+        type: [String],
+        default: ['all']
+    },
+    occasion: {
+        type: [String],
+        default: ['casual']
+    },
+    brand: String,
+    color: String,
+    category: String,
+    notes: String,
+    wearingPhoto: String,
+    dateAdded: {
+        type: Date,
+        default: Date.now
+    }
+}, {
+    timestamps: true
+});
+
+// 复合索引：userId + id 确保每个用户的衣服 ID 唯一
+clothesSchema.index({ userId: 1, id: 1 }, { unique: true });
+
+// 搭配模型
+const outfitSchema = new mongoose.Schema({
+    userId: {
+        type: String,
+        required: true,
+        index: true
+    },
+    id: {
+        type: Number,
+        required: true
+    },
+    name: {
+        type: String,
+        required: true
+    },
+    items: {
+        type: [Number],
+        required: true
+    },
+    image: String,
+    dateAdded: {
+        type: Date,
+        default: Date.now
+    }
+}, {
+    timestamps: true
+});
+
+// 复合索引：userId + id 确保每个用户的搭配 ID 唯一
+outfitSchema.index({ userId: 1, id: 1 }, { unique: true });
+
 const User = mongoose.models.User || mongoose.model('User', userSchema);
 const Session = mongoose.models.Session || mongoose.model('Session', sessionSchema);
+const Clothes = mongoose.models.Clothes || mongoose.model('Clothes', clothesSchema);
+const Outfit = mongoose.models.Outfit || mongoose.model('Outfit', outfitSchema);
 
 // 连接数据库
 let isConnected = false;
@@ -109,6 +185,8 @@ module.exports = {
     connectDB,
     User,
     Session,
+    Clothes,
+    Outfit,
     isMongoConnected: () => isConnected
 };
 
