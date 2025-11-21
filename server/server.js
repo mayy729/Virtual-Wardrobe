@@ -218,8 +218,11 @@ app.post('/api/clothes', authenticate, async (req, res) => {
     }
 
     try {
+        console.log('[Server] Received clothes data - occasion:', req.body.occasion, 'type:', typeof req.body.occasion, 'isArray:', Array.isArray(req.body.occasion));
         const payload = formatPayload(req.body);
+        console.log('[Server] Formatted payload - occasion:', payload.occasion, 'type:', typeof payload.occasion, 'isArray:', Array.isArray(payload.occasion));
         const result = await storage.addClothes(req.userId, payload);
+        console.log('[Server] Saved clothes - occasion:', result.occasion, 'type:', typeof result.occasion, 'isArray:', Array.isArray(result.occasion));
         res.status(201).json(result);
     } catch (error) {
         console.error(error);
@@ -397,12 +400,17 @@ function formatPayload(data) {
     }
     
     // 处理场合：支持数组或单个值
-    let occasion = 'casual';
+    let occasion = ['casual'];
     if (Array.isArray(data.occasion)) {
         const validOccasionsArray = data.occasion.filter(o => validOccasions.includes(o));
         occasion = validOccasionsArray.length > 0 ? validOccasionsArray : ['casual'];
     } else if (typeof data.occasion === 'string' && validOccasions.includes(data.occasion)) {
-        occasion = data.occasion;
+        occasion = [data.occasion]; // 转换为数组以保持一致性
+    }
+    
+    // 确保 occasion 始终是数组
+    if (!Array.isArray(occasion)) {
+        occasion = [occasion];
     }
     
     return {
