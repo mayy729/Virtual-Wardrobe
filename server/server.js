@@ -270,10 +270,12 @@ app.delete('/api/clothes/:id', authenticate, async (req, res) => {
 
 app.get('/api/outfits', authenticate, async (req, res) => {
     try {
+        console.log('[Server] Fetching outfits for user:', req.userId);
         const outfits = await storage.getOutfits(req.userId);
+        console.log('[Server] Found', outfits.length, 'outfits');
         res.json(outfits);
     } catch (error) {
-        console.error(error);
+        console.error('[Server] Error fetching outfits:', error);
         res.status(500).json({ message: 'Failed to fetch outfits' });
     }
 });
