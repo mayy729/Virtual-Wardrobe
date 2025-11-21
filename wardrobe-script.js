@@ -85,10 +85,8 @@ function displayItems() {
             <div class="item-info">
                 <h4>${item.name}</h4>
                 <div class="item-tags">
-                    ${item.type ? `<span class="tag tag-type">${item.type === 'clothes' ? 'Clothes' : 'Accessories'}</span>` : ''}
                     ${seasonTags}
                     ${occasionTags}
-                    ${item.brand ? `<span class="tag tag-brand">${item.brand}</span>` : ''}
                 </div>
                 ${item.notes ? `<p class="item-notes">💬 ${item.notes}</p>` : ''}
             </div>

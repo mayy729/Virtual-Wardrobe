@@ -100,7 +100,6 @@ function displayOutfits() {
                         : `<span class="tag tag-occasion">${getOccasionLabel(outfit.occasion)}</span>`}
                 </div>
                 ${outfit.notes ? `<p class="outfit-notes">💬 ${outfit.notes}</p>` : ''}
-                <p class="outfit-date">Created at: ${new Date(outfit.dateCreated || outfit.dateAdded || Date.now()).toLocaleDateString('zh-CN')}</p>
             </div>
             <button class="btn-view-outfit" data-id="${outfit.id}">View Details</button>
         `;
@@ -162,22 +161,31 @@ function applyFilters() {
         // 匹配季节（支持数组或单个值，多选过滤）
         let matchesSeason = true;
         if (selectedSeasons.length > 0) {
-            const outfitSeasons = Array.isArray(outfit.season) ? outfit.season : [outfit.season];
-            matchesSeason = selectedSeasons.some(selectedSeason => 
-                outfitSeasons.includes(selectedSeason) || 
-                (selectedSeason === 'all' && outfitSeasons.includes('all')) ||
-                (outfitSeasons.includes('all') && selectedSeasons.length > 0)
-            );
+            // 如果选择了"all"，匹配所有outfits
+            if (selectedSeasons.includes('all')) {
+                matchesSeason = true;
+            } else {
+                const outfitSeasons = Array.isArray(outfit.season) ? outfit.season : [outfit.season];
+                // 只有当outfit包含选中的season，或者outfit有"all"时，才匹配
+                matchesSeason = selectedSeasons.some(selectedSeason => 
+                    outfitSeasons.includes(selectedSeason)
+                ) || outfitSeasons.includes('all');
+            }
         }
         
         // 匹配场合（支持数组或单个值，多选过滤）
         let matchesOccasion = true;
         if (selectedOccasions.length > 0) {
-            const outfitOccasions = Array.isArray(outfit.occasion) ? outfit.occasion : [outfit.occasion];
-            matchesOccasion = selectedOccasions.some(selectedOccasion => 
-                outfitOccasions.includes(selectedOccasion) ||
-                (selectedOccasion === 'all' && outfitOccasions.includes('all'))
-            );
+            // 如果选择了"all"，匹配所有outfits
+            if (selectedOccasions.includes('all')) {
+                matchesOccasion = true;
+            } else {
+                const outfitOccasions = Array.isArray(outfit.occasion) ? outfit.occasion : [outfit.occasion];
+                // 只有当outfit包含选中的occasion，或者outfit有"all"时，才匹配
+                matchesOccasion = selectedOccasions.some(selectedOccasion => 
+                    outfitOccasions.includes(selectedOccasion)
+                ) || outfitOccasions.includes('all');
+            }
         }
         
         // 匹配品牌、尺寸、材质（基于outfit名称和notes进行搜索，因为outfit.items只包含id, name, image）

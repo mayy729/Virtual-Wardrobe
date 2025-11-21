@@ -209,7 +209,8 @@ uploadInput.addEventListener('change', function(event) {
             submitBtn.textContent = 'Saving...';
             
             const name = (document.getElementById('item-name').value || 'Unnamed Clothes').trim();
-            const type = (document.getElementById('item-type').value || 'clothes').trim();
+            const type = (document.getElementById('item-type').value 
+            || 'clothes').trim();
             const brand = (document.getElementById('item-brand').value || '').trim();
             const size = (document.getElementById('item-size').value || '').trim();
             const material = (document.getElementById('item-material').value || '').trim();
@@ -243,9 +244,16 @@ uploadInput.addEventListener('change', function(event) {
             };
             
             try {
-                console.log('[Upload] Submitting item data, image size:', mainImage.length, 'bytes');
+                console.log('[Upload] Submitting item data:', {
+                    name: itemData.name,
+                    size: itemData.size,
+                    material: itemData.material,
+                    brand: itemData.brand,
+                    imageSize: mainImage.length
+                });
                 const result = await WardrobeAPI.createClothes(itemData);
                 console.log('[Upload] Item saved successfully:', result);
+                console.log('[Upload] Saved item size:', result.size, 'material:', result.material);
                 Utils.showNotification('Clothes saved to server!', 'success');
                 uploadForm.reset();
                 currentUploadedImages = [];
