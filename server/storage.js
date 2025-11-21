@@ -175,12 +175,18 @@ async function getOutfits(userId) {
     if (shouldUseMongo() && db && db.Outfit) {
         try {
             console.log('[Storage] Loading outfits from MongoDB for user:', userId);
-            const items = await db.Outfit.find({ userId }).sort({ dateAdded: -1 }).lean();
+            const items = await db.Outfit.find({ userId }).sort({ dateCreated: -1, dateAdded: -1 }).lean();
             console.log('[Storage] ✅ Loaded', items.length, 'outfits from MongoDB');
-            return items.map(item => {
+            const outfits = items.map(item => {
                 const { _id, __v, ...rest } = item;
+                // 确保 dateCreated 存在
+                if (!rest.dateCreated && rest.dateAdded) {
+                    rest.dateCreated = rest.dateAdded;
+                }
                 return rest;
             });
+            console.log('[Storage] Processed outfits:', outfits.length, outfits.map(o => ({ id: o.id, name: o.name, itemsCount: o.items?.length })));
+            return outfits;
         } catch (error) {
             console.error('[Storage] ❌ MongoDB getOutfits error:', error);
             console.log('[Storage] Falling back to file storage');
@@ -194,17 +200,22 @@ async function getOutfits(userId) {
 async function addOutfit(userId, outfit) {
     if (shouldUseMongo() && db && db.Outfit) {
         try {
-            console.log('[Storage] Saving outfit to MongoDB for user:', userId);
+            console.log('[Storage] Saving outfit to MongoDB for user:', userId, 'outfit:', JSON.stringify(outfit).substring(0, 200));
+            // 确保 dateCreated 存在
+            if (!outfit.dateCreated) {
+                outfit.dateCreated = new Date().toISOString();
+            }
             const outfitDoc = new db.Outfit({
                 ...outfit,
                 userId
             });
             await outfitDoc.save();
             const { _id, __v, ...rest } = outfitDoc.toObject();
-            console.log('[Storage] ✅ Outfit saved to MongoDB successfully');
+            console.log('[Storage] ✅ Outfit saved to MongoDB successfully, id:', rest.id, 'items:', rest.items?.length);
             return rest;
         } catch (error) {
             console.error('[Storage] ❌ MongoDB addOutfit error:', error);
+            console.error('[Storage] Error details:', error.message, error.stack);
             console.log('[Storage] Falling back to file storage');
             const data = readData(userId, 'outfits');
             data.unshift(outfit);

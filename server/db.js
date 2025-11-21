@@ -116,11 +116,28 @@ const outfitSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    season: {
+        type: [String],
+        default: ['all']
+    },
+    occasion: {
+        type: [String],
+        default: ['casual']
+    },
+    notes: String,
     items: {
-        type: [Number],
+        type: [{
+            id: Number,
+            name: String,
+            image: String
+        }],
         required: true
     },
     image: String,
+    dateCreated: {
+        type: Date,
+        default: Date.now
+    },
     dateAdded: {
         type: Date,
         default: Date.now
