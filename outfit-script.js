@@ -10,8 +10,9 @@ const saveOutfitForm = document.getElementById('save-outfit-form');
 const cancelSaveOutfit = document.getElementById('cancel-save-outfit');
 const closeModal = document.querySelector('.close-modal');
 const outfitFilterType = document.getElementById('outfit-filter-type');
-const outfitFilterSeason = document.getElementById('outfit-filter-season');
-const outfitFilterOccasion = document.getElementById('outfit-filter-occasion');
+const outfitFilterBrand = document.getElementById('outfit-filter-brand');
+const outfitFilterSize = document.getElementById('outfit-filter-size');
+const outfitFilterMaterial = document.getElementById('outfit-filter-material');
 const PLACEHOLDER_IMAGE = './hello-kitty-bg.jpg';
 
 async function loadWardrobeForOutfit() {
@@ -29,8 +30,18 @@ async function loadWardrobeForOutfit() {
 
 function filterAndDisplayItems() {
     const typeFilter = outfitFilterType.value;
-    const seasonFilter = outfitFilterSeason.value;
-    const occasionFilter = outfitFilterOccasion.value;
+    
+    // 收集选中的季节（多选）
+    const seasonCheckboxes = document.querySelectorAll('input[name="outfit-filter-season"]:checked');
+    const selectedSeasons = Array.from(seasonCheckboxes).map(cb => cb.value);
+    
+    // 收集选中的场合（多选）
+    const occasionCheckboxes = document.querySelectorAll('input[name="outfit-filter-occasion"]:checked');
+    const selectedOccasions = Array.from(occasionCheckboxes).map(cb => cb.value);
+    
+    const brandFilter = (outfitFilterBrand.value || '').toLowerCase();
+    const sizeFilter = (outfitFilterSize.value || '').toLowerCase();
+    const materialFilter = (outfitFilterMaterial.value || '').toLowerCase();
     
     let filtered = availableItems;
     
@@ -39,25 +50,50 @@ function filterAndDisplayItems() {
         filtered = filtered.filter(item => (item.type || 'clothes') === typeFilter);
     }
     
-    // 匹配季节（支持数组或单个值）
-    if (seasonFilter) {
+    // 匹配季节（支持数组或单个值，多选过滤）
+    if (selectedSeasons.length > 0) {
         filtered = filtered.filter(item => {
-            if (Array.isArray(item.season)) {
-                return item.season.includes(seasonFilter) || item.season.includes('all');
-            } else {
-                return item.season === seasonFilter || item.season === 'all';
-            }
+            const itemSeasons = Array.isArray(item.season) ? item.season : [item.season];
+            return selectedSeasons.some(selectedSeason => 
+                itemSeasons.includes(selectedSeason) || 
+                (selectedSeason === 'all' && itemSeasons.includes('all')) ||
+                (itemSeasons.includes('all') && selectedSeasons.length > 0)
+            );
         });
     }
     
-    // 匹配场合（支持数组或单个值）
-    if (occasionFilter) {
+    // 匹配场合（支持数组或单个值，多选过滤）
+    if (selectedOccasions.length > 0) {
         filtered = filtered.filter(item => {
-            if (Array.isArray(item.occasion)) {
-                return item.occasion.includes(occasionFilter);
-            } else {
-                return item.occasion === occasionFilter;
-            }
+            const itemOccasions = Array.isArray(item.occasion) ? item.occasion : [item.occasion];
+            return selectedOccasions.some(selectedOccasion => 
+                itemOccasions.includes(selectedOccasion) ||
+                (selectedOccasion === 'all' && itemOccasions.includes('all'))
+            );
+        });
+    }
+    
+    // 匹配品牌
+    if (brandFilter) {
+        filtered = filtered.filter(item => {
+            const brandValue = (item.brand || '').toLowerCase();
+            return brandValue.includes(brandFilter);
+        });
+    }
+    
+    // 匹配尺寸
+    if (sizeFilter) {
+        filtered = filtered.filter(item => {
+            const sizeValue = (item.size || '').toLowerCase();
+            return sizeValue.includes(sizeFilter);
+        });
+    }
+    
+    // 匹配材质
+    if (materialFilter) {
+        filtered = filtered.filter(item => {
+            const materialValue = (item.material || '').toLowerCase();
+            return materialValue.includes(materialFilter);
         });
     }
     
@@ -183,13 +219,20 @@ saveOutfitBtn.addEventListener('click', () => {
         return;
     }
     
+    // 预填充season和occasion（如果第一个物品有这些属性）
     if (selectedItems.length > 0) {
         const firstItem = selectedItems[0];
         if (firstItem.season) {
-            document.getElementById('outfit-season').value = firstItem.season;
+            const seasons = Array.isArray(firstItem.season) ? firstItem.season : [firstItem.season];
+            document.querySelectorAll('input[name="outfit-season"]').forEach(cb => {
+                cb.checked = seasons.includes(cb.value);
+            });
         }
         if (firstItem.occasion) {
-            document.getElementById('outfit-occasion').value = firstItem.occasion;
+            const occasions = Array.isArray(firstItem.occasion) ? firstItem.occasion : [firstItem.occasion];
+            document.querySelectorAll('input[name="outfit-occasion"]').forEach(cb => {
+                cb.checked = occasions.includes(cb.value);
+            });
         }
     }
     
@@ -204,10 +247,20 @@ saveOutfitForm.addEventListener('submit', async (e) => {
     submitBtn.disabled = true;
     submitBtn.textContent = 'Saving...';
     
+    // 收集选中的季节（多选）
+    const seasonCheckboxes = document.querySelectorAll('input[name="outfit-season"]:checked');
+    const seasons = Array.from(seasonCheckboxes).map(cb => cb.value);
+    const season = seasons.length > 0 ? seasons : ['all'];
+    
+    // 收集选中的场合（多选）
+    const occasionCheckboxes = document.querySelectorAll('input[name="outfit-occasion"]:checked');
+    const occasions = Array.from(occasionCheckboxes).map(cb => cb.value);
+    const occasion = occasions.length > 0 ? occasions : ['casual'];
+    
     const outfitData = {
         name: document.getElementById('outfit-name').value,
-        season: document.getElementById('outfit-season').value,
-        occasion: document.getElementById('outfit-occasion').value,
+        season: season,
+        occasion: occasion,
         notes: document.getElementById('outfit-notes').value || '',
         items: selectedItems.map(item => ({
             id: item.id,
@@ -248,7 +301,14 @@ window.addEventListener('click', (e) => {
 });
 
 outfitFilterType.addEventListener('change', filterAndDisplayItems);
-outfitFilterSeason.addEventListener('change', filterAndDisplayItems);
-outfitFilterOccasion.addEventListener('change', filterAndDisplayItems);
+document.querySelectorAll('input[name="outfit-filter-season"]').forEach(cb => {
+    cb.addEventListener('change', filterAndDisplayItems);
+});
+document.querySelectorAll('input[name="outfit-filter-occasion"]').forEach(cb => {
+    cb.addEventListener('change', filterAndDisplayItems);
+});
+outfitFilterBrand.addEventListener('input', Utils.debounce(filterAndDisplayItems, 250));
+outfitFilterSize.addEventListener('input', Utils.debounce(filterAndDisplayItems, 250));
+outfitFilterMaterial.addEventListener('input', Utils.debounce(filterAndDisplayItems, 250));
 
 window.addEventListener('DOMContentLoaded', loadWardrobeForOutfit);

@@ -31,25 +31,87 @@
                     <input type="text" id="outfit-search" placeholder="Search outfit name...">
                 </div>
                 <div class="filters-section">
-                    <select id="saved-filter-season">
-                        <option value="">All Seasons</option>
-                        <option value="spring">🌼 Spring</option>
-                        <option value="summer">🌴 Summer</option>
-                        <option value="autumn">🍂 Autumn</option>
-                        <option value="winter">❄️ Winter</option>
-                        <option value="all">🌏 All Seasons</option>
-                    </select>
-                    <select id="saved-filter-occasion">
-                        <option value="">All Occasions</option>
-                        <option value="casual">👚 Casual</option>
-                        <option value="date">💕 Date</option>
-                        <option value="work">💼 Work</option>
-                        <option value="party">🎉 Party</option>
-                        <option value="formal">👔 Formal Occasion</option>
-                        <option value="sport">🏃 Sport</option>
-                        <option value="all">🌏 All Occasions</option>
-                    </select>
-                    <button id="clear-saved-filters" class="btn-secondary">Clear Filters</button>
+                    <h3>Filter Conditions</h3>
+                    <div class="filters-grid">
+                        <div class="filter-group">
+                            <label>Season: <span class="form-hint">(Select multiple)</span></label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="saved-filter-season" value="spring">
+                                    🌼 Spring
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="saved-filter-season" value="summer">
+                                    🌴 Summer
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="saved-filter-season" value="autumn">
+                                    🍂 Autumn
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="saved-filter-season" value="winter">
+                                    ❄️ Winter
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="saved-filter-season" value="all">
+                                    🌏 All Seasons
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="filter-group">
+                            <label>Occasion: <span class="form-hint">(Select multiple)</span></label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="saved-filter-occasion" value="casual">
+                                    👚 Casual
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="saved-filter-occasion" value="date">
+                                    💕 Date
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="saved-filter-occasion" value="work">
+                                    💼 Work
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="saved-filter-occasion" value="party">
+                                    🎉 Party
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="saved-filter-occasion" value="formal">
+                                    👔 Formal Occasion
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="saved-filter-occasion" value="sport">
+                                    🏃 Sport
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="saved-filter-occasion" value="all">
+                                    🌏 All Occasions
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="filter-group">
+                            <label for="saved-filter-brand">Brand:</label>
+                            <input type="text" id="saved-filter-brand" placeholder="Enter brand name">
+                        </div>
+
+                        <div class="filter-group">
+                            <label for="saved-filter-size">Size:</label>
+                            <input type="text" id="saved-filter-size" placeholder="Enter size">
+                        </div>
+
+                        <div class="filter-group">
+                            <label for="saved-filter-material">Material:</label>
+                            <input type="text" id="saved-filter-material" placeholder="Enter material">
+                        </div>
+
+                        <div class="filter-group">
+                            <button id="clear-saved-filters" class="btn-secondary">Clear Filters</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 

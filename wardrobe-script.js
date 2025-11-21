@@ -6,8 +6,6 @@ let currentPage = 1;
 
 const searchInput = document.getElementById('search-input');
 const filterType = document.getElementById('filter-type');
-const filterSeason = document.getElementById('filter-season');
-const filterOccasion = document.getElementById('filter-occasion');
 const filterBrand = document.getElementById('filter-brand');
 const filterSize = document.getElementById('filter-size');
 const filterMaterial = document.getElementById('filter-material');
@@ -146,8 +144,15 @@ function getOccasionLabel(occasion) {
 function applyFilters() {
     const searchTerm = searchInput.value.toLowerCase();
     const type = filterType.value;
-    const season = filterSeason.value;
-    const occasion = filterOccasion.value;
+    
+    // 收集选中的季节（多选）
+    const seasonCheckboxes = document.querySelectorAll('input[name="filter-season"]:checked');
+    const selectedSeasons = Array.from(seasonCheckboxes).map(cb => cb.value);
+    
+    // 收集选中的场合（多选）
+    const occasionCheckboxes = document.querySelectorAll('input[name="filter-occasion"]:checked');
+    const selectedOccasions = Array.from(occasionCheckboxes).map(cb => cb.value);
+    
     const brand = filterBrand.value.toLowerCase();
     const size = filterSize.value.toLowerCase();
     const material = filterMaterial.value.toLowerCase();
@@ -169,24 +174,25 @@ function applyFilters() {
         // 匹配类型
         const matchesType = !type || (item.type || 'clothes') === type;
         
-        // 匹配季节（支持数组或单个值）
+        // 匹配季节（支持数组或单个值，多选过滤）
         let matchesSeason = true;
-        if (season) {
-            if (Array.isArray(item.season)) {
-                matchesSeason = item.season.includes(season) || item.season.includes('all');
-            } else {
-                matchesSeason = item.season === season || item.season === 'all';
-            }
+        if (selectedSeasons.length > 0) {
+            const itemSeasons = Array.isArray(item.season) ? item.season : [item.season];
+            matchesSeason = selectedSeasons.some(selectedSeason => 
+                itemSeasons.includes(selectedSeason) || 
+                (selectedSeason === 'all' && itemSeasons.includes('all')) ||
+                (itemSeasons.includes('all') && selectedSeasons.length > 0)
+            );
         }
         
-        // 匹配场合（支持数组或单个值）
+        // 匹配场合（支持数组或单个值，多选过滤）
         let matchesOccasion = true;
-        if (occasion) {
-            if (Array.isArray(item.occasion)) {
-                matchesOccasion = item.occasion.includes(occasion);
-            } else {
-                matchesOccasion = item.occasion === occasion;
-            }
+        if (selectedOccasions.length > 0) {
+            const itemOccasions = Array.isArray(item.occasion) ? item.occasion : [item.occasion];
+            matchesOccasion = selectedOccasions.some(selectedOccasion => 
+                itemOccasions.includes(selectedOccasion) ||
+                (selectedOccasion === 'all' && itemOccasions.includes('all'))
+            );
         }
         
         const matchesBrand = !brand || brandValue.includes(brand);
@@ -212,8 +218,12 @@ const debouncedApplyFilters = Utils.debounce(applyFilters, 250);
 
 searchInput.addEventListener('input', debouncedApplyFilters);
 filterType.addEventListener('change', applyFilters);
-filterSeason.addEventListener('change', applyFilters);
-filterOccasion.addEventListener('change', applyFilters);
+document.querySelectorAll('input[name="filter-season"]').forEach(cb => {
+    cb.addEventListener('change', applyFilters);
+});
+document.querySelectorAll('input[name="filter-occasion"]').forEach(cb => {
+    cb.addEventListener('change', applyFilters);
+});
 filterBrand.addEventListener('input', debouncedApplyFilters);
 filterSize.addEventListener('input', debouncedApplyFilters);
 filterMaterial.addEventListener('input', debouncedApplyFilters);
@@ -221,8 +231,8 @@ filterMaterial.addEventListener('input', debouncedApplyFilters);
 clearFiltersBtn.addEventListener('click', function() {
     searchInput.value = '';
     filterType.value = '';
-    filterSeason.value = '';
-    filterOccasion.value = '';
+    document.querySelectorAll('input[name="filter-season"]').forEach(cb => cb.checked = false);
+    document.querySelectorAll('input[name="filter-occasion"]').forEach(cb => cb.checked = false);
     filterBrand.value = '';
     filterSize.value = '';
     filterMaterial.value = '';

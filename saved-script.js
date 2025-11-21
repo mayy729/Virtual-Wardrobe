@@ -3,8 +3,9 @@ let filteredOutfits = [];
 
 const savedOutfitsGrid = document.getElementById('saved-outfits-grid');
 const outfitSearch = document.getElementById('outfit-search');
-const savedFilterSeason = document.getElementById('saved-filter-season');
-const savedFilterOccasion = document.getElementById('saved-filter-occasion');
+const savedFilterBrand = document.getElementById('saved-filter-brand');
+const savedFilterSize = document.getElementById('saved-filter-size');
+const savedFilterMaterial = document.getElementById('saved-filter-material');
 const clearSavedFilters = document.getElementById('clear-saved-filters');
 const outfitModal = document.getElementById('outfit-modal');
 const outfitModalBody = document.getElementById('outfit-modal-body');
@@ -51,8 +52,12 @@ function displayOutfits() {
             </div>
             <div class="outfit-card-info">
                 <div class="outfit-tags">
-                    <span class="tag tag-season">${getSeasonLabel(outfit.season)}</span>
-                    <span class="tag tag-occasion">${getOccasionLabel(outfit.occasion)}</span>
+                    ${Array.isArray(outfit.season) 
+                        ? outfit.season.map(s => `<span class="tag tag-season">${getSeasonLabel(s)}</span>`).join('')
+                        : `<span class="tag tag-season">${getSeasonLabel(outfit.season)}</span>`}
+                    ${Array.isArray(outfit.occasion) 
+                        ? outfit.occasion.map(o => `<span class="tag tag-occasion">${getOccasionLabel(o)}</span>`).join('')
+                        : `<span class="tag tag-occasion">${getOccasionLabel(outfit.occasion)}</span>`}
                 </div>
                 ${outfit.notes ? `<p class="outfit-notes">💬 ${outfit.notes}</p>` : ''}
                 <p class="outfit-date">Created at: ${new Date(outfit.dateCreated).toLocaleDateString('zh-CN')}</p>
@@ -72,6 +77,9 @@ function getSeasonLabel(season) {
         winter: '❄️ Winter',
         all: '🌏 All Seasons'
     };
+    if (Array.isArray(season)) {
+        return season.map(s => labels[s] || s).join(', ');
+    }
     return labels[season] || season;
 }
 
@@ -85,36 +93,93 @@ function getOccasionLabel(occasion) {
         sport: '🏃 Sport',
         all: '🌏 All Occasions'
     };
+    if (Array.isArray(occasion)) {
+        return occasion.map(o => labels[o] || o).join(', ');
+    }
     return labels[occasion] || occasion;
 }
 
 function applyFilters() {
     const searchTerm = outfitSearch.value.toLowerCase();
-    const season = savedFilterSeason.value;
-    const occasion = savedFilterOccasion.value;
+    
+    // 收集选中的季节（多选）
+    const seasonCheckboxes = document.querySelectorAll('input[name="saved-filter-season"]:checked');
+    const selectedSeasons = Array.from(seasonCheckboxes).map(cb => cb.value);
+    
+    // 收集选中的场合（多选）
+    const occasionCheckboxes = document.querySelectorAll('input[name="saved-filter-occasion"]:checked');
+    const selectedOccasions = Array.from(occasionCheckboxes).map(cb => cb.value);
+    
+    const brandFilter = (savedFilterBrand.value || '').toLowerCase();
+    const sizeFilter = (savedFilterSize.value || '').toLowerCase();
+    const materialFilter = (savedFilterMaterial.value || '').toLowerCase();
     
     filteredOutfits = allOutfits.filter(outfit => {
         const matchesSearch = !searchTerm || 
             outfit.name.toLowerCase().includes(searchTerm) ||
-            outfit.notes.toLowerCase().includes(searchTerm);
+            (outfit.notes && outfit.notes.toLowerCase().includes(searchTerm));
         
-        const matchesSeason = !season || outfit.season === season || outfit.season === 'all';
-        const matchesOccasion = !occasion || outfit.occasion === occasion;
+        // 匹配季节（支持数组或单个值，多选过滤）
+        let matchesSeason = true;
+        if (selectedSeasons.length > 0) {
+            const outfitSeasons = Array.isArray(outfit.season) ? outfit.season : [outfit.season];
+            matchesSeason = selectedSeasons.some(selectedSeason => 
+                outfitSeasons.includes(selectedSeason) || 
+                (selectedSeason === 'all' && outfitSeasons.includes('all')) ||
+                (outfitSeasons.includes('all') && selectedSeasons.length > 0)
+            );
+        }
         
-        return matchesSearch && matchesSeason && matchesOccasion;
+        // 匹配场合（支持数组或单个值，多选过滤）
+        let matchesOccasion = true;
+        if (selectedOccasions.length > 0) {
+            const outfitOccasions = Array.isArray(outfit.occasion) ? outfit.occasion : [outfit.occasion];
+            matchesOccasion = selectedOccasions.some(selectedOccasion => 
+                outfitOccasions.includes(selectedOccasion) ||
+                (selectedOccasion === 'all' && outfitOccasions.includes('all'))
+            );
+        }
+        
+        // 匹配品牌、尺寸、材质（基于outfit名称和notes进行搜索，因为outfit.items只包含id, name, image）
+        // 注意：如果需要更精确的过滤，需要修改outfit保存逻辑来包含完整的item信息
+        let matchesBrand = true;
+        let matchesSize = true;
+        let matchesMaterial = true;
+        
+        if (brandFilter || sizeFilter || materialFilter) {
+            const outfitText = (outfit.name + ' ' + (outfit.notes || '')).toLowerCase();
+            matchesBrand = !brandFilter || outfitText.includes(brandFilter);
+            matchesSize = !sizeFilter || outfitText.includes(sizeFilter);
+            matchesMaterial = !materialFilter || outfitText.includes(materialFilter);
+        }
+        
+        return matchesSearch && matchesSeason && matchesOccasion && 
+               matchesBrand && matchesSize && matchesMaterial;
     });
     
     displayOutfits();
 }
 
-outfitSearch.addEventListener('input', applyFilters);
-savedFilterSeason.addEventListener('change', applyFilters);
-savedFilterOccasion.addEventListener('change', applyFilters);
+const debouncedApplyFilters = Utils.debounce(applyFilters, 250);
+
+outfitSearch.addEventListener('input', debouncedApplyFilters);
+document.querySelectorAll('input[name="saved-filter-season"]').forEach(cb => {
+    cb.addEventListener('change', applyFilters);
+});
+document.querySelectorAll('input[name="saved-filter-occasion"]').forEach(cb => {
+    cb.addEventListener('change', applyFilters);
+});
+savedFilterBrand.addEventListener('input', debouncedApplyFilters);
+savedFilterSize.addEventListener('input', debouncedApplyFilters);
+savedFilterMaterial.addEventListener('input', debouncedApplyFilters);
 
 clearSavedFilters.addEventListener('click', function() {
     outfitSearch.value = '';
-    savedFilterSeason.value = '';
-    savedFilterOccasion.value = '';
+    document.querySelectorAll('input[name="saved-filter-season"]').forEach(cb => cb.checked = false);
+    document.querySelectorAll('input[name="saved-filter-occasion"]').forEach(cb => cb.checked = false);
+    savedFilterBrand.value = '';
+    savedFilterSize.value = '';
+    savedFilterMaterial.value = '';
     applyFilters();
 });
 
@@ -141,8 +206,12 @@ function showOutfitModal(outfit) {
         <div class="modal-outfit-content">
             <h2>${outfit.name}</h2>
             <div class="modal-outfit-tags">
-                <span class="tag tag-season">${getSeasonLabel(outfit.season)}</span>
-                <span class="tag tag-occasion">${getOccasionLabel(outfit.occasion)}</span>
+                ${Array.isArray(outfit.season) 
+                    ? outfit.season.map(s => `<span class="tag tag-season">${getSeasonLabel(s)}</span>`).join('')
+                    : `<span class="tag tag-season">${getSeasonLabel(outfit.season)}</span>`}
+                ${Array.isArray(outfit.occasion) 
+                    ? outfit.occasion.map(o => `<span class="tag tag-occasion">${getOccasionLabel(o)}</span>`).join('')
+                    : `<span class="tag tag-occasion">${getOccasionLabel(outfit.occasion)}</span>`}
             </div>
             ${outfit.notes ? `<p class="modal-outfit-notes">${outfit.notes}</p>` : ''}
             <div class="modal-outfit-items">
