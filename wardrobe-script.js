@@ -177,22 +177,39 @@ function applyFilters() {
         // 匹配季节（支持数组或单个值，多选过滤）
         let matchesSeason = true;
         if (selectedSeasons.length > 0) {
-            const itemSeasons = Array.isArray(item.season) ? item.season : [item.season];
-            matchesSeason = selectedSeasons.some(selectedSeason => 
-                itemSeasons.includes(selectedSeason) || 
-                (selectedSeason === 'all' && itemSeasons.includes('all')) ||
-                (itemSeasons.includes('all') && selectedSeasons.length > 0)
-            );
+            // 如果选择了"all"，匹配所有items
+            if (selectedSeasons.includes('all')) {
+                matchesSeason = true;
+            } else {
+                const itemSeasons = Array.isArray(item.season) ? item.season : [item.season];
+                // 如果item有"all"，匹配所有选中的season
+                if (itemSeasons.includes('all')) {
+                    matchesSeason = true;
+                } else {
+                    matchesSeason = selectedSeasons.some(selectedSeason => 
+                        itemSeasons.includes(selectedSeason)
+                    );
+                }
+            }
         }
         
         // 匹配场合（支持数组或单个值，多选过滤）
         let matchesOccasion = true;
         if (selectedOccasions.length > 0) {
-            const itemOccasions = Array.isArray(item.occasion) ? item.occasion : [item.occasion];
-            matchesOccasion = selectedOccasions.some(selectedOccasion => 
-                itemOccasions.includes(selectedOccasion) ||
-                (selectedOccasion === 'all' && itemOccasions.includes('all'))
-            );
+            // 如果选择了"all"，匹配所有items
+            if (selectedOccasions.includes('all')) {
+                matchesOccasion = true;
+            } else {
+                const itemOccasions = Array.isArray(item.occasion) ? item.occasion : [item.occasion];
+                // 如果item有"all"，匹配所有选中的occasion
+                if (itemOccasions.includes('all')) {
+                    matchesOccasion = true;
+                } else {
+                    matchesOccasion = selectedOccasions.some(selectedOccasion => 
+                        itemOccasions.includes(selectedOccasion)
+                    );
+                }
+            }
         }
         
         const matchesBrand = !brand || brandValue.includes(brand);
@@ -342,18 +359,14 @@ function showItemModal(item) {
                             <span class="detail-value">${item.brand}</span>
                         </div>
                     ` : ''}
-                    ${item.size ? `
-                        <div class="detail-item">
-                            <span class="detail-label">Size:</span>
-                            <span class="detail-value">${item.size}</span>
-                        </div>
-                    ` : ''}
-                    ${item.material ? `
-                        <div class="detail-item">
-                            <span class="detail-label">Material:</span>
-                            <span class="detail-value">${item.material}</span>
-                        </div>
-                    ` : ''}
+                    <div class="detail-item">
+                        <span class="detail-label">Size:</span>
+                        <span class="detail-value">${item.size || 'N/A'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Material:</span>
+                        <span class="detail-value">${item.material || 'N/A'}</span>
+                    </div>
                     ${item.notes ? `
                         <div class="detail-item full-width">
                             <span class="detail-label">Notes:</span>

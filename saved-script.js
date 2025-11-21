@@ -3,9 +3,6 @@ let filteredOutfits = [];
 
 const savedOutfitsGrid = document.getElementById('saved-outfits-grid');
 const outfitSearch = document.getElementById('outfit-search');
-const savedFilterBrand = document.getElementById('saved-filter-brand');
-const savedFilterSize = document.getElementById('saved-filter-size');
-const savedFilterMaterial = document.getElementById('saved-filter-material');
 const clearSavedFilters = document.getElementById('clear-saved-filters');
 const outfitModal = document.getElementById('outfit-modal');
 const outfitModalBody = document.getElementById('outfit-modal-body');
@@ -265,17 +262,11 @@ document.querySelectorAll('input[name="saved-filter-season"]').forEach(cb => {
 document.querySelectorAll('input[name="saved-filter-occasion"]').forEach(cb => {
     cb.addEventListener('change', applyFilters);
 });
-savedFilterBrand.addEventListener('input', debouncedApplyFilters);
-savedFilterSize.addEventListener('input', debouncedApplyFilters);
-savedFilterMaterial.addEventListener('input', debouncedApplyFilters);
 
 clearSavedFilters.addEventListener('click', function() {
     outfitSearch.value = '';
     document.querySelectorAll('input[name="saved-filter-season"]').forEach(cb => cb.checked = false);
     document.querySelectorAll('input[name="saved-filter-occasion"]').forEach(cb => cb.checked = false);
-    savedFilterBrand.value = '';
-    savedFilterSize.value = '';
-    savedFilterMaterial.value = '';
     initMultiselect('saved-filter-season-trigger', 'saved-filter-season-dropdown', 'saved-filter-season', 'All Seasons');
     initMultiselect('saved-filter-occasion-trigger', 'saved-filter-occasion-dropdown', 'saved-filter-occasion', 'All Occasions');
     applyFilters();

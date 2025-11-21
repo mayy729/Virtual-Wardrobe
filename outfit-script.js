@@ -52,25 +52,38 @@ function filterAndDisplayItems() {
     
     // 匹配季节（支持数组或单个值，多选过滤）
     if (selectedSeasons.length > 0) {
-        filtered = filtered.filter(item => {
-            const itemSeasons = Array.isArray(item.season) ? item.season : [item.season];
-            return selectedSeasons.some(selectedSeason => 
-                itemSeasons.includes(selectedSeason) || 
-                (selectedSeason === 'all' && itemSeasons.includes('all')) ||
-                (itemSeasons.includes('all') && selectedSeasons.length > 0)
-            );
-        });
+        // 如果选择了"all"，不进行过滤（显示所有）
+        if (!selectedSeasons.includes('all')) {
+            filtered = filtered.filter(item => {
+                const itemSeasons = Array.isArray(item.season) ? item.season : [item.season];
+                // 如果item有"all"，匹配所有选中的season
+                if (itemSeasons.includes('all')) {
+                    return true;
+                } else {
+                    return selectedSeasons.some(selectedSeason => 
+                        itemSeasons.includes(selectedSeason)
+                    );
+                }
+            });
+        }
     }
     
     // 匹配场合（支持数组或单个值，多选过滤）
     if (selectedOccasions.length > 0) {
-        filtered = filtered.filter(item => {
-            const itemOccasions = Array.isArray(item.occasion) ? item.occasion : [item.occasion];
-            return selectedOccasions.some(selectedOccasion => 
-                itemOccasions.includes(selectedOccasion) ||
-                (selectedOccasion === 'all' && itemOccasions.includes('all'))
-            );
-        });
+        // 如果选择了"all"，不进行过滤（显示所有）
+        if (!selectedOccasions.includes('all')) {
+            filtered = filtered.filter(item => {
+                const itemOccasions = Array.isArray(item.occasion) ? item.occasion : [item.occasion];
+                // 如果item有"all"，匹配所有选中的occasion
+                if (itemOccasions.includes('all')) {
+                    return true;
+                } else {
+                    return selectedOccasions.some(selectedOccasion => 
+                        itemOccasions.includes(selectedOccasion)
+                    );
+                }
+            });
+        }
     }
     
     // 匹配品牌
