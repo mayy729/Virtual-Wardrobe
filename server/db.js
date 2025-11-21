@@ -86,6 +86,8 @@ const clothesSchema = new mongoose.Schema({
         default: ['casual']
     },
     brand: String,
+    size: String,
+    material: String,
     color: String,
     category: String,
     notes: String,
