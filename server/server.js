@@ -285,11 +285,14 @@ app.post('/api/outfits', authenticate, async (req, res) => {
     }
 
     try {
+        console.log('[Server] Received outfit data - season:', req.body.season, 'occasion:', req.body.occasion, 'items:', req.body.items?.length);
         const payload = formatOutfitPayload(req.body);
+        console.log('[Server] Formatted payload - season:', payload.season, 'occasion:', payload.occasion);
         const result = await storage.addOutfit(req.userId, payload);
+        console.log('[Server] Saved outfit - id:', result.id, 'season:', result.season, 'occasion:', result.occasion);
         res.status(201).json(result);
     } catch (error) {
-        console.error(error);
+        console.error('[Server] Error saving outfit:', error);
         res.status(500).json({ message: 'Failed to create outfit' });
     }
 });
@@ -470,21 +473,31 @@ function formatOutfitPayload(data) {
     const validOccasions = ['casual', 'date', 'work', 'party', 'formal', 'sport', 'all'];
     
     // 处理季节：支持数组或单个值
-    let season = 'all';
+    let season = ['all'];
     if (Array.isArray(data.season)) {
         const validSeasonsArray = data.season.filter(s => validSeasons.includes(s));
         season = validSeasonsArray.length > 0 ? validSeasonsArray : ['all'];
     } else if (typeof data.season === 'string' && validSeasons.includes(data.season)) {
-        season = data.season;
+        season = [data.season]; // 转换为数组以保持一致性
+    }
+    
+    // 确保 season 始终是数组
+    if (!Array.isArray(season)) {
+        season = [season];
     }
     
     // 处理场合：支持数组或单个值
-    let occasion = 'casual';
+    let occasion = ['casual'];
     if (Array.isArray(data.occasion)) {
         const validOccasionsArray = data.occasion.filter(o => validOccasions.includes(o));
         occasion = validOccasionsArray.length > 0 ? validOccasionsArray : ['casual'];
     } else if (typeof data.occasion === 'string' && validOccasions.includes(data.occasion)) {
-        occasion = data.occasion;
+        occasion = [data.occasion]; // 转换为数组以保持一致性
+    }
+    
+    // 确保 occasion 始终是数组
+    if (!Array.isArray(occasion)) {
+        occasion = [occasion];
     }
     
     const cleanItems = (items) => {
