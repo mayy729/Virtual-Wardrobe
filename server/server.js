@@ -388,7 +388,7 @@ function formatPayload(data) {
     };
     
     const validSeasons = ['spring', 'summer', 'autumn', 'winter', 'all'];
-    const validOccasions = ['casual', 'date', 'work', 'party', 'formal', 'sport'];
+    const validOccasions = ['casual', 'date', 'work', 'party', 'formal', 'sport', 'all'];
     
     // 处理季节：支持数组或单个值
     let season = 'all';
@@ -467,7 +467,7 @@ function formatOutfitPayload(data) {
     };
     
     const validSeasons = ['spring', 'summer', 'autumn', 'winter', 'all'];
-    const validOccasions = ['casual', 'date', 'work', 'party', 'formal', 'sport'];
+    const validOccasions = ['casual', 'date', 'work', 'party', 'formal', 'sport', 'all'];
     
     // 处理季节：支持数组或单个值
     let season = 'all';
