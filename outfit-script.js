@@ -227,14 +227,12 @@ saveOutfitBtn.addEventListener('click', () => {
             document.querySelectorAll('input[name="outfit-season"]').forEach(cb => {
                 cb.checked = seasons.includes(cb.value);
             });
-            initMultiselect('outfit-season-trigger', 'outfit-season-dropdown', 'outfit-season', 'Select Seasons');
         }
         if (firstItem.occasion) {
             const occasions = Array.isArray(firstItem.occasion) ? firstItem.occasion : [firstItem.occasion];
             document.querySelectorAll('input[name="outfit-occasion"]').forEach(cb => {
                 cb.checked = occasions.includes(cb.value);
             });
-            initMultiselect('outfit-occasion-trigger', 'outfit-occasion-dropdown', 'outfit-occasion', 'Select Occasions');
         }
     }
     
@@ -280,11 +278,9 @@ saveOutfitForm.addEventListener('submit', async (e) => {
         selectedItems = [];
         updateOutfitArea();
         saveOutfitForm.reset();
-        // 清除多选下拉菜单的选择
+        // 清除checkbox的选择
         document.querySelectorAll('input[name="outfit-season"]').forEach(cb => cb.checked = false);
         document.querySelectorAll('input[name="outfit-occasion"]').forEach(cb => cb.checked = false);
-        initMultiselect('outfit-season-trigger', 'outfit-season-dropdown', 'outfit-season', 'Select Seasons');
-        initMultiselect('outfit-occasion-trigger', 'outfit-occasion-dropdown', 'outfit-occasion', 'Select Occasions');
         saveOutfitModal.style.display = 'none';
     } catch (error) {
         console.error('[Outfit] Failed to save outfit:', error);
@@ -350,11 +346,9 @@ function initMultiselect(triggerId, dropdownId, checkboxName, defaultText) {
     updateText();
 }
 
-// 初始化多选下拉组件
+// 初始化多选下拉组件（只用于过滤器，不用于save modal）
 initMultiselect('outfit-filter-season-trigger', 'outfit-filter-season-dropdown', 'outfit-filter-season', 'All Seasons');
 initMultiselect('outfit-filter-occasion-trigger', 'outfit-filter-occasion-dropdown', 'outfit-filter-occasion', 'All Occasions');
-initMultiselect('outfit-season-trigger', 'outfit-season-dropdown', 'outfit-season', 'Select Seasons');
-initMultiselect('outfit-occasion-trigger', 'outfit-occasion-dropdown', 'outfit-occasion', 'Select Occasions');
 
 // 点击外部关闭下拉菜单
 document.addEventListener('click', (e) => {
