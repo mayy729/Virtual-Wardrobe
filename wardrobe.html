@@ -44,63 +44,27 @@
                         </div>
 
                         <div class="filter-group">
-                            <label>Season: <span class="form-hint">(Select multiple)</span></label>
-                            <div class="checkbox-group">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="filter-season" value="spring">
-                                    🌼 Spring
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="filter-season" value="summer">
-                                    🌴 Summer
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="filter-season" value="autumn">
-                                    🍂 Autumn
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="filter-season" value="winter">
-                                    ❄️ Winter
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="filter-season" value="all">
-                                    🌏 All Seasons
-                                </label>
-                            </div>
+                            <label for="filter-season">Season: <span class="form-hint">(Hold Ctrl/Cmd to select multiple)</span></label>
+                            <select id="filter-season" multiple size="3">
+                                <option value="spring">🌼 Spring</option>
+                                <option value="summer">🌴 Summer</option>
+                                <option value="autumn">🍂 Autumn</option>
+                                <option value="winter">❄️ Winter</option>
+                                <option value="all">🌏 All Seasons</option>
+                            </select>
                         </div>
 
                         <div class="filter-group">
-                            <label>Occasion: <span class="form-hint">(Select multiple)</span></label>
-                            <div class="checkbox-group">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="filter-occasion" value="casual">
-                                    👚 Casual
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="filter-occasion" value="date">
-                                    💕 Date
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="filter-occasion" value="work">
-                                    💼 Work
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="filter-occasion" value="party">
-                                    🎉 Party
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="filter-occasion" value="formal">
-                                    👔 Formal Occasion
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="filter-occasion" value="sport">
-                                    🏃 Sport
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="filter-occasion" value="all">
-                                    🌏 All Occasions
-                                </label>
-                            </div>
+                            <label for="filter-occasion">Occasion: <span class="form-hint">(Hold Ctrl/Cmd to select multiple)</span></label>
+                            <select id="filter-occasion" multiple size="4">
+                                <option value="casual">👚 Casual</option>
+                                <option value="date">💕 Date</option>
+                                <option value="work">💼 Work</option>
+                                <option value="party">🎉 Party</option>
+                                <option value="formal">👔 Formal Occasion</option>
+                                <option value="sport">🏃 Sport</option>
+                                <option value="all">🌏 All Occasions</option>
+                            </select>
                         </div>
 
                         <div class="filter-group">

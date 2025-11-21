@@ -31,13 +31,13 @@ async function loadWardrobeForOutfit() {
 function filterAndDisplayItems() {
     const typeFilter = outfitFilterType.value;
     
-    // 收集选中的季节（多选）
-    const seasonCheckboxes = document.querySelectorAll('input[name="outfit-filter-season"]:checked');
-    const selectedSeasons = Array.from(seasonCheckboxes).map(cb => cb.value);
+    // 收集选中的季节（多选下拉菜单）
+    const outfitFilterSeason = document.getElementById('outfit-filter-season');
+    const selectedSeasons = Array.from(outfitFilterSeason.selectedOptions).map(opt => opt.value);
     
-    // 收集选中的场合（多选）
-    const occasionCheckboxes = document.querySelectorAll('input[name="outfit-filter-occasion"]:checked');
-    const selectedOccasions = Array.from(occasionCheckboxes).map(cb => cb.value);
+    // 收集选中的场合（多选下拉菜单）
+    const outfitFilterOccasion = document.getElementById('outfit-filter-occasion');
+    const selectedOccasions = Array.from(outfitFilterOccasion.selectedOptions).map(opt => opt.value);
     
     const brandFilter = (outfitFilterBrand.value || '').toLowerCase();
     const sizeFilter = (outfitFilterSize.value || '').toLowerCase();
@@ -220,18 +220,21 @@ saveOutfitBtn.addEventListener('click', () => {
     }
     
     // 预填充season和occasion（如果第一个物品有这些属性）
+    const outfitSeasonSelect = document.getElementById('outfit-season');
+    const outfitOccasionSelect = document.getElementById('outfit-occasion');
+    
     if (selectedItems.length > 0) {
         const firstItem = selectedItems[0];
         if (firstItem.season) {
             const seasons = Array.isArray(firstItem.season) ? firstItem.season : [firstItem.season];
-            document.querySelectorAll('input[name="outfit-season"]').forEach(cb => {
-                cb.checked = seasons.includes(cb.value);
+            Array.from(outfitSeasonSelect.options).forEach(opt => {
+                opt.selected = seasons.includes(opt.value);
             });
         }
         if (firstItem.occasion) {
             const occasions = Array.isArray(firstItem.occasion) ? firstItem.occasion : [firstItem.occasion];
-            document.querySelectorAll('input[name="outfit-occasion"]').forEach(cb => {
-                cb.checked = occasions.includes(cb.value);
+            Array.from(outfitOccasionSelect.options).forEach(opt => {
+                opt.selected = occasions.includes(opt.value);
             });
         }
     }
@@ -247,14 +250,14 @@ saveOutfitForm.addEventListener('submit', async (e) => {
     submitBtn.disabled = true;
     submitBtn.textContent = 'Saving...';
     
-    // 收集选中的季节（多选）
-    const seasonCheckboxes = document.querySelectorAll('input[name="outfit-season"]:checked');
-    const seasons = Array.from(seasonCheckboxes).map(cb => cb.value);
+    // 收集选中的季节（多选下拉菜单）
+    const outfitSeasonSelect = document.getElementById('outfit-season');
+    const seasons = Array.from(outfitSeasonSelect.selectedOptions).map(opt => opt.value);
     const season = seasons.length > 0 ? seasons : ['all'];
     
-    // 收集选中的场合（多选）
-    const occasionCheckboxes = document.querySelectorAll('input[name="outfit-occasion"]:checked');
-    const occasions = Array.from(occasionCheckboxes).map(cb => cb.value);
+    // 收集选中的场合（多选下拉菜单）
+    const outfitOccasionSelect = document.getElementById('outfit-occasion');
+    const occasions = Array.from(outfitOccasionSelect.selectedOptions).map(opt => opt.value);
     const occasion = occasions.length > 0 ? occasions : ['casual'];
     
     const outfitData = {
@@ -270,16 +273,23 @@ saveOutfitForm.addEventListener('submit', async (e) => {
     };
     
     try {
-        await WardrobeAPI.createOutfit(outfitData);
+        console.log('[Outfit] Submitting outfit data:', outfitData);
+        const result = await WardrobeAPI.createOutfit(outfitData);
+        console.log('[Outfit] Outfit saved successfully:', result);
         Utils.showNotification('Outfit saved to server!', 'success');
         
         selectedItems = [];
         updateOutfitArea();
         saveOutfitForm.reset();
+        // 清除多选下拉菜单的选择
+        const outfitSeasonSelect = document.getElementById('outfit-season');
+        const outfitOccasionSelect = document.getElementById('outfit-occasion');
+        if (outfitSeasonSelect) outfitSeasonSelect.selectedIndex = -1;
+        if (outfitOccasionSelect) outfitOccasionSelect.selectedIndex = -1;
         saveOutfitModal.style.display = 'none';
     } catch (error) {
-        console.error('Failed to save outfit:', error);
-        Utils.showNotification('Save failed, please try again later.', 'error');
+        console.error('[Outfit] Failed to save outfit:', error);
+        Utils.showNotification('Save failed: ' + (error.message || 'Please try again later.'), 'error');
     } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = originalText;
@@ -301,12 +311,8 @@ window.addEventListener('click', (e) => {
 });
 
 outfitFilterType.addEventListener('change', filterAndDisplayItems);
-document.querySelectorAll('input[name="outfit-filter-season"]').forEach(cb => {
-    cb.addEventListener('change', filterAndDisplayItems);
-});
-document.querySelectorAll('input[name="outfit-filter-occasion"]').forEach(cb => {
-    cb.addEventListener('change', filterAndDisplayItems);
-});
+document.getElementById('outfit-filter-season').addEventListener('change', filterAndDisplayItems);
+document.getElementById('outfit-filter-occasion').addEventListener('change', filterAndDisplayItems);
 outfitFilterBrand.addEventListener('input', Utils.debounce(filterAndDisplayItems, 250));
 outfitFilterSize.addEventListener('input', Utils.debounce(filterAndDisplayItems, 250));
 outfitFilterMaterial.addEventListener('input', Utils.debounce(filterAndDisplayItems, 250));

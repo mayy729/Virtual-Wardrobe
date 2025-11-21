@@ -102,13 +102,13 @@ function getOccasionLabel(occasion) {
 function applyFilters() {
     const searchTerm = outfitSearch.value.toLowerCase();
     
-    // 收集选中的季节（多选）
-    const seasonCheckboxes = document.querySelectorAll('input[name="saved-filter-season"]:checked');
-    const selectedSeasons = Array.from(seasonCheckboxes).map(cb => cb.value);
+    // 收集选中的季节（多选下拉菜单）
+    const savedFilterSeason = document.getElementById('saved-filter-season');
+    const selectedSeasons = Array.from(savedFilterSeason.selectedOptions).map(opt => opt.value);
     
-    // 收集选中的场合（多选）
-    const occasionCheckboxes = document.querySelectorAll('input[name="saved-filter-occasion"]:checked');
-    const selectedOccasions = Array.from(occasionCheckboxes).map(cb => cb.value);
+    // 收集选中的场合（多选下拉菜单）
+    const savedFilterOccasion = document.getElementById('saved-filter-occasion');
+    const selectedOccasions = Array.from(savedFilterOccasion.selectedOptions).map(opt => opt.value);
     
     const brandFilter = (savedFilterBrand.value || '').toLowerCase();
     const sizeFilter = (savedFilterSize.value || '').toLowerCase();
@@ -161,22 +161,20 @@ function applyFilters() {
 }
 
 const debouncedApplyFilters = Utils.debounce(applyFilters, 250);
+const savedFilterSeason = document.getElementById('saved-filter-season');
+const savedFilterOccasion = document.getElementById('saved-filter-occasion');
 
 outfitSearch.addEventListener('input', debouncedApplyFilters);
-document.querySelectorAll('input[name="saved-filter-season"]').forEach(cb => {
-    cb.addEventListener('change', applyFilters);
-});
-document.querySelectorAll('input[name="saved-filter-occasion"]').forEach(cb => {
-    cb.addEventListener('change', applyFilters);
-});
+savedFilterSeason.addEventListener('change', applyFilters);
+savedFilterOccasion.addEventListener('change', applyFilters);
 savedFilterBrand.addEventListener('input', debouncedApplyFilters);
 savedFilterSize.addEventListener('input', debouncedApplyFilters);
 savedFilterMaterial.addEventListener('input', debouncedApplyFilters);
 
 clearSavedFilters.addEventListener('click', function() {
     outfitSearch.value = '';
-    document.querySelectorAll('input[name="saved-filter-season"]').forEach(cb => cb.checked = false);
-    document.querySelectorAll('input[name="saved-filter-occasion"]').forEach(cb => cb.checked = false);
+    savedFilterSeason.selectedIndex = -1;
+    savedFilterOccasion.selectedIndex = -1;
     savedFilterBrand.value = '';
     savedFilterSize.value = '';
     savedFilterMaterial.value = '';

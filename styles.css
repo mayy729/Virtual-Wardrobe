@@ -807,6 +807,20 @@ nav ul li a:hover {
     border-radius: 8px;
 }
 
+.selection-filters select[multiple] {
+    min-height: 80px;
+    max-height: 120px;
+}
+
+.filters-grid select[multiple] {
+    min-height: 80px;
+    max-height: 120px;
+    padding: 8px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--white);
+}
+
 .selectable-wardrobe {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
