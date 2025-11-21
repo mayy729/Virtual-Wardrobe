@@ -44,27 +44,75 @@
                         </div>
 
                         <div class="filter-group">
-                            <label for="filter-season">Season: <span class="form-hint">(Hold Ctrl/Cmd to select multiple)</span></label>
-                            <select id="filter-season" multiple size="3">
-                                <option value="spring">🌼 Spring</option>
-                                <option value="summer">🌴 Summer</option>
-                                <option value="autumn">🍂 Autumn</option>
-                                <option value="winter">❄️ Winter</option>
-                                <option value="all">🌏 All Seasons</option>
-                            </select>
+                            <label>Season:</label>
+                            <div class="custom-multiselect">
+                                <div class="multiselect-trigger" id="filter-season-trigger">
+                                    <span class="multiselect-text">All Seasons</span>
+                                    <span class="multiselect-arrow">▼</span>
+                                </div>
+                                <div class="multiselect-dropdown" id="filter-season-dropdown">
+                                    <label class="multiselect-option">
+                                        <input type="checkbox" name="filter-season" value="spring">
+                                        <span>🌼 Spring</span>
+                                    </label>
+                                    <label class="multiselect-option">
+                                        <input type="checkbox" name="filter-season" value="summer">
+                                        <span>🌴 Summer</span>
+                                    </label>
+                                    <label class="multiselect-option">
+                                        <input type="checkbox" name="filter-season" value="autumn">
+                                        <span>🍂 Autumn</span>
+                                    </label>
+                                    <label class="multiselect-option">
+                                        <input type="checkbox" name="filter-season" value="winter">
+                                        <span>❄️ Winter</span>
+                                    </label>
+                                    <label class="multiselect-option">
+                                        <input type="checkbox" name="filter-season" value="all">
+                                        <span>🌏 All Seasons</span>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="filter-group">
-                            <label for="filter-occasion">Occasion: <span class="form-hint">(Hold Ctrl/Cmd to select multiple)</span></label>
-                            <select id="filter-occasion" multiple size="4">
-                                <option value="casual">👚 Casual</option>
-                                <option value="date">💕 Date</option>
-                                <option value="work">💼 Work</option>
-                                <option value="party">🎉 Party</option>
-                                <option value="formal">👔 Formal Occasion</option>
-                                <option value="sport">🏃 Sport</option>
-                                <option value="all">🌏 All Occasions</option>
-                            </select>
+                            <label>Occasion:</label>
+                            <div class="custom-multiselect">
+                                <div class="multiselect-trigger" id="filter-occasion-trigger">
+                                    <span class="multiselect-text">All Occasions</span>
+                                    <span class="multiselect-arrow">▼</span>
+                                </div>
+                                <div class="multiselect-dropdown" id="filter-occasion-dropdown">
+                                    <label class="multiselect-option">
+                                        <input type="checkbox" name="filter-occasion" value="casual">
+                                        <span>👚 Casual</span>
+                                    </label>
+                                    <label class="multiselect-option">
+                                        <input type="checkbox" name="filter-occasion" value="date">
+                                        <span>💕 Date</span>
+                                    </label>
+                                    <label class="multiselect-option">
+                                        <input type="checkbox" name="filter-occasion" value="work">
+                                        <span>💼 Work</span>
+                                    </label>
+                                    <label class="multiselect-option">
+                                        <input type="checkbox" name="filter-occasion" value="party">
+                                        <span>🎉 Party</span>
+                                    </label>
+                                    <label class="multiselect-option">
+                                        <input type="checkbox" name="filter-occasion" value="formal">
+                                        <span>👔 Formal Occasion</span>
+                                    </label>
+                                    <label class="multiselect-option">
+                                        <input type="checkbox" name="filter-occasion" value="sport">
+                                        <span>🏃 Sport</span>
+                                    </label>
+                                    <label class="multiselect-option">
+                                        <input type="checkbox" name="filter-occasion" value="all">
+                                        <span>🌏 All Occasions</span>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="filter-group">

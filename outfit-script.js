@@ -31,13 +31,13 @@ async function loadWardrobeForOutfit() {
 function filterAndDisplayItems() {
     const typeFilter = outfitFilterType.value;
     
-    // 收集选中的季节（多选下拉菜单）
-    const outfitFilterSeason = document.getElementById('outfit-filter-season');
-    const selectedSeasons = Array.from(outfitFilterSeason.selectedOptions).map(opt => opt.value);
+    // 收集选中的季节（checkbox）
+    const seasonCheckboxes = document.querySelectorAll('input[name="outfit-filter-season"]:checked');
+    const selectedSeasons = Array.from(seasonCheckboxes).map(cb => cb.value);
     
-    // 收集选中的场合（多选下拉菜单）
-    const outfitFilterOccasion = document.getElementById('outfit-filter-occasion');
-    const selectedOccasions = Array.from(outfitFilterOccasion.selectedOptions).map(opt => opt.value);
+    // 收集选中的场合（checkbox）
+    const occasionCheckboxes = document.querySelectorAll('input[name="outfit-filter-occasion"]:checked');
+    const selectedOccasions = Array.from(occasionCheckboxes).map(cb => cb.value);
     
     const brandFilter = (outfitFilterBrand.value || '').toLowerCase();
     const sizeFilter = (outfitFilterSize.value || '').toLowerCase();
@@ -220,22 +220,21 @@ saveOutfitBtn.addEventListener('click', () => {
     }
     
     // 预填充season和occasion（如果第一个物品有这些属性）
-    const outfitSeasonSelect = document.getElementById('outfit-season');
-    const outfitOccasionSelect = document.getElementById('outfit-occasion');
-    
     if (selectedItems.length > 0) {
         const firstItem = selectedItems[0];
         if (firstItem.season) {
             const seasons = Array.isArray(firstItem.season) ? firstItem.season : [firstItem.season];
-            Array.from(outfitSeasonSelect.options).forEach(opt => {
-                opt.selected = seasons.includes(opt.value);
+            document.querySelectorAll('input[name="outfit-season"]').forEach(cb => {
+                cb.checked = seasons.includes(cb.value);
             });
+            initMultiselect('outfit-season-trigger', 'outfit-season-dropdown', 'outfit-season', 'Select Seasons');
         }
         if (firstItem.occasion) {
             const occasions = Array.isArray(firstItem.occasion) ? firstItem.occasion : [firstItem.occasion];
-            Array.from(outfitOccasionSelect.options).forEach(opt => {
-                opt.selected = occasions.includes(opt.value);
+            document.querySelectorAll('input[name="outfit-occasion"]').forEach(cb => {
+                cb.checked = occasions.includes(cb.value);
             });
+            initMultiselect('outfit-occasion-trigger', 'outfit-occasion-dropdown', 'outfit-occasion', 'Select Occasions');
         }
     }
     
@@ -250,14 +249,14 @@ saveOutfitForm.addEventListener('submit', async (e) => {
     submitBtn.disabled = true;
     submitBtn.textContent = 'Saving...';
     
-    // 收集选中的季节（多选下拉菜单）
-    const outfitSeasonSelect = document.getElementById('outfit-season');
-    const seasons = Array.from(outfitSeasonSelect.selectedOptions).map(opt => opt.value);
+    // 收集选中的季节（checkbox）
+    const seasonCheckboxes = document.querySelectorAll('input[name="outfit-season"]:checked');
+    const seasons = Array.from(seasonCheckboxes).map(cb => cb.value);
     const season = seasons.length > 0 ? seasons : ['all'];
     
-    // 收集选中的场合（多选下拉菜单）
-    const outfitOccasionSelect = document.getElementById('outfit-occasion');
-    const occasions = Array.from(outfitOccasionSelect.selectedOptions).map(opt => opt.value);
+    // 收集选中的场合（checkbox）
+    const occasionCheckboxes = document.querySelectorAll('input[name="outfit-occasion"]:checked');
+    const occasions = Array.from(occasionCheckboxes).map(cb => cb.value);
     const occasion = occasions.length > 0 ? occasions : ['casual'];
     
     const outfitData = {
@@ -282,10 +281,10 @@ saveOutfitForm.addEventListener('submit', async (e) => {
         updateOutfitArea();
         saveOutfitForm.reset();
         // 清除多选下拉菜单的选择
-        const outfitSeasonSelect = document.getElementById('outfit-season');
-        const outfitOccasionSelect = document.getElementById('outfit-occasion');
-        if (outfitSeasonSelect) outfitSeasonSelect.selectedIndex = -1;
-        if (outfitOccasionSelect) outfitOccasionSelect.selectedIndex = -1;
+        document.querySelectorAll('input[name="outfit-season"]').forEach(cb => cb.checked = false);
+        document.querySelectorAll('input[name="outfit-occasion"]').forEach(cb => cb.checked = false);
+        initMultiselect('outfit-season-trigger', 'outfit-season-dropdown', 'outfit-season', 'Select Seasons');
+        initMultiselect('outfit-occasion-trigger', 'outfit-occasion-dropdown', 'outfit-occasion', 'Select Occasions');
         saveOutfitModal.style.display = 'none';
     } catch (error) {
         console.error('[Outfit] Failed to save outfit:', error);
@@ -310,9 +309,68 @@ window.addEventListener('click', (e) => {
     }
 });
 
+// 初始化自定义多选下拉组件
+function initMultiselect(triggerId, dropdownId, checkboxName, defaultText) {
+    const trigger = document.getElementById(triggerId);
+    if (!trigger) return;
+    const dropdown = document.getElementById(dropdownId);
+    if (!dropdown) return;
+    const checkboxes = dropdown.querySelectorAll(`input[name="${checkboxName}"]`);
+    const textSpan = trigger.querySelector('.multiselect-text');
+    
+    function updateText() {
+        const selected = Array.from(checkboxes).filter(cb => cb.checked);
+        if (selected.length === 0) {
+            textSpan.textContent = defaultText;
+        } else if (selected.length === 1) {
+            textSpan.textContent = selected[0].nextElementSibling.textContent;
+        } else {
+            textSpan.textContent = `${selected.length} selected`;
+        }
+    }
+    
+    trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isActive = trigger.classList.contains('active');
+        document.querySelectorAll('.multiselect-dropdown').forEach(d => d.classList.remove('show'));
+        document.querySelectorAll('.multiselect-trigger').forEach(t => t.classList.remove('active'));
+        if (!isActive) {
+            dropdown.classList.add('show');
+            trigger.classList.add('active');
+        }
+    });
+    
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+            updateText();
+            filterAndDisplayItems();
+        });
+    });
+    
+    updateText();
+}
+
+// 初始化多选下拉组件
+initMultiselect('outfit-filter-season-trigger', 'outfit-filter-season-dropdown', 'outfit-filter-season', 'All Seasons');
+initMultiselect('outfit-filter-occasion-trigger', 'outfit-filter-occasion-dropdown', 'outfit-filter-occasion', 'All Occasions');
+initMultiselect('outfit-season-trigger', 'outfit-season-dropdown', 'outfit-season', 'Select Seasons');
+initMultiselect('outfit-occasion-trigger', 'outfit-occasion-dropdown', 'outfit-occasion', 'Select Occasions');
+
+// 点击外部关闭下拉菜单
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.custom-multiselect')) {
+        document.querySelectorAll('.multiselect-dropdown').forEach(d => d.classList.remove('show'));
+        document.querySelectorAll('.multiselect-trigger').forEach(t => t.classList.remove('active'));
+    }
+});
+
 outfitFilterType.addEventListener('change', filterAndDisplayItems);
-document.getElementById('outfit-filter-season').addEventListener('change', filterAndDisplayItems);
-document.getElementById('outfit-filter-occasion').addEventListener('change', filterAndDisplayItems);
+document.querySelectorAll('input[name="outfit-filter-season"]').forEach(cb => {
+    cb.addEventListener('change', filterAndDisplayItems);
+});
+document.querySelectorAll('input[name="outfit-filter-occasion"]').forEach(cb => {
+    cb.addEventListener('change', filterAndDisplayItems);
+});
 outfitFilterBrand.addEventListener('input', Utils.debounce(filterAndDisplayItems, 250));
 outfitFilterSize.addEventListener('input', Utils.debounce(filterAndDisplayItems, 250));
 outfitFilterMaterial.addEventListener('input', Utils.debounce(filterAndDisplayItems, 250));

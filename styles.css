@@ -821,6 +821,89 @@ nav ul li a:hover {
     background: var(--white);
 }
 
+/* 自定义多选下拉组件样式 */
+.custom-multiselect {
+    position: relative;
+    width: 100%;
+}
+
+.multiselect-trigger {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--white);
+    cursor: pointer;
+    user-select: none;
+}
+
+.multiselect-trigger:hover {
+    border-color: var(--accent-pink);
+}
+
+.multiselect-trigger.active {
+    border-color: var(--accent-pink);
+    box-shadow: 0 0 0 2px var(--light-pink);
+}
+
+.multiselect-text {
+    flex: 1;
+    color: var(--black);
+}
+
+.multiselect-arrow {
+    color: var(--accent-pink);
+    transition: transform 0.2s;
+}
+
+.multiselect-trigger.active .multiselect-arrow {
+    transform: rotate(180deg);
+}
+
+.multiselect-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 4px;
+    background: var(--white);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.multiselect-dropdown.show {
+    display: block;
+}
+
+.multiselect-option {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.multiselect-option:hover {
+    background: var(--light-pink);
+}
+
+.multiselect-option input[type="checkbox"] {
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+.multiselect-option span {
+    flex: 1;
+    color: var(--black);
+}
+
 .selectable-wardrobe {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));

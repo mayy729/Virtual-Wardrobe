@@ -14,26 +14,46 @@ const closeModal = document.querySelector('.close-modal');
 async function loadSavedOutfits() {
     Utils.renderLoading(savedOutfitsGrid, 'Loading saved combinations...');
     try {
+        console.log('[Saved] Loading outfits from server...');
         const savedOutfits = await WardrobeAPI.listOutfits();
-        allOutfits = savedOutfits.sort((a, b) => new Date(b.dateCreated) - new Date(a.dateCreated));
+        console.log('[Saved] Received outfits:', savedOutfits.length, savedOutfits);
+        if (!savedOutfits || savedOutfits.length === 0) {
+            console.log('[Saved] No outfits found');
+            allOutfits = [];
+            filteredOutfits = [];
+            displayOutfits();
+            return;
+        }
+        allOutfits = savedOutfits.sort((a, b) => {
+            const dateA = new Date(a.dateCreated || a.dateAdded || 0);
+            const dateB = new Date(b.dateCreated || b.dateAdded || 0);
+            return dateB - dateA;
+        });
         filteredOutfits = [...allOutfits];
+        console.log('[Saved] Processed outfits:', allOutfits.length, allOutfits);
         displayOutfits();
     } catch (error) {
-        console.error('Failed to load saved outfits:', error);
+        console.error('[Saved] Failed to load saved outfits:', error);
         Utils.renderError(savedOutfitsGrid, 'Unable to load saved outfits, please check the backend service.');
         Utils.showNotification('Unable to load outfit data, please try again later.', 'error');
     }
 }
 
 function displayOutfits() {
+    console.log('[Saved] Displaying outfits, filtered count:', filteredOutfits.length, 'all count:', allOutfits.length);
     if (filteredOutfits.length === 0) {
-        savedOutfitsGrid.innerHTML = '<p class="empty-message">No outfits found matching the criteria</p>';
+        if (allOutfits.length === 0) {
+            savedOutfitsGrid.innerHTML = '<p class="empty-message">You haven\'t saved any outfits yet, go create your first outfit!</p>';
+        } else {
+            savedOutfitsGrid.innerHTML = '<p class="empty-message">No outfits found matching the criteria</p>';
+        }
         return;
     }
 
     savedOutfitsGrid.innerHTML = '';
     
     filteredOutfits.forEach(outfit => {
+        console.log('[Saved] Displaying outfit:', outfit.id, outfit.name, outfit.items?.length);
         const outfitCard = document.createElement('div');
         outfitCard.className = 'saved-outfit-card';
         outfitCard.dataset.id = outfit.id;
@@ -60,7 +80,7 @@ function displayOutfits() {
                         : `<span class="tag tag-occasion">${getOccasionLabel(outfit.occasion)}</span>`}
                 </div>
                 ${outfit.notes ? `<p class="outfit-notes">💬 ${outfit.notes}</p>` : ''}
-                <p class="outfit-date">Created at: ${new Date(outfit.dateCreated).toLocaleDateString('zh-CN')}</p>
+                <p class="outfit-date">Created at: ${new Date(outfit.dateCreated || outfit.dateAdded || Date.now()).toLocaleDateString('zh-CN')}</p>
             </div>
             <button class="btn-view-outfit" data-id="${outfit.id}">View Details</button>
         `;
@@ -102,13 +122,13 @@ function getOccasionLabel(occasion) {
 function applyFilters() {
     const searchTerm = outfitSearch.value.toLowerCase();
     
-    // 收集选中的季节（多选下拉菜单）
-    const savedFilterSeason = document.getElementById('saved-filter-season');
-    const selectedSeasons = Array.from(savedFilterSeason.selectedOptions).map(opt => opt.value);
+    // 收集选中的季节（checkbox）
+    const seasonCheckboxes = document.querySelectorAll('input[name="saved-filter-season"]:checked');
+    const selectedSeasons = Array.from(seasonCheckboxes).map(cb => cb.value);
     
-    // 收集选中的场合（多选下拉菜单）
-    const savedFilterOccasion = document.getElementById('saved-filter-occasion');
-    const selectedOccasions = Array.from(savedFilterOccasion.selectedOptions).map(opt => opt.value);
+    // 收集选中的场合（checkbox）
+    const occasionCheckboxes = document.querySelectorAll('input[name="saved-filter-occasion"]:checked');
+    const selectedOccasions = Array.from(occasionCheckboxes).map(cb => cb.value);
     
     const brandFilter = (savedFilterBrand.value || '').toLowerCase();
     const sizeFilter = (savedFilterSize.value || '').toLowerCase();
@@ -160,24 +180,81 @@ function applyFilters() {
     displayOutfits();
 }
 
+// 初始化自定义多选下拉组件
+function initMultiselect(triggerId, dropdownId, checkboxName, defaultText) {
+    const trigger = document.getElementById(triggerId);
+    if (!trigger) return;
+    const dropdown = document.getElementById(dropdownId);
+    if (!dropdown) return;
+    const checkboxes = dropdown.querySelectorAll(`input[name="${checkboxName}"]`);
+    const textSpan = trigger.querySelector('.multiselect-text');
+    
+    function updateText() {
+        const selected = Array.from(checkboxes).filter(cb => cb.checked);
+        if (selected.length === 0) {
+            textSpan.textContent = defaultText;
+        } else if (selected.length === 1) {
+            textSpan.textContent = selected[0].nextElementSibling.textContent;
+        } else {
+            textSpan.textContent = `${selected.length} selected`;
+        }
+    }
+    
+    trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isActive = trigger.classList.contains('active');
+        document.querySelectorAll('.multiselect-dropdown').forEach(d => d.classList.remove('show'));
+        document.querySelectorAll('.multiselect-trigger').forEach(t => t.classList.remove('active'));
+        if (!isActive) {
+            dropdown.classList.add('show');
+            trigger.classList.add('active');
+        }
+    });
+    
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+            updateText();
+            applyFilters();
+        });
+    });
+    
+    updateText();
+}
+
+// 初始化多选下拉组件
+initMultiselect('saved-filter-season-trigger', 'saved-filter-season-dropdown', 'saved-filter-season', 'All Seasons');
+initMultiselect('saved-filter-occasion-trigger', 'saved-filter-occasion-dropdown', 'saved-filter-occasion', 'All Occasions');
+
+// 点击外部关闭下拉菜单
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.custom-multiselect')) {
+        document.querySelectorAll('.multiselect-dropdown').forEach(d => d.classList.remove('show'));
+        document.querySelectorAll('.multiselect-trigger').forEach(t => t.classList.remove('active'));
+    }
+});
+
 const debouncedApplyFilters = Utils.debounce(applyFilters, 250);
-const savedFilterSeason = document.getElementById('saved-filter-season');
-const savedFilterOccasion = document.getElementById('saved-filter-occasion');
 
 outfitSearch.addEventListener('input', debouncedApplyFilters);
-savedFilterSeason.addEventListener('change', applyFilters);
-savedFilterOccasion.addEventListener('change', applyFilters);
+document.querySelectorAll('input[name="saved-filter-season"]').forEach(cb => {
+    cb.addEventListener('change', applyFilters);
+});
+document.querySelectorAll('input[name="saved-filter-occasion"]').forEach(cb => {
+    cb.addEventListener('change', applyFilters);
+});
 savedFilterBrand.addEventListener('input', debouncedApplyFilters);
 savedFilterSize.addEventListener('input', debouncedApplyFilters);
 savedFilterMaterial.addEventListener('input', debouncedApplyFilters);
 
 clearSavedFilters.addEventListener('click', function() {
     outfitSearch.value = '';
-    savedFilterSeason.selectedIndex = -1;
-    savedFilterOccasion.selectedIndex = -1;
+    document.querySelectorAll('input[name="saved-filter-season"]').forEach(cb => cb.checked = false);
+    document.querySelectorAll('input[name="saved-filter-occasion"]').forEach(cb => cb.checked = false);
     savedFilterBrand.value = '';
     savedFilterSize.value = '';
     savedFilterMaterial.value = '';
+    initMultiselect('saved-filter-season-trigger', 'saved-filter-season-dropdown', 'saved-filter-season', 'All Seasons');
+    initMultiselect('saved-filter-occasion-trigger', 'saved-filter-occasion-dropdown', 'saved-filter-occasion', 'All Occasions');
     applyFilters();
 });
 
@@ -223,7 +300,7 @@ function showOutfitModal(outfit) {
                     `).join('')}
                 </div>
             </div>
-            <p class="modal-outfit-date">Created at: ${new Date(outfit.dateCreated).toLocaleDateString('zh-CN')}</p>
+            <p class="modal-outfit-date">Created at: ${new Date(outfit.dateCreated || outfit.dateAdded || Date.now()).toLocaleDateString('zh-CN')}</p>
         </div>
     `;
     outfitModal.style.display = 'block';

@@ -145,13 +145,13 @@ function applyFilters() {
     const searchTerm = searchInput.value.toLowerCase();
     const type = filterType.value;
     
-    // 收集选中的季节（多选下拉菜单）
-    const seasonSelect = document.getElementById('filter-season');
-    const selectedSeasons = Array.from(seasonSelect.selectedOptions).map(opt => opt.value);
+    // 收集选中的季节（checkbox）
+    const seasonCheckboxes = document.querySelectorAll('input[name="filter-season"]:checked');
+    const selectedSeasons = Array.from(seasonCheckboxes).map(cb => cb.value);
     
-    // 收集选中的场合（多选下拉菜单）
-    const occasionSelect = document.getElementById('filter-occasion');
-    const selectedOccasions = Array.from(occasionSelect.selectedOptions).map(opt => opt.value);
+    // 收集选中的场合（checkbox）
+    const occasionCheckboxes = document.querySelectorAll('input[name="filter-occasion"]:checked');
+    const selectedOccasions = Array.from(occasionCheckboxes).map(cb => cb.value);
     
     const brand = filterBrand.value.toLowerCase();
     const size = filterSize.value.toLowerCase();
@@ -216,13 +216,59 @@ function updateStats() {
 
 const debouncedApplyFilters = Utils.debounce(applyFilters, 250);
 
-const filterSeason = document.getElementById('filter-season');
-const filterOccasion = document.getElementById('filter-occasion');
+// 初始化自定义多选下拉组件
+function initMultiselect(triggerId, dropdownId, checkboxName, defaultText) {
+    const trigger = document.getElementById(triggerId);
+    const dropdown = document.getElementById(dropdownId);
+    const checkboxes = dropdown.querySelectorAll(`input[name="${checkboxName}"]`);
+    const textSpan = trigger.querySelector('.multiselect-text');
+    
+    function updateText() {
+        const selected = Array.from(checkboxes).filter(cb => cb.checked);
+        if (selected.length === 0) {
+            textSpan.textContent = defaultText;
+        } else if (selected.length === 1) {
+            textSpan.textContent = selected[0].nextElementSibling.textContent;
+        } else {
+            textSpan.textContent = `${selected.length} selected`;
+        }
+    }
+    
+    trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isActive = trigger.classList.contains('active');
+        document.querySelectorAll('.multiselect-dropdown').forEach(d => d.classList.remove('show'));
+        document.querySelectorAll('.multiselect-trigger').forEach(t => t.classList.remove('active'));
+        if (!isActive) {
+            dropdown.classList.add('show');
+            trigger.classList.add('active');
+        }
+    });
+    
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+            updateText();
+            applyFilters();
+        });
+    });
+    
+    updateText();
+}
+
+// 初始化多选下拉组件
+initMultiselect('filter-season-trigger', 'filter-season-dropdown', 'filter-season', 'All Seasons');
+initMultiselect('filter-occasion-trigger', 'filter-occasion-dropdown', 'filter-occasion', 'All Occasions');
+
+// 点击外部关闭下拉菜单
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.custom-multiselect')) {
+        document.querySelectorAll('.multiselect-dropdown').forEach(d => d.classList.remove('show'));
+        document.querySelectorAll('.multiselect-trigger').forEach(t => t.classList.remove('active'));
+    }
+});
 
 searchInput.addEventListener('input', debouncedApplyFilters);
 filterType.addEventListener('change', applyFilters);
-filterSeason.addEventListener('change', applyFilters);
-filterOccasion.addEventListener('change', applyFilters);
 filterBrand.addEventListener('input', debouncedApplyFilters);
 filterSize.addEventListener('input', debouncedApplyFilters);
 filterMaterial.addEventListener('input', debouncedApplyFilters);
@@ -230,11 +276,13 @@ filterMaterial.addEventListener('input', debouncedApplyFilters);
 clearFiltersBtn.addEventListener('click', function() {
     searchInput.value = '';
     filterType.value = '';
-    filterSeason.selectedIndex = -1;
-    filterOccasion.selectedIndex = -1;
+    document.querySelectorAll('input[name="filter-season"]').forEach(cb => cb.checked = false);
+    document.querySelectorAll('input[name="filter-occasion"]').forEach(cb => cb.checked = false);
     filterBrand.value = '';
     filterSize.value = '';
     filterMaterial.value = '';
+    initMultiselect('filter-season-trigger', 'filter-season-dropdown', 'filter-season', 'All Seasons');
+    initMultiselect('filter-occasion-trigger', 'filter-occasion-dropdown', 'filter-occasion', 'All Occasions');
     applyFilters();
 });
 
