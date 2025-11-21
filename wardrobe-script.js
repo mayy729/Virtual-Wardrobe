@@ -5,6 +5,7 @@ const ITEMS_PER_PAGE = 20;
 let currentPage = 1;
 
 const searchInput = document.getElementById('search-input');
+const filterType = document.getElementById('filter-type');
 const filterSeason = document.getElementById('filter-season');
 const filterOccasion = document.getElementById('filter-occasion');
 const filterBrand = document.getElementById('filter-brand');
@@ -86,6 +87,7 @@ function displayItems() {
             <div class="item-info">
                 <h4>${item.name}</h4>
                 <div class="item-tags">
+                    ${item.type ? `<span class="tag tag-type">${item.type === 'clothes' ? 'Clothes' : 'Accessories'}</span>` : ''}
                     ${seasonTags}
                     ${occasionTags}
                     ${item.brand ? `<span class="tag tag-brand">${item.brand}</span>` : ''}
@@ -143,6 +145,7 @@ function getOccasionLabel(occasion) {
 
 function applyFilters() {
     const searchTerm = searchInput.value.toLowerCase();
+    const type = filterType.value;
     const season = filterSeason.value;
     const occasion = filterOccasion.value;
     const brand = filterBrand.value.toLowerCase();
@@ -162,6 +165,9 @@ function applyFilters() {
             nameValue.includes(searchTerm) ||
             brandValue.includes(searchTerm) ||
             notesValue.includes(searchTerm);
+        
+        // 匹配类型
+        const matchesType = !type || (item.type || 'clothes') === type;
         
         // 匹配季节（支持数组或单个值）
         let matchesSeason = true;
@@ -189,7 +195,7 @@ function applyFilters() {
         
         const matchesMaterial = !material || materialValue.includes(material);
         
-        return matchesSearch && matchesSeason && matchesOccasion && 
+        return matchesSearch && matchesType && matchesSeason && matchesOccasion && 
                matchesBrand && matchesSize && matchesMaterial;
     });
     
@@ -205,6 +211,7 @@ function updateStats() {
 const debouncedApplyFilters = Utils.debounce(applyFilters, 250);
 
 searchInput.addEventListener('input', debouncedApplyFilters);
+filterType.addEventListener('change', applyFilters);
 filterSeason.addEventListener('change', applyFilters);
 filterOccasion.addEventListener('change', applyFilters);
 filterBrand.addEventListener('input', debouncedApplyFilters);
@@ -213,6 +220,7 @@ filterMaterial.addEventListener('input', debouncedApplyFilters);
 
 clearFiltersBtn.addEventListener('click', function() {
     searchInput.value = '';
+    filterType.value = '';
     filterSeason.value = '';
     filterOccasion.value = '';
     filterBrand.value = '';

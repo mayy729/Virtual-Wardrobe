@@ -209,6 +209,7 @@ uploadInput.addEventListener('change', function(event) {
             submitBtn.textContent = 'Saving...';
             
             const name = (document.getElementById('item-name').value || 'Unnamed Clothes').trim();
+            const type = (document.getElementById('item-type').value || 'clothes').trim();
             const brand = (document.getElementById('item-brand').value || '').trim();
             const size = (document.getElementById('item-size').value || '').trim();
             const material = (document.getElementById('item-material').value || '').trim();
@@ -228,6 +229,7 @@ uploadInput.addEventListener('change', function(event) {
             
             const itemData = {
                 name: name.substring(0, 200),
+                type: type, // 'clothes' or 'accessories'
                 season: season,
                 occasion: occasion,
                 brand: brand.substring(0, 100),

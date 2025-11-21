@@ -9,6 +9,7 @@ const saveOutfitModal = document.getElementById('save-outfit-modal');
 const saveOutfitForm = document.getElementById('save-outfit-form');
 const cancelSaveOutfit = document.getElementById('cancel-save-outfit');
 const closeModal = document.querySelector('.close-modal');
+const outfitFilterType = document.getElementById('outfit-filter-type');
 const outfitFilterSeason = document.getElementById('outfit-filter-season');
 const outfitFilterOccasion = document.getElementById('outfit-filter-occasion');
 const PLACEHOLDER_IMAGE = './hello-kitty-bg.jpg';
@@ -27,19 +28,37 @@ async function loadWardrobeForOutfit() {
 }
 
 function filterAndDisplayItems() {
+    const typeFilter = outfitFilterType.value;
     const seasonFilter = outfitFilterSeason.value;
     const occasionFilter = outfitFilterOccasion.value;
     
     let filtered = availableItems;
     
-    if (seasonFilter) {
-        filtered = filtered.filter(item => 
-            item.season === seasonFilter || item.season === 'all'
-        );
+    // 匹配类型
+    if (typeFilter) {
+        filtered = filtered.filter(item => (item.type || 'clothes') === typeFilter);
     }
     
+    // 匹配季节（支持数组或单个值）
+    if (seasonFilter) {
+        filtered = filtered.filter(item => {
+            if (Array.isArray(item.season)) {
+                return item.season.includes(seasonFilter) || item.season.includes('all');
+            } else {
+                return item.season === seasonFilter || item.season === 'all';
+            }
+        });
+    }
+    
+    // 匹配场合（支持数组或单个值）
     if (occasionFilter) {
-        filtered = filtered.filter(item => item.occasion === occasionFilter);
+        filtered = filtered.filter(item => {
+            if (Array.isArray(item.occasion)) {
+                return item.occasion.includes(occasionFilter);
+            } else {
+                return item.occasion === occasionFilter;
+            }
+        });
     }
     
     displaySelectableItems(filtered);
@@ -228,6 +247,7 @@ window.addEventListener('click', (e) => {
     }
 });
 
+outfitFilterType.addEventListener('change', filterAndDisplayItems);
 outfitFilterSeason.addEventListener('change', filterAndDisplayItems);
 outfitFilterOccasion.addEventListener('change', filterAndDisplayItems);
 
