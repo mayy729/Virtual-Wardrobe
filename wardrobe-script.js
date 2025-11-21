@@ -352,6 +352,13 @@ function showItemModal(item, editMode = false) {
                             <input type="text" id="edit-item-name" value="${item.name || ''}" required>
                         </div>
                         <div class="form-group">
+                            <label for="edit-item-type">Type:</label>
+                            <select id="edit-item-type" required>
+                                <option value="clothes" ${(item.type || 'clothes') === 'clothes' ? 'selected' : ''}>Clothes</option>
+                                <option value="accessories" ${item.type === 'accessories' ? 'selected' : ''}>Accessories</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label>Season: <span class="form-hint">(Select multiple)</span></label>
                             <div class="checkbox-group">
                                 <label class="checkbox-label">
@@ -453,6 +460,10 @@ function showItemModal(item, editMode = false) {
                     <h2>${item.name}</h2>
                     <div class="detail-grid">
                         <div class="detail-item">
+                            <span class="detail-label">Type:</span>
+                            <span class="detail-value">${item.type === 'accessories' ? 'Accessories' : 'Clothes'}</span>
+                        </div>
+                        <div class="detail-item">
                             <span class="detail-label">Season:</span>
                             <span class="detail-value">
                                 ${Array.isArray(item.season) 
@@ -546,6 +557,7 @@ function setupEditItemForm(itemId) {
         try {
             // 收集表单数据
             const name = document.getElementById('edit-item-name').value.trim();
+            const type = document.getElementById('edit-item-type').value;
             const brand = document.getElementById('edit-item-brand').value.trim();
             const size = document.getElementById('edit-item-size').value.trim();
             const material = document.getElementById('edit-item-material').value.trim();
@@ -568,6 +580,7 @@ function setupEditItemForm(itemId) {
             
             const updateData = {
                 name: name.substring(0, 200),
+                type: type,
                 season: season,
                 occasion: occasion,
                 brand: brand.substring(0, 100),
