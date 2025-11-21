@@ -263,14 +263,21 @@ app.put('/api/clothes/:id', authenticate, async (req, res) => {
             return res.status(404).json({ message: 'Not found' });
         }
 
-        const updatedPayload = {
+        // 格式化更新数据，确保数据格式正确
+        const formattedData = formatPayload({
             ...existing,
             ...req.body,
-            id,
+            id
+        });
+        
+        const updatedPayload = {
+            ...formattedData,
             dateAdded: existing.dateAdded || new Date().toISOString()
         };
 
+        console.log('[Server] Updating clothes - id:', id, 'payload:', JSON.stringify(updatedPayload).substring(0, 200));
         const result = await storage.updateClothes(req.userId, id, updatedPayload);
+        console.log('[Server] Clothes updated - size:', result.size, 'material:', result.material, 'season:', result.season, 'occasion:', result.occasion);
         res.json(result);
     } catch (error) {
         console.error(error);
@@ -332,14 +339,21 @@ app.put('/api/outfits/:id', authenticate, async (req, res) => {
             return res.status(404).json({ message: 'Not found' });
         }
 
-        const updatedPayload = {
+        // 格式化更新数据，确保数据格式正确
+        const formattedData = formatOutfitPayload({
             ...existing,
             ...req.body,
-            id,
+            id
+        });
+        
+        const updatedPayload = {
+            ...formattedData,
             dateCreated: existing.dateCreated || new Date().toISOString()
         };
 
+        console.log('[Server] Updating outfit - id:', id, 'payload:', JSON.stringify(updatedPayload).substring(0, 200));
         const result = await storage.updateOutfit(req.userId, id, updatedPayload);
+        console.log('[Server] Outfit updated - season:', result.season, 'occasion:', result.occasion);
         res.json(result);
     } catch (error) {
         console.error(error);
