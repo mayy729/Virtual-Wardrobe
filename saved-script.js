@@ -53,22 +53,45 @@ function displayOutfits() {
     savedOutfitsGrid.innerHTML = '';
     
     filteredOutfits.forEach(outfit => {
-        console.log('[Saved] Displaying outfit:', outfit.id, outfit.name, outfit.items?.length);
+        console.log('[Saved] Displaying outfit:', outfit.id, outfit.name, 'items:', outfit.items, 'items type:', typeof outfit.items, 'isArray:', Array.isArray(outfit.items));
         const outfitCard = document.createElement('div');
         outfitCard.className = 'saved-outfit-card';
         outfitCard.dataset.id = outfit.id;
         
+        // 确保items是数组
+        const items = Array.isArray(outfit.items) ? outfit.items : (outfit.items ? [outfit.items] : []);
+        console.log('[Saved] Processed items for display:', items);
+        
         outfitCard.innerHTML = `
             <div class="outfit-card-header">
-                <h3>${outfit.name}</h3>
+                <h3>${outfit.name || 'Unnamed Outfit'}</h3>
                 <button class="btn-delete-outfit" data-id="${outfit.id}">Delete</button>
             </div>
             <div class="outfit-card-items">
-                ${outfit.items.map(item => `
-                    <div class="outfit-item-preview">
-                        <img src="${item.image}" alt="${item.name}">
-                    </div>
-                `).join('')}
+                ${items.length > 0 ? items.map(item => {
+                    // 处理items可能是对象数组或数字数组
+                    if (typeof item === 'object' && item !== null && item.image) {
+                        return `
+                            <div class="outfit-item-preview">
+                                <img src="${item.image}" alt="${item.name || 'Item'}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                <div style="display:none;">${item.name || 'Item'}</div>
+                            </div>
+                        `;
+                    } else if (typeof item === 'object' && item !== null && item.id) {
+                        return `
+                            <div class="outfit-item-preview">
+                                <div class="outfit-item-placeholder">${item.name || 'Item ' + item.id}</div>
+                            </div>
+                        `;
+                    } else {
+                        // 如果是数字ID或其他格式
+                        return `
+                            <div class="outfit-item-preview">
+                                <div class="outfit-item-placeholder">Item ${item}</div>
+                            </div>
+                        `;
+                    }
+                }).join('') : '<p class="empty-message">No items in this outfit</p>'}
             </div>
             <div class="outfit-card-info">
                 <div class="outfit-tags">
@@ -292,12 +315,24 @@ function showOutfitModal(outfit) {
             <div class="modal-outfit-items">
                 <h3>Outfit Items</h3>
                 <div class="modal-items-grid">
-                    ${outfit.items.map(item => `
-                        <div class="modal-item">
-                            <img src="${item.image}" alt="${item.name}">
-                            <p>${item.name}</p>
-                        </div>
-                    `).join('')}
+                    ${(outfit.items && Array.isArray(outfit.items) ? outfit.items : []).map(item => {
+                        // 处理items可能是对象数组或数字数组
+                        if (typeof item === 'object' && item.image) {
+                            return `
+                                <div class="modal-item">
+                                    <img src="${item.image}" alt="${item.name || 'Item'}">
+                                    <p>${item.name || 'Unknown'}</p>
+                                </div>
+                            `;
+                        } else {
+                            return `
+                                <div class="modal-item">
+                                    <div class="outfit-item-placeholder">Item ${item}</div>
+                                    <p>Item ID: ${item}</p>
+                                </div>
+                            `;
+                        }
+                    }).join('')}
                 </div>
             </div>
             <p class="modal-outfit-date">Created at: ${new Date(outfit.dateCreated || outfit.dateAdded || Date.now()).toLocaleDateString('zh-CN')}</p>
