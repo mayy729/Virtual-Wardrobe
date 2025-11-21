@@ -1042,6 +1042,8 @@ nav ul li a:hover {
     padding: 20px;
     border: 2px solid var(--border-color);
     transition: transform 0.3s ease;
+    overflow: hidden;
+    word-wrap: break-word;
 }
 
 .saved-outfit-card:hover {
@@ -1093,12 +1095,23 @@ nav ul li a:hover {
 
 .outfit-card-info {
     margin-bottom: 15px;
+    overflow: hidden;
+    width: 100%;
 }
 
 .outfit-tags {
     display: flex;
-    gap: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
     margin-bottom: 10px;
+    max-width: 100%;
+}
+
+.outfit-tags .tag {
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-size: 0.85em;
+    padding: 4px 8px;
 }
 
 .outfit-notes {

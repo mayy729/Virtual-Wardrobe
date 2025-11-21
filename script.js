@@ -59,6 +59,19 @@ const Utils = {
             clearTimeout(timer);
             timer = setTimeout(() => fn.apply(context, args), delay);
         };
+    },
+
+    fileToBase64: function(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                resolve(e.target.result);
+            };
+            reader.onerror = function(error) {
+                reject(error);
+            };
+            reader.readAsDataURL(file);
+        });
     }
 };
 
