@@ -68,6 +68,11 @@ const clothesSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    type: {
+        type: String,
+        enum: ['clothes', 'accessories'],
+        default: 'clothes'
+    },
     image: {
         type: String,
         required: true

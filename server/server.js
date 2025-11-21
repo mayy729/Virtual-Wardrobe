@@ -338,6 +338,9 @@ function validateClothes(data = {}) {
     if (!data.image || typeof data.image !== 'string') {
         return 'Image is required';
     }
+    if (data.type && !['clothes', 'accessories'].includes(data.type)) {
+        return 'Type must be either "clothes" or "accessories"';
+    }
     
     const MAX_BASE64_SIZE = 10 * 1024 * 1024;
     if (data.image.length > MAX_BASE64_SIZE) {
@@ -405,6 +408,7 @@ function formatPayload(data) {
     return {
         id: data.id || Date.now(),
         name: cleanString(data.name, 200) || 'Unnamed Clothes',
+        type: data.type && ['clothes', 'accessories'].includes(data.type) ? data.type : 'clothes',
         season: season,
         occasion: occasion,
         brand: cleanString(data.brand, 100),
