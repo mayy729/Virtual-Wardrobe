@@ -149,10 +149,6 @@ function applyFilters() {
     const occasionCheckboxes = document.querySelectorAll('input[name="saved-filter-occasion"]:checked');
     const selectedOccasions = Array.from(occasionCheckboxes).map(cb => cb.value);
     
-    const brandFilter = (savedFilterBrand.value || '').toLowerCase();
-    const sizeFilter = (savedFilterSize.value || '').toLowerCase();
-    const materialFilter = (savedFilterMaterial.value || '').toLowerCase();
-    
     filteredOutfits = allOutfits.filter(outfit => {
         const matchesSearch = !searchTerm || 
             outfit.name.toLowerCase().includes(searchTerm) ||
@@ -188,21 +184,7 @@ function applyFilters() {
             }
         }
         
-        // 匹配品牌、尺寸、材质（基于outfit名称和notes进行搜索，因为outfit.items只包含id, name, image）
-        // 注意：如果需要更精确的过滤，需要修改outfit保存逻辑来包含完整的item信息
-        let matchesBrand = true;
-        let matchesSize = true;
-        let matchesMaterial = true;
-        
-        if (brandFilter || sizeFilter || materialFilter) {
-            const outfitText = (outfit.name + ' ' + (outfit.notes || '')).toLowerCase();
-            matchesBrand = !brandFilter || outfitText.includes(brandFilter);
-            matchesSize = !sizeFilter || outfitText.includes(sizeFilter);
-            matchesMaterial = !materialFilter || outfitText.includes(materialFilter);
-        }
-        
-        return matchesSearch && matchesSeason && matchesOccasion && 
-               matchesBrand && matchesSize && matchesMaterial;
+        return matchesSearch && matchesSeason && matchesOccasion;
     });
     
     displayOutfits();
