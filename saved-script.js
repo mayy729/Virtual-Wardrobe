@@ -280,46 +280,229 @@ savedOutfitsGrid.addEventListener('click', function(e) {
     }
 });
 
-function showOutfitModal(outfit) {
-    outfitModalBody.innerHTML = `
-        <div class="modal-outfit-content">
-            <h2>${outfit.name}</h2>
-            <div class="modal-outfit-tags">
-                ${Array.isArray(outfit.season) 
-                    ? outfit.season.map(s => `<span class="tag tag-season">${getSeasonLabel(s)}</span>`).join('')
-                    : `<span class="tag tag-season">${getSeasonLabel(outfit.season)}</span>`}
-                ${Array.isArray(outfit.occasion) 
-                    ? outfit.occasion.map(o => `<span class="tag tag-occasion">${getOccasionLabel(o)}</span>`).join('')
-                    : `<span class="tag tag-occasion">${getOccasionLabel(outfit.occasion)}</span>`}
+let isEditingOutfit = false;
+let currentEditingOutfit = null;
+
+function showOutfitModal(outfit, editMode = false) {
+    isEditingOutfit = editMode;
+    currentEditingOutfit = outfit;
+    
+    if (editMode) {
+        // 编辑模式
+        const seasons = Array.isArray(outfit.season) ? outfit.season : [outfit.season];
+        const occasions = Array.isArray(outfit.occasion) ? outfit.occasion : [outfit.occasion];
+        
+        outfitModalBody.innerHTML = `
+            <div class="modal-outfit-content">
+                <h2>Edit Outfit</h2>
+                <form id="edit-outfit-form">
+                    <div class="form-group">
+                        <label for="edit-outfit-name">Outfit Name:</label>
+                        <input type="text" id="edit-outfit-name" value="${outfit.name || ''}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Season: <span class="form-hint">(Select multiple)</span></label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="edit-outfit-season" value="spring" ${seasons.includes('spring') ? 'checked' : ''}>
+                                🌼 Spring
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="edit-outfit-season" value="summer" ${seasons.includes('summer') ? 'checked' : ''}>
+                                🌴 Summer
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="edit-outfit-season" value="autumn" ${seasons.includes('autumn') ? 'checked' : ''}>
+                                🍂 Autumn
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="edit-outfit-season" value="winter" ${seasons.includes('winter') ? 'checked' : ''}>
+                                ❄️ Winter
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="edit-outfit-season" value="all" ${seasons.includes('all') ? 'checked' : ''}>
+                                🌏 All Seasons
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Occasion: <span class="form-hint">(Select multiple)</span></label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="edit-outfit-occasion" value="casual" ${occasions.includes('casual') ? 'checked' : ''}>
+                                👚 Casual
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="edit-outfit-occasion" value="date" ${occasions.includes('date') ? 'checked' : ''}>
+                                💕 Date
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="edit-outfit-occasion" value="work" ${occasions.includes('work') ? 'checked' : ''}>
+                                💼 Work
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="edit-outfit-occasion" value="party" ${occasions.includes('party') ? 'checked' : ''}>
+                                🎉 Party
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="edit-outfit-occasion" value="formal" ${occasions.includes('formal') ? 'checked' : ''}>
+                                👔 Formal Occasion
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="edit-outfit-occasion" value="sport" ${occasions.includes('sport') ? 'checked' : ''}>
+                                🏃 Sport
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="edit-outfit-occasion" value="all" ${occasions.includes('all') ? 'checked' : ''}>
+                                🌏 All Occasions
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-outfit-notes">Notes:</label>
+                        <textarea id="edit-outfit-notes" rows="3">${outfit.notes || ''}</textarea>
+                    </div>
+                    <div class="modal-outfit-items">
+                        <h3>Outfit Items (Cannot be edited)</h3>
+                        <div class="modal-items-grid">
+                            ${(outfit.items && Array.isArray(outfit.items) ? outfit.items : []).map(item => {
+                                if (typeof item === 'object' && item.image) {
+                                    return `
+                                        <div class="modal-item">
+                                            <img src="${item.image}" alt="${item.name || 'Item'}">
+                                            <p>${item.name || 'Unknown'}</p>
+                                        </div>
+                                    `;
+                                } else {
+                                    return `
+                                        <div class="modal-item">
+                                            <div class="outfit-item-placeholder">Item ${item}</div>
+                                            <p>Item ID: ${item}</p>
+                                        </div>
+                                    `;
+                                }
+                            }).join('')}
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button type="submit" class="btn-primary">Save Changes</button>
+                        <button type="button" class="btn-secondary" id="cancel-edit-outfit">Cancel</button>
+                    </div>
+                </form>
             </div>
-            ${outfit.notes ? `<p class="modal-outfit-notes">${outfit.notes}</p>` : ''}
-            <div class="modal-outfit-items">
-                <h3>Outfit Items</h3>
-                <div class="modal-items-grid">
-                    ${(outfit.items && Array.isArray(outfit.items) ? outfit.items : []).map(item => {
-                        // 处理items可能是对象数组或数字数组
-                        if (typeof item === 'object' && item.image) {
-                            return `
-                                <div class="modal-item">
-                                    <img src="${item.image}" alt="${item.name || 'Item'}">
-                                    <p>${item.name || 'Unknown'}</p>
-                                </div>
-                            `;
-                        } else {
-                            return `
-                                <div class="modal-item">
-                                    <div class="outfit-item-placeholder">Item ${item}</div>
-                                    <p>Item ID: ${item}</p>
-                                </div>
-                            `;
-                        }
-                    }).join('')}
+        `;
+        
+        setupEditOutfitForm(outfit.id);
+    } else {
+        // 查看模式
+        outfitModalBody.innerHTML = `
+            <div class="modal-outfit-content">
+                <h2>${outfit.name}</h2>
+                <div class="modal-outfit-tags">
+                    ${Array.isArray(outfit.season) 
+                        ? outfit.season.map(s => `<span class="tag tag-season">${getSeasonLabel(s)}</span>`).join('')
+                        : `<span class="tag tag-season">${getSeasonLabel(outfit.season)}</span>`}
+                    ${Array.isArray(outfit.occasion) 
+                        ? outfit.occasion.map(o => `<span class="tag tag-occasion">${getOccasionLabel(o)}</span>`).join('')
+                        : `<span class="tag tag-occasion">${getOccasionLabel(outfit.occasion)}</span>`}
+                </div>
+                ${outfit.notes ? `<p class="modal-outfit-notes">${outfit.notes}</p>` : ''}
+                <div class="modal-outfit-items">
+                    <h3>Outfit Items</h3>
+                    <div class="modal-items-grid">
+                        ${(outfit.items && Array.isArray(outfit.items) ? outfit.items : []).map(item => {
+                            if (typeof item === 'object' && item.image) {
+                                return `
+                                    <div class="modal-item">
+                                        <img src="${item.image}" alt="${item.name || 'Item'}">
+                                        <p>${item.name || 'Unknown'}</p>
+                                    </div>
+                                `;
+                            } else {
+                                return `
+                                    <div class="modal-item">
+                                        <div class="outfit-item-placeholder">Item ${item}</div>
+                                        <p>Item ID: ${item}</p>
+                                    </div>
+                                `;
+                            }
+                        }).join('')}
+                    </div>
+                </div>
+                <p class="modal-outfit-date">Created at: ${new Date(outfit.dateCreated || outfit.dateAdded || Date.now()).toLocaleDateString('zh-CN')}</p>
+                <div class="button-group" style="margin-top: 20px;">
+                    <button class="btn-primary" id="edit-outfit-btn">Edit</button>
                 </div>
             </div>
-            <p class="modal-outfit-date">Created at: ${new Date(outfit.dateCreated || outfit.dateAdded || Date.now()).toLocaleDateString('zh-CN')}</p>
-        </div>
-    `;
+        `;
+        
+        document.getElementById('edit-outfit-btn').addEventListener('click', () => {
+            showOutfitModal(outfit, true);
+        });
+    }
     outfitModal.style.display = 'block';
+}
+
+function setupEditOutfitForm(outfitId) {
+    const form = document.getElementById('edit-outfit-form');
+    const cancelBtn = document.getElementById('cancel-edit-outfit');
+    
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving...';
+        
+        try {
+            const name = document.getElementById('edit-outfit-name').value.trim();
+            const notes = document.getElementById('edit-outfit-notes').value.trim();
+            
+            const seasonCheckboxes = document.querySelectorAll('input[name="edit-outfit-season"]:checked');
+            const seasons = Array.from(seasonCheckboxes).map(cb => cb.value);
+            const season = seasons.length > 0 ? seasons : ['all'];
+            
+            const occasionCheckboxes = document.querySelectorAll('input[name="edit-outfit-occasion"]:checked');
+            const occasions = Array.from(occasionCheckboxes).map(cb => cb.value);
+            const occasion = occasions.length > 0 ? occasions : ['casual'];
+            
+            const updateData = {
+                name: name.substring(0, 200),
+                season: season,
+                occasion: occasion,
+                notes: notes.substring(0, 500)
+            };
+            
+            console.log('[Saved] Updating outfit:', outfitId, updateData);
+            const result = await WardrobeAPI.updateOutfit(outfitId, updateData);
+            console.log('[Saved] Outfit updated successfully:', result);
+            
+            // 更新本地数据
+            const outfitIndex = allOutfits.findIndex(o => o.id === outfitId);
+            if (outfitIndex !== -1) {
+                allOutfits[outfitIndex] = { ...allOutfits[outfitIndex], ...result };
+            }
+            
+            // 重新应用过滤和显示
+            applyFilters();
+            
+            Utils.showNotification('Outfit updated successfully!', 'success');
+            outfitModal.style.display = 'none';
+        } catch (error) {
+            console.error('[Saved] Failed to update outfit:', error);
+            Utils.showNotification('Failed to update outfit: ' + (error.message || 'Please try again'), 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        }
+    });
+    
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+            showOutfitModal(currentEditingOutfit, false);
+        });
+    }
 }
 
 closeModal.addEventListener('click', function() {

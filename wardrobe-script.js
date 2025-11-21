@@ -319,67 +319,293 @@ wardrobeItems.addEventListener('click', function(e) {
     }
 });
 
-function showItemModal(item) {
+let isEditingItem = false;
+let currentEditingItem = null;
+
+function showItemModal(item, editMode = false) {
+    isEditingItem = editMode;
+    currentEditingItem = item;
     const modalBody = document.getElementById('modal-body');
-    modalBody.innerHTML = `
-        <div class="modal-item-content">
-            <div class="modal-image-section">
-                <img src="${item.image}" alt="${item.name}">
-                ${item.wearingPhoto ? `
-                    <div class="wearing-photo-section">
-                        <h4>Wearing Effect</h4>
-                        <img src="${item.wearingPhoto}" alt="Wearing Effect">
-                    </div>
-                ` : ''}
+    
+    if (editMode) {
+        // 编辑模式
+        const seasons = Array.isArray(item.season) ? item.season : [item.season];
+        const occasions = Array.isArray(item.occasion) ? item.occasion : [item.occasion];
+        
+        modalBody.innerHTML = `
+            <div class="modal-item-content">
+                <div class="modal-image-section">
+                    <img src="${item.image}" alt="${item.name}">
+                    ${item.wearingPhoto ? `
+                        <div class="wearing-photo-section">
+                            <h4>Wearing Effect</h4>
+                            <img src="${item.wearingPhoto}" alt="Wearing Effect" id="edit-wearing-preview">
+                        </div>
+                    ` : '<div class="wearing-photo-section" style="display:none;"><h4>Wearing Effect</h4><img id="edit-wearing-preview" alt="Wearing Effect"></div>'}
+                    <input type="file" id="edit-wearing-photo" accept="image/*" style="margin-top: 10px;">
+                </div>
+                <div class="modal-details-section">
+                    <h2>Edit Item</h2>
+                    <form id="edit-item-form">
+                        <div class="form-group">
+                            <label for="edit-item-name">Name:</label>
+                            <input type="text" id="edit-item-name" value="${item.name || ''}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Season: <span class="form-hint">(Select multiple)</span></label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="edit-item-season" value="spring" ${seasons.includes('spring') ? 'checked' : ''}>
+                                    🌼 Spring
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="edit-item-season" value="summer" ${seasons.includes('summer') ? 'checked' : ''}>
+                                    🌴 Summer
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="edit-item-season" value="autumn" ${seasons.includes('autumn') ? 'checked' : ''}>
+                                    🍂 Autumn
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="edit-item-season" value="winter" ${seasons.includes('winter') ? 'checked' : ''}>
+                                    ❄️ Winter
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="edit-item-season" value="all" ${seasons.includes('all') ? 'checked' : ''}>
+                                    🌏 All Seasons
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Occasion: <span class="form-hint">(Select multiple)</span></label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="edit-item-occasion" value="casual" ${occasions.includes('casual') ? 'checked' : ''}>
+                                    👚 Casual
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="edit-item-occasion" value="date" ${occasions.includes('date') ? 'checked' : ''}>
+                                    💕 Date
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="edit-item-occasion" value="work" ${occasions.includes('work') ? 'checked' : ''}>
+                                    💼 Work
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="edit-item-occasion" value="party" ${occasions.includes('party') ? 'checked' : ''}>
+                                    🎉 Party
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="edit-item-occasion" value="formal" ${occasions.includes('formal') ? 'checked' : ''}>
+                                    👔 Formal Occasion
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="edit-item-occasion" value="sport" ${occasions.includes('sport') ? 'checked' : ''}>
+                                    🏃 Sport
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="edit-item-occasion" value="all" ${occasions.includes('all') ? 'checked' : ''}>
+                                    🌏 All Occasions
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-item-brand">Brand:</label>
+                            <input type="text" id="edit-item-brand" value="${item.brand || ''}">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-item-size">Size:</label>
+                            <input type="text" id="edit-item-size" value="${item.size || ''}">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-item-material">Material:</label>
+                            <input type="text" id="edit-item-material" value="${item.material || ''}">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-item-notes">Notes:</label>
+                            <textarea id="edit-item-notes" rows="3">${item.notes || ''}</textarea>
+                        </div>
+                        <div class="button-group">
+                            <button type="submit" class="btn-primary">Save Changes</button>
+                            <button type="button" class="btn-secondary" id="cancel-edit-item">Cancel</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="modal-details-section">
-                <h2>${item.name}</h2>
-                <div class="detail-grid">
-                    <div class="detail-item">
-                        <span class="detail-label">Season:</span>
-                        <span class="detail-value">
-                            ${Array.isArray(item.season) 
-                                ? item.season.map(s => getSeasonLabel(s)).join(', ') 
-                                : getSeasonLabel(item.season)}
-                        </span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Occasion:</span>
-                        <span class="detail-value">
-                            ${Array.isArray(item.occasion) 
-                                ? item.occasion.map(o => getOccasionLabel(o)).join(', ') 
-                                : getOccasionLabel(item.occasion)}
-                        </span>
-                    </div>
-                    ${item.brand ? `
+        `;
+        
+        // 设置事件监听器
+        setupEditItemForm(item.id);
+    } else {
+        // 查看模式
+        modalBody.innerHTML = `
+            <div class="modal-item-content">
+                <div class="modal-image-section">
+                    <img src="${item.image}" alt="${item.name}">
+                    ${item.wearingPhoto ? `
+                        <div class="wearing-photo-section">
+                            <h4>Wearing Effect</h4>
+                            <img src="${item.wearingPhoto}" alt="Wearing Effect">
+                        </div>
+                    ` : ''}
+                </div>
+                <div class="modal-details-section">
+                    <h2>${item.name}</h2>
+                    <div class="detail-grid">
                         <div class="detail-item">
-                            <span class="detail-label">Brand:</span>
-                            <span class="detail-value">${item.brand}</span>
+                            <span class="detail-label">Season:</span>
+                            <span class="detail-value">
+                                ${Array.isArray(item.season) 
+                                    ? item.season.map(s => getSeasonLabel(s)).join(', ') 
+                                    : getSeasonLabel(item.season)}
+                            </span>
                         </div>
-                    ` : ''}
-                    <div class="detail-item">
-                        <span class="detail-label">Size:</span>
-                        <span class="detail-value">${item.size || 'N/A'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Material:</span>
-                        <span class="detail-value">${item.material || 'N/A'}</span>
-                    </div>
-                    ${item.notes ? `
-                        <div class="detail-item full-width">
-                            <span class="detail-label">Notes:</span>
-                            <span class="detail-value">${item.notes}</span>
+                        <div class="detail-item">
+                            <span class="detail-label">Occasion:</span>
+                            <span class="detail-value">
+                                ${Array.isArray(item.occasion) 
+                                    ? item.occasion.map(o => getOccasionLabel(o)).join(', ') 
+                                    : getOccasionLabel(item.occasion)}
+                            </span>
                         </div>
-                    ` : ''}
-                    <div class="detail-item">
-                        <span class="detail-label">Added Date:</span>
-                        <span class="detail-value">${new Date(item.dateAdded).toLocaleDateString('zh-CN')}</span>
+                        ${item.brand ? `
+                            <div class="detail-item">
+                                <span class="detail-label">Brand:</span>
+                                <span class="detail-value">${item.brand}</span>
+                            </div>
+                        ` : ''}
+                        <div class="detail-item">
+                            <span class="detail-label">Size:</span>
+                            <span class="detail-value">${item.size || 'N/A'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Material:</span>
+                            <span class="detail-value">${item.material || 'N/A'}</span>
+                        </div>
+                        ${item.notes ? `
+                            <div class="detail-item full-width">
+                                <span class="detail-label">Notes:</span>
+                                <span class="detail-value">${item.notes}</span>
+                            </div>
+                        ` : ''}
+                        <div class="detail-item">
+                            <span class="detail-label">Added Date:</span>
+                            <span class="detail-value">${new Date(item.dateAdded).toLocaleDateString('zh-CN')}</span>
+                        </div>
+                    </div>
+                    <div class="button-group" style="margin-top: 20px;">
+                        <button class="btn-primary" id="edit-item-btn">Edit</button>
                     </div>
                 </div>
             </div>
-        </div>
-    `;
+        `;
+        
+        // 添加编辑按钮事件
+        document.getElementById('edit-item-btn').addEventListener('click', () => {
+            showItemModal(item, true);
+        });
+    }
     itemModal.style.display = 'block';
+}
+
+function setupEditItemForm(itemId) {
+    const form = document.getElementById('edit-item-form');
+    const cancelBtn = document.getElementById('cancel-edit-item');
+    const wearingPhotoInput = document.getElementById('edit-wearing-photo');
+    const wearingPreview = document.getElementById('edit-wearing-preview');
+    const wearingSection = wearingPreview?.closest('.wearing-photo-section');
+    
+    // 处理wearing photo上传
+    if (wearingPhotoInput) {
+        wearingPhotoInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.size > 5 * 1024 * 1024) {
+                    Utils.showNotification('Wearing photo is too large (max 5MB)', 'error');
+                    return;
+                }
+                const base64 = await Utils.fileToBase64(file);
+                if (wearingPreview) {
+                    wearingPreview.src = base64;
+                    if (wearingSection) {
+                        wearingSection.style.display = 'block';
+                    }
+                }
+            }
+        });
+    }
+    
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving...';
+        
+        try {
+            // 收集表单数据
+            const name = document.getElementById('edit-item-name').value.trim();
+            const brand = document.getElementById('edit-item-brand').value.trim();
+            const size = document.getElementById('edit-item-size').value.trim();
+            const material = document.getElementById('edit-item-material').value.trim();
+            const notes = document.getElementById('edit-item-notes').value.trim();
+            
+            // 收集季节和场合
+            const seasonCheckboxes = document.querySelectorAll('input[name="edit-item-season"]:checked');
+            const seasons = Array.from(seasonCheckboxes).map(cb => cb.value);
+            const season = seasons.length > 0 ? seasons : ['all'];
+            
+            const occasionCheckboxes = document.querySelectorAll('input[name="edit-item-occasion"]:checked');
+            const occasions = Array.from(occasionCheckboxes).map(cb => cb.value);
+            const occasion = occasions.length > 0 ? occasions : ['casual'];
+            
+            // 处理wearing photo
+            let wearingPhoto = currentEditingItem.wearingPhoto || null;
+            if (wearingPhotoInput && wearingPhotoInput.files[0]) {
+                wearingPhoto = await Utils.fileToBase64(wearingPhotoInput.files[0]);
+            }
+            
+            const updateData = {
+                name: name.substring(0, 200),
+                season: season,
+                occasion: occasion,
+                brand: brand.substring(0, 100),
+                size: size.substring(0, 50),
+                material: material.substring(0, 100),
+                notes: notes.substring(0, 500),
+                wearingPhoto: wearingPhoto
+            };
+            
+            console.log('[Wardrobe] Updating item:', itemId, updateData);
+            const result = await WardrobeAPI.updateClothes(itemId, updateData);
+            console.log('[Wardrobe] Item updated successfully:', result);
+            
+            // 更新本地数据
+            const itemIndex = allItems.findIndex(i => i.id === itemId);
+            if (itemIndex !== -1) {
+                allItems[itemIndex] = { ...allItems[itemIndex], ...result };
+            }
+            
+            // 重新应用过滤和显示
+            applyFilters();
+            
+            Utils.showNotification('Item updated successfully!', 'success');
+            itemModal.style.display = 'none';
+        } catch (error) {
+            console.error('[Wardrobe] Failed to update item:', error);
+            Utils.showNotification('Failed to update item: ' + (error.message || 'Please try again'), 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        }
+    });
+    
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+            showItemModal(currentEditingItem, false);
+        });
+    }
 }
 
 closeModal.addEventListener('click', function() {
