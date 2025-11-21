@@ -183,8 +183,9 @@ async function connectDB() {
         console.log('[DB] MongoDB URI:', mongoUri.replace(/:[^:@]+@/, ':****@')); // 隐藏密码
         
         await mongoose.connect(mongoUri, {
-            serverSelectionTimeoutMS: 10000, // 10秒超时
-            socketTimeoutMS: 45000,
+            serverSelectionTimeoutMS: 5000, // 5秒超时（更快失败，避免阻塞）
+            socketTimeoutMS: 30000,
+            connectTimeoutMS: 5000,
         });
 
         isConnected = true;

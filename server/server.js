@@ -6,11 +6,19 @@ const storage = require('./storage');
 const users = require('./users');
 
 // 初始化数据库连接（如果可用）
+let db = null;
 try {
-    const db = require('./db');
-    db.connectDB().catch(console.error);
+    db = require('./db');
+    // 延迟连接，避免阻塞服务器启动
+    setTimeout(() => {
+        db.connectDB().catch(err => {
+            console.error('[Server] MongoDB connection failed:', err.message);
+            console.log('[Server] Continuing with file-based storage');
+        });
+    }, 1000);
 } catch (error) {
-    console.log('[Server] MongoDB not available, using file-based storage');
+    console.log('[Server] MongoDB module not available, using file-based storage');
+    console.log('[Server] Error:', error.message);
 }
 
 const app = express();
@@ -51,7 +59,23 @@ const apiLimiter = rateLimit({
 
 app.use(express.json({ limit: '15mb' }));
 
-app.get('/', (req, res) => res.send('API is running'));
+// 健康检查端点（Render 需要这个来检测服务是否启动）
+app.get('/health', (req, res) => {
+    res.status(200).json({ 
+        status: 'ok', 
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+    });
+});
+
+// 根路由
+app.get('/', (req, res) => {
+    res.status(200).json({ 
+        message: 'Virtual Wardrobe API is running',
+        version: '1.0.0',
+        timestamp: new Date().toISOString()
+    });
+});
 
 async function authenticate(req, res, next) {
     const token = req.headers.authorization?.replace('Bearer ', '') || 
@@ -218,11 +242,11 @@ app.post('/api/clothes', authenticate, async (req, res) => {
     }
 
     try {
-        console.log('[Server] Received clothes data - occasion:', req.body.occasion, 'type:', typeof req.body.occasion, 'isArray:', Array.isArray(req.body.occasion));
+        console.log('[Server] Received clothes data - size:', req.body.size, 'material:', req.body.material, 'occasion:', req.body.occasion);
         const payload = formatPayload(req.body);
-        console.log('[Server] Formatted payload - occasion:', payload.occasion, 'type:', typeof payload.occasion, 'isArray:', Array.isArray(payload.occasion));
+        console.log('[Server] Formatted payload - size:', payload.size, 'material:', payload.material, 'occasion:', payload.occasion);
         const result = await storage.addClothes(req.userId, payload);
-        console.log('[Server] Saved clothes - occasion:', result.occasion, 'type:', typeof result.occasion, 'isArray:', Array.isArray(result.occasion));
+        console.log('[Server] Saved clothes - size:', result.size, 'material:', result.material, 'occasion:', result.occasion);
         res.status(201).json(result);
     } catch (error) {
         console.error(error);
@@ -337,7 +361,28 @@ app.delete('/api/outfits/:id', authenticate, async (req, res) => {
     }
 });
 
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+// 错误处理中间件（必须在所有路由之后）
+app.use((err, req, res, next) => {
+    console.error('[Server] Unhandled error:', err);
+    res.status(500).json({ message: 'Internal server error', error: process.env.NODE_ENV === 'development' ? err.message : undefined });
+});
+
+// 启动服务器
+app.listen(PORT, () => {
+    console.log(`[Server] ✅ Server running on port ${PORT}`);
+    console.log(`[Server] Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`[Server] Health check available at: http://localhost:${PORT}/health`);
+});
+
+// 处理未捕获的异常
+process.on('uncaughtException', (error) => {
+    console.error('[Server] ❌ Uncaught Exception:', error);
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('[Server] ❌ Unhandled Rejection at:', promise, 'reason:', reason);
+});
 
 function validateClothes(data = {}) {
     if (!data.name || typeof data.name !== 'string' || data.name.trim().length === 0) {
