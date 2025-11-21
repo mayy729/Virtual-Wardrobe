@@ -40,14 +40,10 @@ function initUploadElements() {
 }
 
 function setupEventListeners() {
-    const uploadLabel = document.querySelector('.upload-label');
-    if (uploadLabel) {
-        uploadLabel.addEventListener('click', () => {
-    uploadInput.click();
-});
-    }
-
-const uploadArea = document.querySelector('.upload-area');
+    // 注意：不需要为uploadLabel添加click事件，因为HTML中的<label for="clothes-upload">已经会自动触发文件选择
+    // 如果添加click事件会导致双重触发（一次是label的for属性，一次是JavaScript事件）
+    
+    const uploadArea = document.querySelector('.upload-area');
     if (uploadArea) {
 uploadArea.addEventListener('dragover', (e) => {
     e.preventDefault();
@@ -68,13 +64,35 @@ uploadArea.addEventListener('drop', (e) => {
 });
     }
 
+// 防止重复处理文件的标志
+let isProcessingFiles = false;
+
 uploadInput.addEventListener('change', function(event) {
-        if (!event.target.files || event.target.files.length === 0) {
+        console.log('[Upload] File input changed');
+        
+        // 防止重复触发
+        if (isProcessingFiles) {
+            console.log('[Upload] Already processing files, ignoring duplicate change event');
             return;
         }
         
+        if (!event.target.files || event.target.files.length === 0) {
+            console.log('[Upload] No files selected');
+            return;
+        }
+        
+        console.log('[Upload] Files selected:', event.target.files.length);
+        isProcessingFiles = true;
         Utils.showNotification('Processing images...', 'info');
-    handleFileUpload(event.target.files);
+        
+        // 添加小延迟，确保iOS能正确处理
+        setTimeout(() => {
+            handleFileUpload(event.target.files);
+            // 处理完成后重置标志
+            setTimeout(() => {
+                isProcessingFiles = false;
+            }, 500);
+        }, 100);
 });
     
     console.log('[Upload] File input element:', uploadInput);
@@ -130,8 +148,9 @@ uploadInput.addEventListener('change', function(event) {
         wearingPhotoInput.addEventListener('change', function(e) {
             if (e.target.files.length > 0) {
                 const file = e.target.files[0];
+                console.log('[Upload] Wearing photo file:', file.name, 'type:', file.type);
                 
-                if (!ALLOWED_IMAGE_TYPES.includes(file.type.toLowerCase())) {
+                if (!isValidImageFile(file)) {
                     Utils.showNotification('Wearing photo format not supported, only JPG, PNG, GIF, WebP are supported', 'error');
                     e.target.value = '';
                     return;
@@ -323,13 +342,45 @@ if (document.readyState === 'loading') {
     }
 }
 
+// 检查文件是否为图片（兼容iOS，iOS可能返回空type）
+function isValidImageFile(file) {
+    // 检查MIME类型
+    const mimeType = file.type.toLowerCase();
+    if (mimeType && ALLOWED_IMAGE_TYPES.includes(mimeType)) {
+        return true;
+    }
+    
+    // iOS可能返回空type，通过文件扩展名检查
+    const fileName = file.name.toLowerCase();
+    const validExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.heic', '.heif'];
+    const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
+    
+    if (hasValidExtension) {
+        return true;
+    }
+    
+    // 如果type为空但有文件名，尝试读取文件头来判断
+    // 对于iOS，我们更宽松一些，只要文件名看起来像图片就允许
+    if (!mimeType && fileName.match(/\.(jpg|jpeg|png|gif|webp|heic|heif)$/i)) {
+        return true;
+    }
+    
+    return false;
+}
+
 function handleFileUpload(files) {
     currentUploadedImages = [];
     let validFiles = [];
     let hasErrors = false;
     
+    console.log('[Upload] Processing files:', files.length);
+    
     for (const file of files) {
-        if (!ALLOWED_IMAGE_TYPES.includes(file.type.toLowerCase())) {
+        console.log('[Upload] File:', file.name, 'type:', file.type, 'size:', file.size);
+        
+        // 使用改进的文件验证
+        if (!isValidImageFile(file)) {
+            console.warn('[Upload] Invalid file type:', file.name, file.type);
             Utils.showNotification(`"${file.name}" is not supported, only JPG, PNG, GIF, WebP are supported`, 'error');
             hasErrors = true;
             continue;
@@ -352,32 +403,95 @@ function handleFileUpload(files) {
         return;
     }
     
+    console.log('[Upload] Valid files:', validFiles.length);
+    
     let processedCount = 0;
+    let errorCount = 0;
+    
     for (const file of validFiles) {
         const reader = new FileReader();
+        
         reader.onload = function(e) {
-            const imageData = {
-                original: e.target.result,
-                processed: e.target.result,
-                id: Date.now() + Math.random(),
-                fileName: file.name,
-                fileSize: file.size
-            };
-            currentUploadedImages.push(imageData);
-            processedCount++;
-            
-            if (processedCount === validFiles.length) {
-                showPreview();
+            try {
+                const imageData = {
+                    original: e.target.result,
+                    processed: e.target.result,
+                    id: Date.now() + Math.random(),
+                    fileName: file.name,
+                    fileSize: file.size
+                };
+                currentUploadedImages.push(imageData);
+                processedCount++;
+                console.log('[Upload] Successfully processed:', file.name, processedCount, '/', validFiles.length);
+                
+                if (processedCount + errorCount === validFiles.length) {
+                    // 重置处理标志
+                    isProcessingFiles = false;
+                    if (currentUploadedImages.length > 0) {
+                        showPreview();
+                    } else {
+                        Utils.showNotification('Failed to process all images. Please try again.', 'error');
+                    }
+                }
+            } catch (error) {
+                console.error('[Upload] Error processing file:', file.name, error);
+                errorCount++;
+                Utils.showNotification(`Failed to process "${file.name}"`, 'error');
+                if (processedCount + errorCount === validFiles.length) {
+                    // 重置处理标志
+                    isProcessingFiles = false;
+                    if (currentUploadedImages.length > 0) {
+                        showPreview();
+                    } else {
+                        Utils.showNotification('Failed to process all images. Please try again.', 'error');
+                    }
+                }
             }
         };
-        reader.onerror = function() {
+        
+        reader.onerror = function(error) {
+            console.error('[Upload] FileReader error for:', file.name, error);
+            errorCount++;
             Utils.showNotification(`Failed to read file "${file.name}"`, 'error');
-            processedCount++;
-            if (processedCount === validFiles.length && currentUploadedImages.length > 0) {
-                showPreview();
+            if (processedCount + errorCount === validFiles.length) {
+                // 重置处理标志
+                isProcessingFiles = false;
+                if (currentUploadedImages.length > 0) {
+                    showPreview();
+                } else {
+                    Utils.showNotification('Failed to process all images. Please try again.', 'error');
+                }
             }
         };
-        reader.readAsDataURL(file);
+        
+        reader.onabort = function() {
+            console.warn('[Upload] File read aborted for:', file.name);
+            errorCount++;
+            if (processedCount + errorCount === validFiles.length) {
+                // 重置处理标志
+                isProcessingFiles = false;
+                if (currentUploadedImages.length > 0) {
+                    showPreview();
+                }
+            }
+        };
+        
+        try {
+            reader.readAsDataURL(file);
+        } catch (error) {
+            console.error('[Upload] Error starting FileReader for:', file.name, error);
+            errorCount++;
+            Utils.showNotification(`Failed to read file "${file.name}"`, 'error');
+            if (processedCount + errorCount === validFiles.length) {
+                // 重置处理标志
+                isProcessingFiles = false;
+                if (currentUploadedImages.length > 0) {
+                    showPreview();
+                } else {
+                    Utils.showNotification('Failed to process all images. Please try again.', 'error');
+                }
+            }
+        }
     }
 }
 
