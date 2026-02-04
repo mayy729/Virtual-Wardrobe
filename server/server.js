@@ -227,6 +227,8 @@ app.post('/api/auth/reset-password', authLimiter, async (req, res) => {
 
 app.get('/api/clothes', apiLimiter, authenticate, async (req, res) => {
     try {
+        console.log("[GET /api/clothes] req.userId =", req.userId);
+        console.log("[GET /api/clothes] req.user =", req.user);
         const clothes = await storage.getClothes(req.userId);
         res.json(clothes);
     } catch (error) {
