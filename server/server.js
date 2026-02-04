@@ -30,10 +30,13 @@ app.use(helmet({
     crossOriginEmbedderPolicy: false
 }));
 
-// CORS 配置（可以根据需要限制特定域名）
+// CORS 配置
+// 说明：
+// - 为了本地开发方便，这里默认放宽为“允许所有来源”；
+// - 正式部署时可以通过环境变量 ALLOWED_ORIGINS（用逗号分隔）来收紧白名单。
 const allowedOrigins = (process.env.ALLOWED_ORIGINS 
     ? process.env.ALLOWED_ORIGINS.split(',')
-    : ['https://mayy729.github.io'] // 开发环境允许所有来源，生产环境应该限制
+    : ['*'] // 默认允许所有来源，避免本地开发时因 CORS 出现 failed to fetch
 ).map(s => s.trim());
 
 app.use(cors({
