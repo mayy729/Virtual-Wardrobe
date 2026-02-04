@@ -31,19 +31,22 @@ app.use(helmet({
 }));
 
 // CORS 配置（可以根据需要限制特定域名）
-const allowedOrigins = process.env.ALLOWED_ORIGINS 
+const allowedOrigins = (process.env.ALLOWED_ORIGINS 
     ? process.env.ALLOWED_ORIGINS.split(',')
-    : ['*']; // 开发环境允许所有来源，生产环境应该限制
+    : ['https://mayy729.github.io'] // 开发环境允许所有来源，生产环境应该限制
+).map(s => s.trim());
 
 app.use(cors({
     origin: allowedOrigins.includes('*') ? true : allowedOrigins,
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['ContentType', 'Authorization', 'X-Auth-Token']
 }));
 
-// 速率限制：防止暴力破解
+// 速率限制：防止暴力破解       
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 分钟
-    max: 5, // 最多 5 次请求
+    max: 5, // 最多 5 次请求    
     message: 'Too many login attempts, please try again later.',
     standardHeaders: true,
     legacyHeaders: false,
