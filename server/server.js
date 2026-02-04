@@ -31,19 +31,13 @@ app.use(helmet({
 }));
 
 // CORS 配置
-// 说明：
-// - 为了本地开发方便，这里默认放宽为“允许所有来源”；
-// - 正式部署时可以通过环境变量 ALLOWED_ORIGINS（用逗号分隔）来收紧白名单。
-const allowedOrigins = (process.env.ALLOWED_ORIGINS 
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
     ? process.env.ALLOWED_ORIGINS.split(',')
-    : ['*'] // 默认允许所有来源，避免本地开发时因 CORS 出现 failed to fetch
-).map(s => s.trim());
+    : ['*']; // 默认允许所有来源，避免本地开发时因 CORS 出现 failed to fetch
 
 app.use(cors({
     origin: allowedOrigins.includes('*') ? true : allowedOrigins,
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['ContentType', 'Authorization', 'X-Auth-Token']
+    credentials: true
 }));
 
 // 速率限制：防止暴力破解       
