@@ -42,8 +42,8 @@ function initUploadElements() {
 function setupEventListeners() {
     // 注意：不需要为uploadLabel添加click事件，因为HTML中的<label for="clothes-upload">已经会自动触发文件选择
     // 如果添加click事件会导致双重触发（一次是label的for属性，一次是JavaScript事件）
-    
-    const uploadArea = document.querySelector('.upload-area');
+
+const uploadArea = document.querySelector('.upload-area');
     if (uploadArea) {
 uploadArea.addEventListener('dragover', (e) => {
     e.preventDefault();
@@ -87,7 +87,7 @@ uploadInput.addEventListener('change', function(event) {
         
         // 添加小延迟，确保iOS能正确处理
         setTimeout(() => {
-            handleFileUpload(event.target.files);
+    handleFileUpload(event.target.files);
             // 处理完成后重置标志
             setTimeout(() => {
                 isProcessingFiles = false;
@@ -256,8 +256,9 @@ uploadInput.addEventListener('change', function(event) {
                 size: size.substring(0, 50),
                 material: material.substring(0, 100),
                 notes: notes.substring(0, 500),
+                // 只保存用于展示的主图，减少数据体积
                 image: mainImage,
-                originalImage: currentUploadedImages[0].original,
+                // 不再保存 originalImage，避免单条数据过大
                 wearingPhoto: currentWearingPhoto || null,
                 dateAdded: new Date().toISOString()
             };
@@ -385,7 +386,7 @@ function handleFileUpload(files) {
             hasErrors = true;
             continue;
         }
-        
+
         if (file.size > MAX_FILE_SIZE) {
             const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
             Utils.showNotification(`"${file.name}" is too large (${fileSizeMB}MB), maximum supported is 5MB`, 'error');
@@ -413,14 +414,14 @@ function handleFileUpload(files) {
         
         reader.onload = function(e) {
             try {
-                const imageData = {
-                    original: e.target.result,
-                    processed: e.target.result,
+            const imageData = {
+                original: e.target.result,
+                processed: e.target.result,
                     id: Date.now() + Math.random(),
                     fileName: file.name,
                     fileSize: file.size
-                };
-                currentUploadedImages.push(imageData);
+            };
+            currentUploadedImages.push(imageData);
                 processedCount++;
                 console.log('[Upload] Successfully processed:', file.name, processedCount, '/', validFiles.length);
                 
@@ -471,13 +472,13 @@ function handleFileUpload(files) {
                 // 重置处理标志
                 isProcessingFiles = false;
                 if (currentUploadedImages.length > 0) {
-                    showPreview();
+                showPreview();
                 }
             }
         };
         
         try {
-            reader.readAsDataURL(file);
+        reader.readAsDataURL(file);
         } catch (error) {
             console.error('[Upload] Error starting FileReader for:', file.name, error);
             errorCount++;
