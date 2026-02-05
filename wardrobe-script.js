@@ -139,7 +139,7 @@ function getOccasionLabel(occasion) {
     return labels[occasion] || occasion;
 }
 
-function applyFilters(resetPage = true) {
+function applyFilters() {
     const searchTerm = searchInput.value.toLowerCase();
     const type = filterType.value;
     
@@ -155,7 +155,7 @@ function applyFilters(resetPage = true) {
     const size = filterSize.value.toLowerCase();
     const material = filterMaterial.value.toLowerCase();
     
-    if (resetPage) currentPage = 1;
+    currentPage = 1;
     
     filteredItems = allItems.filter(item => {
         const brandValue = (item.brand || '').toLowerCase();
@@ -601,7 +601,7 @@ function setupEditItemForm(itemId) {
             }
             
             // 重新应用过滤和显示
-            applyFilters(falese);
+            applyFilters();
             
             Utils.showNotification('Item updated successfully!', 'success');
             itemModal.style.display = 'none';
