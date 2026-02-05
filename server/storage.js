@@ -61,13 +61,12 @@ async function getClothes(userId) {
     if (shouldUseMongo() && db && db.Clothes) {
         try {
             console.log('[Storage] Loading clothes from MongoDB for user:', userId);
-            const items = await db.Clothes.find({ userId }).sort({ dateAdded: -1 }).lean();
+
+            const items = await db.Clothes.find({ userId }).lean();
+
             console.log('[Storage] ✅ Loaded', items.length, 'items from MongoDB');
             // 转换 MongoDB 文档为普通对象，移除 _id 和 __v
-            return items.map(item => {
-                const { _id, __v, ...rest } = item;
-                return rest;
-            });
+            return items.map(({ _id, __v, ...rest }) => rest);
         } catch (error) {
             console.error('[Storage] ❌ MongoDB getClothes error:', error);
             console.log('[Storage] Falling back to file storage');
